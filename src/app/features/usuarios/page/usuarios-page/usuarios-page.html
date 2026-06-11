@@ -1,0 +1,26 @@
+<app-header></app-header>
+<app-nav></app-nav>
+<div class="pagina">
+    <h2>Listado de Usuarios</h2>
+    <p>Total: {{ usuariosService.usuarios().length }} usuarios registrados</p>
+
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (usuario of usuariosService.usuarios(); track usuario.id) {
+                <tr>
+                    <td>{{ usuario.id }}</td>
+                    <td>{{ usuario.nombre }}</td>
+                    <td>{{ usuario.email }}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<app-footer></app-footer>
