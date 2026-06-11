@@ -6,6 +6,6 @@ import { HeroComponent } from '../../../../shared/components/hero/hero';
   selector: 'app-home-page',
   imports: [NavComponent, HeroComponent],
   templateUrl: './home-page.html',
-  styleUrl: './home-page.css',
+
 })
 export class HomePage {}
