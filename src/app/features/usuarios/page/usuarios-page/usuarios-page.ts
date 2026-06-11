@@ -1,6 +1,4 @@
 import { Component, inject } from '@angular/core'; //<<<-----
-import { CommonModule } from "@angular/common"; //<<<-----
-import { RouterOutlet } from "@angular/router"; //<<<-----
 import { UsuariosService } from "../../services/usuarios"; //<<<-----
 import { Header } from '../../../../shared/components/header/header'; //<<<-----
 import { Nav } from '../../../../shared/components/nav/nav'; //<<<-----
