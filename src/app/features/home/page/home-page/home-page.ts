@@ -20,6 +20,5 @@ import { StatsComponent } from '../../../../shared/components/stats/stats';
     StatsComponent,
   ],
   templateUrl: './home-page.html',
-  styleUrl: './home-page.css',
 })
 export class HomePage {}
