@@ -1,0 +1,55 @@
+src
+├── app
+│   ├── app.config.ts
+│   ├── app.css
+│   ├── app.html
+│   ├── app.routes.ts
+│   ├── app.spec.ts
+│   ├── app.ts
+│   ├── core
+│   │   └── services
+│   │       ├── services.css
+│   │       ├── services.html
+│   │       ├── services.spec.ts
+│   │       └── services.ts
+│   ├── features
+│   │   ├── contacto
+│   │   │   └── page
+│   │   │       └── contacto-page
+│   │   │           ├── contacto-page.html
+│   │   │           ├── contacto-page.spec.ts
+│   │   │           └── contacto-page.ts
+│   │   ├── principal
+│   │   │   └── page
+│   │   │       └── principal-page
+│   │   │           ├── principal-page.html
+│   │   │           ├── principal-page.spec.ts
+│   │   │           └── principal-page.ts
+│   │   └── usuarios
+│   │       ├── page
+│   │       │   └── usuarios-page
+│   │       │       ├── usuarios-page.html
+│   │       │       ├── usuarios-page.spec.ts
+│   │       │       └── usuarios-page.ts
+│   │       └── services
+│   │           ├── usuarios.spec.ts
+│   │           └── usuarios.ts
+│   └── shared
+│       └── components
+│           ├── footer
+│           │   ├── footer.html
+│           │   ├── footer.spec.ts
+│           │   └── footer.ts
+│           ├── header
+│           │   ├── header.html
+│           │   ├── header.spec.ts
+│           │   └── header.ts
+│           └── nav
+│               ├── nav.html
+│               ├── nav.spec.ts
+│               └── nav.ts
+├── index.html
+├── main.ts
+└── styles.css
+
+20 directories, 33 files

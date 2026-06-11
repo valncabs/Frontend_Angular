@@ -1,20 +1,70 @@
-<nav class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center gap-6 justify-center sm:justify-start">
-  <a routerLink="/principal"
-     routerLinkActive="bg-sky-500/10 text-sky-400 font-semibold"
-     [routerLinkActiveOptions]="{exact: true}"
-     class="text-slate-400 hover:text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-     Principal
-  </a>
-  
-  <a routerLink="/usuarios" 
-     routerLinkActive="bg-sky-500/10 text-sky-400 font-semibold"
-     class="text-slate-400 hover:text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-     Usuarios
-  </a>
-  
-  <a routerLink="/contacto" 
-     routerLinkActive="bg-sky-500/10 text-sky-400 font-semibold"
-     class="text-slate-400 hover:text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-     Contacto
-  </a>
+<nav class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+  <div class="container-custom">
+    <div class="flex items-center justify-between h-20">
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center gap-3 no-underline">
+        <div
+          class="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--primary)] text-white text-xl"
+        >
+          <i class="bi bi-heart-pulse-fill"></i>
+        </div>
+
+        <div>
+          <h1 class="text-xl font-bold m-0 text-slate-800">Pet-Centric</h1>
+
+          <span class="text-sm text-slate-500"> Encuentra a tu compañero </span>
+        </div>
+      </a>
+
+      <!-- Desktop Menu -->
+      <div class="hidden lg:flex items-center gap-8">
+        <a
+          href="#como-funciona"
+          class="text-slate-600 hover:text-[var(--primary)] transition no-underline"
+        >
+          Cómo funciona
+        </a>
+
+        <a
+          href="#mascotas"
+          class="text-slate-600 hover:text-[var(--primary)] transition no-underline"
+        >
+          Mascotas
+        </a>
+
+        <a
+          href="#testimonios"
+          class="text-slate-600 hover:text-[var(--primary)] transition no-underline"
+        >
+          Testimonios
+        </a>
+
+        <a href="#faq" class="text-slate-600 hover:text-[var(--primary)] transition no-underline">
+          FAQ
+        </a>
+
+        <a routerLink="/login" class="btn-primary-custom no-underline"> Iniciar sesión </a>
+      </div>
+
+      <!-- Mobile Button -->
+      <button class="lg:hidden text-3xl text-slate-700" (click)="toggleMenu()">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div *ngIf="isMenuOpen" class="lg:hidden pb-5 flex flex-col gap-4">
+      <a href="#como-funciona" class="text-slate-700 no-underline"> Cómo funciona </a>
+
+      <a href="#mascotas" class="text-slate-700 no-underline"> Mascotas </a>
+
+      <a href="#testimonios" class="text-slate-700 no-underline"> Testimonios </a>
+
+      <a href="#faq" class="text-slate-700 no-underline"> FAQ </a>
+
+      <a routerLink="/login" class="btn-primary-custom text-center no-underline">
+        Iniciar sesión
+      </a>
+    </div>
+  </div>
 </nav>

@@ -1,0 +1,83 @@
+<section class="relative overflow-hidden bg-[var(--background)]">
+  <div class="container-custom">
+    <div class="row align-items-center min-h-[85vh] py-5">
+      <!-- Left -->
+      <div class="col-12 col-lg-6 mb-5 mb-lg-0">
+        <span
+          class="inline-flex items-center gap-2 bg-teal-50 text-[var(--primary)] px-4 py-2 rounded-full text-sm font-semibold"
+        >
+          <i class="bi bi-heart-fill"></i>
+          Plataforma de ayuda para mascotas
+        </span>
+
+        <h1 class="text-5xl lg:text-7xl font-extrabold leading-tight mt-4">
+          Encuentra a tu
+          <span class="text-[var(--primary)]"> mascota perdida </span>
+
+          o ayúdala a volver a casa.
+        </h1>
+
+        <p class="text-slate-500 text-lg mt-4 max-w-xl leading-8">
+          Reporta mascotas perdidas o encontradas de manera rápida, simple y segura. Conecta con
+          personas cerca de ti y aumenta las probabilidades de reencuentro.
+        </p>
+
+        <div class="flex flex-wrap gap-4 mt-5">
+          <a routerLink="/registro" class="btn-primary-custom no-underline"> Reportar mascota </a>
+
+          <button class="btn-secondary-custom">Ver mascotas</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex flex-wrap gap-5 mt-10">
+          <div class="bg-white rounded-3xl px-5 py-4 shadow-sm">
+            <h3 class="text-2xl font-bold m-0">+2.500</h3>
+
+            <span class="text-slate-500"> Mascotas reunidas </span>
+          </div>
+
+          <div class="bg-white rounded-3xl px-5 py-4 shadow-sm">
+            <h3 class="text-2xl font-bold m-0">+12k</h3>
+
+            <span class="text-slate-500"> Usuarios activos </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="col-12 col-lg-6 relative">
+        <!-- Background shape -->
+        <div
+          class="absolute top-0 right-0 w-[450px] h-[450px] rounded-full bg-[var(--primary)] opacity-10 blur-3xl"
+        ></div>
+
+        <div
+          class="bg-gradient-to-br from-teal-100 to-orange-100 rounded-[40px] p-4 relative shadow-xl"
+        >
+          <img
+            src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200"
+            alt="Mascotas"
+            class="w-full rounded-[32px] object-cover h-[550px]"
+          />
+
+          <!-- Floating Card -->
+          <div class="absolute bottom-5 left-5 bg-white rounded-[24px] p-4 shadow-lg max-w-[280px]">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-red-500 text-2xl"
+              >
+                <i class="bi bi-search-heart"></i>
+              </div>
+
+              <div>
+                <h4 class="font-bold m-0">Reporte rápido</h4>
+
+                <span class="text-slate-500 text-sm"> Publica mascotas en menos de 2 minutos </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

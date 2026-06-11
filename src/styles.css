@@ -1,3 +1,83 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* ==========
+   PET-CENTRIC THEME
+========== */
+
+:root {
+  --primary: #2a9d8f;
+  --primary-dark: #1f7a70;
+
+  --secondary: #f4a261;
+  --secondary-soft: #ffd6b0;
+
+  --background: #f8faf9;
+  --surface: #ffffff;
+
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+
+  --success: #4caf50;
+  --danger: #ef4444;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.section-padding {
+  padding: 5rem 0;
+}
+
+.container-custom {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-inline: 1rem;
+}
+
+.card-pet {
+  border-radius: 24px;
+  background: white;
+  transition: 0.3s ease;
+}
+
+.card-pet:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary-custom {
+  background: var(--primary);
+  color: white;
+  border-radius: 999px;
+  padding: 12px 22px;
+  transition: 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+  background: var(--primary-dark);
+}
+
+.btn-secondary-custom {
+  background: var(--secondary);
+  color: white;
+  border-radius: 999px;
+  padding: 12px 22px;
+}

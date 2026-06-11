@@ -1,42 +1,79 @@
 import { Routes } from '@angular/router';
 
+// Home
+import { HomePage } from './features/home/page/home-page/home-page';
+
+// Informativas
+import { ContactoPage } from './features/contacto/page/contacto-page/contacto-page';
+
+// Auth
+import { LoginPage } from './features/auth/page/login-page/login-page';
+import { RegisterPage } from './features/auth/page/register-page/register-page';
+import { VerifyEmailPage } from './features/auth/page/verify-email-page/verify-email-page';
+import { ForgotPasswordPage } from './features/auth/page/forgot-password-page/forgot-password-page';
+import { ResetPasswordPage } from './features/auth/page/reset-password-page/reset-password-page';
+
+// Legal
+import { TermsPage } from './features/terms/page/terms-page/terms-page';
+import { PrivacyPage } from './features/privacy/page/privacy-page/privacy-page';
+
 export const routes: Routes = [
-
-  // Ruta raíz: redirige a /principal
+  // Landing
   {
-    path: "",
-    redirectTo: "principal",
-    pathMatch: "full"  // Solo redirige si la URL es exactamente ""
+    path: '',
+    component: HomePage,
+    title: 'Pet-Centric',
   },
 
-  // Ruta /principal → carga PrincipalPageComponent
+  // Contacto
   {
-    path: "principal",
-    loadComponent: () =>
-      import("./features/principal/page/principal-page/principal-page")
-        .then(m => m.PrincipalPage)
+    path: 'contacto',
+    component: ContactoPage,
+    title: 'Contacto | Pet-Centric',
   },
 
-  // Ruta /usuarios → carga UsuariosPageComponent
+  // Auth
   {
-    path: "usuarios",
-    loadComponent: () =>
-      import("./features/usuarios/page/usuarios-page/usuarios-page")
-        .then(m => m.UsuariosPage)
+    path: 'login',
+    component: LoginPage,
+    title: 'Iniciar Sesión | Pet-Centric',
+  },
+  {
+    path: 'registro',
+    component: RegisterPage,
+    title: 'Registro | Pet-Centric',
+  },
+  {
+    path: 'verificar-correo',
+    component: VerifyEmailPage,
+    title: 'Verificar Correo | Pet-Centric',
+  },
+  {
+    path: 'recuperar-password',
+    component: ForgotPasswordPage,
+    title: 'Recuperar Contraseña | Pet-Centric',
+  },
+  {
+    path: 'restablecer-password',
+    component: ResetPasswordPage,
+    title: 'Restablecer Contraseña | Pet-Centric',
   },
 
-  // Ruta /contacto → carga ContactoPageComponent
+  // Legal
   {
-    path: "contacto",
-    loadComponent: () =>
-      import("./features/contacto/page/contacto-page/contacto-page")
-        .then(m => m.ContactoPage)
+    path: 'terminos',
+    component: TermsPage,
+    title: 'Términos y Condiciones | Pet-Centric',
+  },
+  {
+    path: 'privacidad',
+    component: PrivacyPage,
+    title: 'Política de Privacidad | Pet-Centric',
   },
 
-  // Ruta comodín: cualquier URL no reconocida redirige a /principal
+  // 404
   {
-    path: "**",
-    redirectTo: "principal"
-  }
-
+    path: '**',
+    redirectTo: '',
+  },
 ];
