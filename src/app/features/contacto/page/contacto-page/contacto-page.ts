@@ -7,6 +7,6 @@ import { Footer } from '../../../../shared/components/footer/footer'; //<<<---
   selector: 'app-contacto-page',
   imports: [ Header, Nav, Footer],
   templateUrl: './contacto-page.html',
-  styleUrl: './contacto-page.css',
+
 })
 export class ContactoPage {}

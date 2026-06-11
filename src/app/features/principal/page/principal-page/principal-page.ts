@@ -8,6 +8,6 @@ import { Footer } from '../../../../shared/components/footer/footer'; //<<<---
   selector: 'app-principal-page',
   imports: [ Header, Nav, Footer],
   templateUrl: './principal-page.html',
-  styleUrl: './principal-page.css',
+
 })
 export class PrincipalPage {}

@@ -10,7 +10,7 @@ import { Footer } from '../../../../shared/components/footer/footer'; //<<<-----
   selector: 'app-usuarios-page',
   imports: [ Header, Nav, Footer],
   templateUrl: './usuarios-page.html',
-  styleUrl: './usuarios-page.css',
+
 })
 export class UsuariosPage {
   // Inyectamos el servicio

@@ -1,9 +1,57 @@
 <app-header></app-header>
 <app-nav></app-nav>
-<div class="pagina">
-    <h2>Contacto</h2>
-    <p>Para comunicarte con nosotros, escríbenos a:</p>
-    <p><strong>Email:</strong> info@appv1.com</p>
-    <p><strong>Teléfono:</strong> +57 300 000 0000</p>
-</div>
+
+<main class="min-h-screen bg-slate-950 text-slate-100 px-4 py-12 sm:px-6 lg:px-8 flex items-center justify-center">
+  <div class="max-w-4xl w-full space-y-8">
+    
+    <!-- Encabezado de la Página -->
+    <div class="text-center space-y-2">
+      <h2 class="text-3xl font-extrabold tracking-tight text-slate-100 sm:text-4xl">
+        Contacto
+      </h2>
+      <p class="text-base text-slate-400 max-w-md mx-auto">
+        ¿Tienes alguna duda o sugerencia? Para comunicarte con nosotros, escríbenos a través de nuestros canales oficiales:
+      </p>
+    </div>
+
+    <!-- Contenedor de Tarjetas de Canales de Comunicación -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+      
+      <!-- Tarjeta: Email -->
+      <a href="mailto:info@appv1.com" 
+         class="group p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm hover:border-sky-500/30 hover:bg-slate-900/80 transition-all duration-200 flex flex-col items-center text-center space-y-3 shadow-lg">
+        <div class="p-3 rounded-xl bg-sky-500/10 text-sky-400 group-hover:bg-sky-500 group-hover:text-slate-950 transition-colors duration-200">
+          <svg xmlns="http://w3.org" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Correo Electrónico</h3>
+          <p class="text-sm font-medium text-slate-200 mt-1 group-hover:text-sky-400 transition-colors">
+            info&#64;appv1.com
+          </p>
+        </div>
+      </a>
+
+      <!-- Tarjeta: Teléfono -->
+      <a href="tel:+573000000000" 
+         class="group p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm hover:border-emerald-500/30 hover:bg-slate-900/80 transition-all duration-200 flex flex-col items-center text-center space-y-3 shadow-lg">
+        <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors duration-200">
+          <svg xmlns="http://w3.org" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Línea Telefónica</h3>
+          <p class="text-sm font-medium text-slate-200 mt-1 group-hover:text-emerald-400 transition-colors">
+            +57 300 000 0000
+          </p>
+        </div>
+      </a>
+
+    </div>
+
+  </div>
+</main>
+
 <app-footer></app-footer>

@@ -1,13 +1,20 @@
-<nav class="nav">
-    <a routerLink="/principal"
-       [routerLinkActive]="'activo'"
-       [routerLinkActiveOptions]="{exact: true}">
-       Principal
-    </a>
-    <a routerLink="/usuarios" routerLinkActive="activo">
-       Usuarios
-    </a>
-    <a routerLink="/contacto" routerLinkActive="activo">
-       Contacto
-    </a>
+<nav class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center gap-6 justify-center sm:justify-start">
+  <a routerLink="/principal"
+     routerLinkActive="bg-sky-500/10 text-sky-400 font-semibold"
+     [routerLinkActiveOptions]="{exact: true}"
+     class="text-slate-400 hover:text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+     Principal
+  </a>
+  
+  <a routerLink="/usuarios" 
+     routerLinkActive="bg-sky-500/10 text-sky-400 font-semibold"
+     class="text-slate-400 hover:text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+     Usuarios
+  </a>
+  
+  <a routerLink="/contacto" 
+     routerLinkActive="bg-sky-500/10 text-sky-400 font-semibold"
+     class="text-slate-400 hover:text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+     Contacto
+  </a>
 </nav>
