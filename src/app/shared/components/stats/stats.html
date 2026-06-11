@@ -1,0 +1,31 @@
+<section class="section-padding bg-[var(--primary)]">
+  <div class="container-custom">
+    <div class="text-center mb-5">
+      <span class="text-orange-200 uppercase tracking-wider font-semibold"> Impacto </span>
+
+      <h2 class="text-4xl lg:text-5xl text-white font-bold mt-3">
+        Miles de mascotas ya volvieron a casa
+      </h2>
+    </div>
+
+    <div class="row g-4">
+      <div *ngFor="let stat of stats" class="col-6 col-lg-3">
+        <div class="bg-white rounded-[30px] p-5 text-center h-full">
+          <div
+            class="w-20 h-20 rounded-[24px] bg-teal-50 text-[var(--primary)] flex items-center justify-center text-4xl mx-auto mb-4"
+          >
+            <i [class]="stat.icon"></i>
+          </div>
+
+          <h3 class="text-4xl font-extrabold">
+            {{ stat.value }}
+          </h3>
+
+          <p class="text-slate-500 mt-2">
+            {{ stat.label }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

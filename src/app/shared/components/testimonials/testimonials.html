@@ -1,0 +1,39 @@
+<section id="testimonios" class="section-padding bg-white">
+  <div class="container-custom">
+    <div class="text-center mb-5">
+      <span class="text-[var(--secondary)] uppercase font-semibold"> Testimonios </span>
+
+      <h2 class="text-4xl lg:text-5xl font-bold mt-3">Historias reales</h2>
+    </div>
+
+    <div class="row g-4">
+      <div *ngFor="let item of testimonials" class="col-12 col-md-6 col-lg-4">
+        <div class="card-pet p-5 h-full">
+          <div class="flex items-center gap-4">
+            <img [src]="item.image" [alt]="item.name" class="w-16 h-16 rounded-full object-cover" />
+
+            <div>
+              <h4 class="font-bold text-lg m-0">
+                {{ item.name }}
+              </h4>
+
+              <span class="text-slate-500">
+                {{ item.city }}
+              </span>
+            </div>
+          </div>
+
+          <p class="text-slate-500 leading-7 mt-4">"{{ item.text }}"</p>
+
+          <div class="mt-4 text-[var(--secondary)] text-xl">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

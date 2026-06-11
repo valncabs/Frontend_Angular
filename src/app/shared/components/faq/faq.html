@@ -1,0 +1,21 @@
+<section id="faq" class="section-padding bg-[var(--background)]">
+  <div class="container-custom max-w-4xl">
+    <div class="text-center mb-5">
+      <span class="text-[var(--secondary)] uppercase font-semibold"> FAQ </span>
+
+      <h2 class="text-4xl lg:text-5xl font-bold mt-3">Preguntas frecuentes</h2>
+    </div>
+
+    <div class="space-y-4">
+      <div *ngFor="let faq of faqs" class="bg-white rounded-[24px] p-5 shadow-sm">
+        <h4 class="font-bold text-lg">
+          {{ faq.question }}
+        </h4>
+
+        <p class="text-slate-500 mt-3">
+          {{ faq.answer }}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

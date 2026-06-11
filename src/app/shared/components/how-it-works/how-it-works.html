@@ -1,0 +1,38 @@
+<section id="como-funciona" class="section-padding bg-white">
+  <div class="container-custom">
+    <div class="text-center mb-5">
+      <span class="text-[var(--secondary)] font-semibold uppercase tracking-wider">
+        Cómo funciona
+      </span>
+
+      <h2 class="text-4xl lg:text-5xl font-bold mt-3">
+        Encontrar una mascota nunca fue tan simple
+      </h2>
+
+      <p class="text-slate-500 mt-3 max-w-2xl mx-auto">
+        Diseñado para que cualquier persona pueda reportar, buscar y ayudar a reunir mascotas con
+        sus familias.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div *ngFor="let step of steps" class="col-12 col-md-6 col-lg-4">
+        <div class="card-pet h-full p-5 text-center border border-slate-100">
+          <div
+            class="w-20 h-20 mx-auto rounded-[28px] bg-teal-50 flex items-center justify-center text-[var(--primary)] text-4xl mb-4"
+          >
+            <i [class]="step.icon"></i>
+          </div>
+
+          <h3 class="text-2xl font-bold">
+            {{ step.title }}
+          </h3>
+
+          <p class="text-slate-500 leading-7 mt-3">
+            {{ step.description }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
