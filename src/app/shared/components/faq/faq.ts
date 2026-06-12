@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-faq',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './faq.html',
+  templateUrl: './faq.html'
 })
 export class FaqComponent {
   faqs = [
