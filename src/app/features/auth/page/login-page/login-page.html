@@ -1,1 +1,115 @@
-<p>login-page works!</p>
+
+<div class="flex min-h-screen" style="background-color: var(--background);">
+
+  <!-- Left panel: image -->
+  <div class="hidden lg:flex lg:w-5/12 flex-col justify-between relative bg-cover bg-center bg-no-repeat p-12"
+       style="background-image: url('/image/dog.jpg');">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0"
+         style="background: linear-gradient(160deg, rgba(42,157,143,0.55) 0%, rgba(0,0,0,0.45) 100%);"></div>
+
+    <!-- Top text -->
+    <div class="relative z-10">
+      <h1 class="text-white font-semibold text-2xl leading-snug mb-3"
+          style="font-family: 'Montserrat', sans-serif;">
+        Bienvenido a<br>Pet-Centric
+      </h1>
+      <p class="text-white/70 text-sm font-light leading-relaxed">
+         La forma más inteligente de cuidar a tu mascota.
+      </p>
+    </div>
+
+    <!-- Bottom badge -->
+    <div class="relative z-10">
+      <div class="inline-flex items-center gap-2 px-5 py-3 rounded-full"
+           style="background: rgba(255,255,255,0.15); border: 0.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px);">
+        <span class="text-white text-xs font-light tracking-wide"> Gestion de reportes</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right panel: form -->
+  <div class="w-full lg:w-7/12 flex flex-col justify-between px-10 sm:px-16 lg:px-24 py-14"
+       style="background-color: var(--surface);">
+
+    <!-- Logo -->
+    <h1 class=" font-bold tracking-[0.45em] uppercase text-[11px]"
+        style="color: var(--text-secondary); font-family: 'Montserrat', sans-serif;">
+      Pet-Centric
+    </h1>
+
+    <!-- Form area -->
+    <div class="w-full max-w-sm mx-auto">
+
+      <p class="mb-1 text-2xl font-semibold"
+        style="color: var(--text-primary); font-family: 'Montserrat', sans-serif;">
+       Iniciar sesión
+      </p>
+      <p class="mb-10 text-xs font-light" style="color: var(--text-secondary);">
+       Bienvenido de nuevo
+      </p>
+
+      <!-- Email -->
+      <div class="mb-6">
+        <label class="block text-[10px] font-medium tracking-widest uppercase mb-2"
+               style="color: var(--text-secondary);">Email</label>
+        <input
+          type="email"
+          placeholder="you@gmail.com"
+          class="w-full bg-transparent text-sm pb-2 border-0 border-b focus:outline-none transition-colors duration-200 font-light placeholder-gray-300"
+          style="color: var(--text-primary); border-color: #e5e7eb;"
+          onfocus="this.style.borderColor='var(--primary)'"
+          onblur="this.style.borderColor='#e5e7eb'"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label class="block text-[10px] font-medium tracking-widest uppercase mb-2"
+               style="color: var(--text-secondary);">Contraseña</label>
+        <input
+          type="password"
+          placeholder="••••••••"
+          class="w-full bg-transparent text-sm pb-2 border-0 border-b focus:outline-none transition-colors duration-200 font-light placeholder-gray-300"
+          style="color: var(--text-primary); border-color: #e5e7eb;"
+          onfocus="this.style.borderColor='var(--primary)'"
+          onblur="this.style.borderColor='#e5e7eb'"
+        />
+      </div>
+
+      <!-- Forgot -->
+      <div class="flex justify-end mb-10">
+        <a href="#" class="text-[11px] transition-opacity hover:opacity-100 opacity-80"
+           style="color: var(--primary);">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col gap-3">
+        <button
+          type="button"
+          class="btn-primary-custom w-full text-xs tracking-widest uppercase text-center active:scale-95 transition-all duration-200"
+        >
+        Iniciar sesión
+        </button>
+
+        <a href="#"
+           class="w-full py-3 rounded-full border text-xs font-medium tracking-widest uppercase text-center transition-all duration-200 hover:opacity-80"
+           style="color: var(--primary); border-color: var(--primary);">
+          Registrate
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="text-[10.5px]" style="color: #d1d5db;">
+      © 2026 Pet-Centric. Derechos reservados
+    </p>
+
+  </div>
+
+</div>

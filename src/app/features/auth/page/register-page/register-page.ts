@@ -4,6 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-register-page',
   imports: [],
   templateUrl: './register-page.html',
-  styleUrl: './register-page.css',
+
 })
 export class RegisterPage {}
