@@ -53,18 +53,24 @@
     </div>
 
     <!-- Mobile Menu -->
-    <div *ngIf="isMenuOpen" class="lg:hidden pb-5 flex flex-col gap-4">
-      <a href="#como-funciona" class="text-slate-700 no-underline"> Cómo funciona </a>
+  <!-- Botón para abrir/cerrar el menú (Hamburguesa) -->
+<button (click)="toggleMenu()" class="lg:hidden p-2 text-slate-700">
+  @if (isMenuOpen) { ☰ } @else { ☰ }
+</button>
 
-      <a href="#mascotas" class="text-slate-700 no-underline"> Mascotas </a>
+  <!-- Contenedor del menú desplegable -->
+@if (isMenuOpen) {
+  <div class="lg:hidden pb-5 flex flex-col gap-4">
+    <a href="#como-funciona" class="text-slate-700 no-underline"> Cómo funciona </a>
+    <a href="#mascotas" class="text-slate-700 no-underline"> Mascotas </a>
+    <a href="#testimonios" class="text-slate-700 no-underline"> Testimonios </a>
+    <a href="#faq" class="text-slate-700 no-underline"> FAQ </a>
+    
+    <a routerLink="/login" class="btn-primary-custom text-center no-underline">
+      Iniciar sesión
+    </a>
+  </div>
+}
 
-      <a href="#testimonios" class="text-slate-700 no-underline"> Testimonios </a>
-
-      <a href="#faq" class="text-slate-700 no-underline"> FAQ </a>
-
-      <a routerLink="/login" class="btn-primary-custom text-center no-underline">
-        Iniciar sesión
-      </a>
-    </div>
   </div>
 </nav>

@@ -12,12 +12,12 @@ import { StatsComponent } from '../../../../shared/components/stats/stats';
   imports: [
     NavComponent,
     HeroComponent,
-    HowItWorksComponent,
-    PetsCarouselComponent,
-    FaqComponent,
-    FooterComponent,
-    TestimonialsComponent,
-    StatsComponent,
+    //HowItWorksComponent,
+    //PetsCarouselComponent,
+    //FaqComponent,
+    //FooterComponent,
+    //TestimonialsComponent,
+    //StatsComponent
   ],
   templateUrl: './home-page.html',
 })
