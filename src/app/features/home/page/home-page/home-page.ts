@@ -13,7 +13,7 @@ import { StatsComponent } from '../../../../shared/components/stats/stats';
     NavComponent,
     HeroComponent,
     //HowItWorksComponent,
-    //PetsCarouselComponent,
+    PetsCarouselComponent,
     //FaqComponent,
     //FooterComponent,
     //TestimonialsComponent,
