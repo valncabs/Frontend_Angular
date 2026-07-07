@@ -3,7 +3,7 @@ import { HomePage } from './features/home/page/home-page/home-page';
 import { AdminPage } from './features/admin/page/admin-page/admin-page';
 import { PageConfiguration } from './features/dash/page/page-configuration/page-configuration';
 import { PageMyProfile } from './features/dash/page/page-my-profile/page-my-profile';
-import { authGuard } from './core/services/auth.guard';
+
 import { DashPage } from './features/dash/page/dash-page/dash-page';
 import { MyPets } from './features/dash/page/my-pets-page/my-pets-page';
 import { PetReportsComponent } from './features/dash/page/pet-reports/pet-reports';
@@ -21,7 +21,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashPage,
-    canActivate: [authGuard],
+
     title: 'Dashboard | Pet-Centric',
     children: [
       { path: '', redirectTo: 'mascotas', pathMatch: 'full' },
@@ -36,7 +36,6 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminPage,
-    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: AdminReportesPage },
