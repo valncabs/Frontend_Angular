@@ -1,12 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '@auth0/auth0-angular';
 
-import { ChatbotComponent } from '../app/shared/components/chatbot/chatbot'; // o chatbot.component
+import { ChatbotComponent } from './shared/components/chatbot/chatbot';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [
     RouterOutlet,
     CommonModule,
@@ -17,18 +17,5 @@ import { ChatbotComponent } from '../app/shared/components/chatbot/chatbot'; // 
 export class App {
 
   protected readonly window = window;
-  protected auth = inject(AuthService);
-
-  constructor() {
-
-    this.auth.isLoading$.subscribe(l =>
-      console.log('APP isLoading:', l)
-    );
-
-    this.auth.isAuthenticated$.subscribe(a =>
-      console.log('APP isAuthenticated:', a)
-    );
-
-  }
 
 }

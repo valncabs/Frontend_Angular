@@ -1,8 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
-import { Observable } from 'rxjs';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-admin-nav',
@@ -11,14 +9,15 @@ import { Observable } from 'rxjs';
   templateUrl: './admin-nav.html',
 })
 export class AdminNavComponent {
-  private auth = inject(AuthService);
-  userProfile$ = this.auth.user$ as Observable<any>;
 
-  logout() {
-    this.auth.logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-      },
-    });
+  constructor(private router: Router) {}
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('usuario');
+
+    this.router.navigate(['/home']);
   }
+
 }

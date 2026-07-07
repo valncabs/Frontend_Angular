@@ -4,6 +4,8 @@ import { AuthLayoutComponent } from '../../components/auth-layout/auth-layout';
 import { EmailInputComponent } from '../../../../shared/components/email-input/email-input';
 import { PasswordInputComponent } from '../../../../shared/components/password-input/password-input';
 import { ModalComponent } from '../../../../shared/components/modal/modal';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-login-page',
   standalone: true,
@@ -12,4 +14,10 @@ import { ModalComponent } from '../../../../shared/components/modal/modal';
 })
 export class LoginPage {
   showForgotPassword = false;
+   constructor(private router: Router) {}
+
+  irARegistro(): void {
+    this.router.navigate(['/registro']);
+  }
+
 }

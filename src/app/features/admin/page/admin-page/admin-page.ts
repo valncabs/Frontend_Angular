@@ -1,9 +1,10 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
+import { Router, RouterOutlet } from '@angular/router';
+
 import { AdminNavComponent } from '../../components/admin-nav/admin-nav';
+
 import {
   PetReport,
   ReportType,
@@ -13,11 +14,17 @@ import {
 @Component({
   selector: 'app-admin-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, AdminNavComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterOutlet,
+    AdminNavComponent
+  ],
   templateUrl: './admin-page.html',
 })
 export class AdminPage {
-  private auth = inject(AuthService);
+
+  constructor(private router: Router) {}
 
   reports = signal<PetReport[]>([
     {
@@ -64,7 +71,10 @@ export class AdminPage {
 
   filteredReports = computed(() => {
     return this.reports().filter((r) => {
-      const matchType = this.filterType() === 'ALL' || r.type === this.filterType();
+
+      const matchType =
+        this.filterType() === 'ALL' ||
+        r.type === this.filterType();
 
       const term = this.searchTerm().toLowerCase();
 
@@ -75,6 +85,7 @@ export class AdminPage {
         r.city.toLowerCase().includes(term);
 
       return matchType && matchSearch;
+
     });
   });
 
@@ -91,54 +102,69 @@ export class AdminPage {
     };
   }
 
-  openCreate() {
+  openCreate(): void {
     this.editingReport.set(this.emptyForm());
     this.showModal.set(true);
   }
 
-  openEdit(report: PetReport) {
+  openEdit(report: PetReport): void {
     this.editingReport.set({ ...report });
     this.showModal.set(true);
   }
 
-  saveReport() {
+  saveReport(): void {
+
     const report = this.editingReport();
+
     if (!report) return;
 
-    const exists = this.reports().find((r) => r.id === report.id);
+    const exists = this.reports().find(r => r.id === report.id);
 
     if (exists) {
-      this.reports.update((list) => list.map((r) => (r.id === report.id ? report : r)));
+
+      this.reports.update(list =>
+        list.map(r => r.id === report.id ? report : r)
+      );
+
     } else {
-      this.reports.update((list) => [...list, report]);
+
+      this.reports.update(list => [...list, report]);
+
     }
 
     this.closeModal();
   }
 
-  confirmDelete(id: string) {
+  confirmDelete(id: string): void {
     this.showDeleteConfirm.set(id);
   }
 
-  deleteReport(id: string) {
-    this.reports.update((list) => list.filter((r) => r.id !== id));
+  deleteReport(id: string): void {
+
+    this.reports.update(list =>
+      list.filter(r => r.id !== id)
+    );
+
     this.showDeleteConfirm.set(null);
   }
 
-  closeModal() {
+  closeModal(): void {
     this.showModal.set(false);
     this.editingReport.set(null);
   }
 
-  cityLabel(value: string) {
-    return this.cities.find((c) => c.value === value)?.label ?? value;
+  cityLabel(value: string): string {
+    return this.cities.find(c => c.value === value)?.label ?? value;
   }
 
-  logout() {
-    this.auth.logout({
-      logoutParams: {
-        returnTo: window.location.origin + '/home',
-      },
-    });
+  logout(): void {
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('usuario');
+
+    this.router.navigate(['/home']);
+
   }
+
 }

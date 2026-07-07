@@ -33,17 +33,7 @@
         </a>
       </div>
 
-      <!-- Usuario + Logout -->
-      <div class="flex items-center gap-3">
-        <ng-container *ngIf="userProfile$ | async as profile">
-          <div class="text-right hidden sm:block">
-            <p class="text-sm font-semibold text-slate-800 m-0">{{ profile.name }}</p>
-            <p class="text-xs m-0" style="color: var(--text-secondary)">{{ profile.email }}</p>
-          </div>
-          <img [src]="profile.picture" [alt]="profile.name"
-            class="w-9 h-9 rounded-full object-cover border-2"
-            style="border-color: var(--primary)" />
-        </ng-container>
+
 
           <button (click)="logout()"
             class="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 hover:bg-red-100 transition shadow-sm">
@@ -52,5 +42,4 @@
         </div>
 
     </div>
-  </div>
 </nav>

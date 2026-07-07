@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-nav',
@@ -10,16 +9,16 @@ import { AuthService } from '@auth0/auth0-angular';
   templateUrl: './nav.html',
 })
 export class NavComponent {
+
   isMenuOpen = false;
 
-  constructor(public auth: AuthService) {}
+  constructor(private router: Router) {}
 
-  login(event: Event) {
+  login(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    this.auth.loginWithRedirect({
-      appState: { target: '/dashboard' }
-    });
+
+    this.router.navigate(['/login']);
   }
 
   toggleMenu(): void {
@@ -28,11 +27,17 @@ export class NavComponent {
 
   scrollToSection(sectionId: string): void {
     this.isMenuOpen = false;
+
     setTimeout(() => {
       const element = document.getElementById(sectionId);
+
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
       }
     }, 100);
   }
+
 }

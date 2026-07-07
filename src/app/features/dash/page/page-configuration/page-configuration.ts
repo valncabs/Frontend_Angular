@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '@auth0/auth0-angular'; // 👈 Inyección de Auth0
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-page-configuration',
@@ -9,24 +9,40 @@ import { AuthService } from '@auth0/auth0-angular'; // 👈 Inyección de Auth0
   templateUrl: './page-configuration.html',
 })
 export class PageConfiguration {
-  private auth = inject(AuthService);
 
-  // Estados locales para los interruptores (Switches)
+  constructor(private router: Router) {}
+
+  // Estados locales para los interruptores
   notificationsEnabled = true;
   emailReportsEnabled = false;
   securityAlertsEnabled = true;
 
-  // Alternar los interruptores de manera reactiva
-  toggleSetting(setting: 'notifications' | 'email' | 'alerts') {
-    if (setting === 'notifications') this.notificationsEnabled = !this.notificationsEnabled;
-    if (setting === 'email') this.emailReportsEnabled = !this.emailReportsEnabled;
-    if (setting === 'alerts') this.securityAlertsEnabled = !this.securityAlertsEnabled;
+  // Alternar los interruptores
+  toggleSetting(setting: 'notifications' | 'email' | 'alerts'): void {
+
+    if (setting === 'notifications') {
+      this.notificationsEnabled = !this.notificationsEnabled;
+    }
+
+    if (setting === 'email') {
+      this.emailReportsEnabled = !this.emailReportsEnabled;
+    }
+
+    if (setting === 'alerts') {
+      this.securityAlertsEnabled = !this.securityAlertsEnabled;
+    }
+
   }
 
-  // Método para cerrar sesión de forma segura a través de Auth0
-  logout() {
-    this.auth.logout({ 
-      logoutParams: { returnTo: window.location.origin } 
-    });
+  // Cerrar sesión
+  logout(): void {
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('usuario');
+
+    this.router.navigate(['/home']);
+
   }
+
 }

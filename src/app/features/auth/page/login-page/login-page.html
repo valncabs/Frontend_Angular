@@ -41,12 +41,12 @@
       Iniciar sesión
     </button>
 
-    <a
-      routerLink="/registro"
-      class="w-full py-3 rounded-full border text-xs font-medium tracking-widest uppercase text-center"
-      style="color: var(--primary); border-color: var(--primary)"
-    >
-      Registrate
-    </a>
+<a
+  (click)="irARegistro()"
+  class="w-full py-3 rounded-full border text-xs font-medium tracking-widest uppercase text-center cursor-pointer"
+  style="color: var(--primary); border-color: var(--primary)"
+>
+  Registrate
+</a>
   </div>
 </app-auth-layout>
