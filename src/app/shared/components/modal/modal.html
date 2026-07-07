@@ -1,0 +1,26 @@
+@if (isOpen) {
+  <div class="fixed inset-0 z-50 overflow-y-auto">
+    <!-- Fondo oscuro -->
+    <div class="fixed inset-0 bg-black/50" (click)="closeModal()"></div>
+
+    <!-- Wrapper centrado con padding para que no toque los bordes -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <!-- Modal -->
+      <div
+        class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10 max-h-[90vh] overflow-y-auto scrollbar-hide"
+      >
+        <h2 class="text-xl font-semibold mb-4">
+          {{ title }}
+        </h2>
+
+        <ng-content></ng-content>
+
+        <div class="flex justify-end mt-6">
+          <button class="px-5 py-2 rounded-lg bg-[#2A9D8F] text-white" (click)="closeModal()">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

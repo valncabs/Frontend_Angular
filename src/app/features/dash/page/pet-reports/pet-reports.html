@@ -1,0 +1,386 @@
+
+<div class="min-h-screen" style="background-color: var(--background)">
+  <!-- Header -->
+  <div class="px-4 pt-6 pb-4">
+    <div class="flex items-center justify-between mb-1">
+      <h1 class="text-2xl font-bold text-[var(--text-primary)]">Reportes</h1>
+      <app-pet-button
+        label="Publicar reporte"
+        variant="primary"
+        size="sm"
+        (clicked)="navigateToReport()"
+      />
+    </div>
+    <p class="text-sm text-[var(--text-secondary)]">Mascotas perdidas y encontradas en Colombia</p>
+  </div>
+
+  <!-- Filtros -->
+  <div class="px-4 py-3 border-b border-gray-100 bg-white sticky top-0 z-10">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <app-pet-select
+        [(ngModel)]="filterTypeValue"
+        [options]="typeOptions"
+        placeholder="Tipo de reporte"
+      />
+      <app-pet-select
+        [(ngModel)]="filterSpeciesValue"
+        [options]="speciesOptions"
+        placeholder="Especie"
+      />
+      <app-pet-select [(ngModel)]="filterCityValue" [options]="cityOptions" placeholder="Ciudad" />
+    </div>
+
+    @if (filters().city) {
+      <div class="flex items-center gap-1 mt-2">
+        <span class="material-icons text-sm text-[var(--primary)]">location_on</span>
+        <p class="text-xs text-[var(--text-secondary)]">
+          Mostrando en
+          <span class="font-medium text-[var(--text-primary)]">{{
+            getCityLabel(filterCity())
+          }}</span>
+        </p>
+        <button class="text-xs text-[var(--primary)] underline ml-1" (click)="filterCity.set('')">
+          Ver todo el país
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Contadores -->
+  <div class="px-4 py-3 flex gap-3">
+    <span
+      class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
+      style="background-color: #fef3c7; color: #92400e"
+    >
+      <span class="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
+      {{ lostCount() }} perdida{{ lostCount() !== 1 ? 's' : '' }}
+    </span>
+    <span
+      class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
+      style="background-color: #d1fae5; color: #065f46"
+    >
+      <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+      {{ foundCount() }} encontrada{{ foundCount() !== 1 ? 's' : '' }}
+    </span>
+  </div>
+
+  <!-- Grid de cards -->
+  <div class="px-4 pb-8">
+    @if (filteredReports().length === 0) {
+      <div class="flex flex-col items-center justify-center py-16 text-center">
+        <span class="text-5xl mb-4">🔍</span>
+        <p class="text-[var(--text-primary)] font-medium mb-1">Sin resultados</p>
+        <p class="text-sm text-[var(--text-secondary)]">
+          Intenta cambiar los filtros para ver más reportes
+        </p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @for (report of filteredReports(); track report.id) {
+          <div
+            class="card-pet border border-gray-100 p-0 flex flex-col overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
+            (click)="openDetail(report)"
+          >
+            <!-- Badge tipo + fecha -->
+            <div class="flex items-center justify-between px-4 pt-3 pb-0">
+              @if (report.type === 'LOST') {
+                <span
+                  class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+                  style="background-color: #fef3c7; color: #92400e"
+                >
+                  <span class="material-icons text-sm leading-none">search</span>
+                  Perdido
+                </span>
+              } @else {
+                <span
+                  class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+                  style="background-color: #d1fae5; color: #065f46"
+                >
+                  <span class="material-icons text-sm leading-none">favorite</span>
+                  Encontrado
+                </span>
+              }
+              <span class="text-xs text-[var(--text-secondary)]">
+                {{ formatDateTime(report.reportedAt) }}
+              </span>
+            </div>
+
+            <!-- Foto placeholder o emoji -->
+            <div class="px-4 pt-3">
+              @if (report.photoUrl) {
+                <img
+                  [src]="report.photoUrl"
+                  [alt]="report.petName ?? 'Mascota'"
+                  class="w-full h-36 object-cover rounded-xl"
+                />
+              } @else {
+                <div
+                  class="w-full h-36 rounded-xl flex items-center justify-center text-5xl"
+                  style="background-color: var(--secondary-soft)"
+                >
+                  {{ getEmoji(report.species) }}
+                </div>
+              }
+            </div>
+
+            <!-- Info principal -->
+            <div class="px-4 pt-3 pb-1 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h3 class="font-semibold text-[var(--text-primary)] text-base">
+                    {{ report.petName ?? (report.type === 'FOUND' ? 'Sin nombre' : 'Desconocido') }}
+                  </h3>
+                  <p class="text-sm text-[var(--text-secondary)]">
+                    {{ report.species }}
+                    @if (report.breed) {
+                      · {{ report.breed }}
+                    }
+                  </p>
+                </div>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  @if (report.sex) {
+                    <span class="text-xs text-[var(--text-secondary)]">
+                      {{ sexLabel[report.sex] }}
+                    </span>
+                  }
+                  @if (report.size) {
+                    <span class="text-xs text-[var(--text-secondary)]">
+                      {{ sizeLabel[report.size] }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <!-- Chips: color y ubicación -->
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                <span
+                  class="text-xs px-2 py-0.5 rounded-full border border-gray-200 text-[var(--text-secondary)]"
+                >
+                  {{ report.color }}
+                </span>
+                <span
+                  class="text-xs px-2 py-0.5 rounded-full border border-gray-200 text-[var(--text-secondary)] flex items-center gap-0.5"
+                >
+                  <span class="material-icons text-xs leading-none">place</span>
+                  {{ getCityLabel(report.city) }}
+                  @if (report.neighborhood) {
+                    · {{ report.neighborhood }}
+                  }
+                </span>
+              </div>
+
+              @if (report.description) {
+                <p class="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed line-clamp-2">
+                  {{ report.description }}
+                </p>
+              }
+            </div>
+
+            <!-- Footer de la card -->
+            <div
+              class="px-4 py-3 mt-2 border-t border-gray-100 flex gap-2"
+              (click)="$event.stopPropagation()"
+            >
+              <app-pet-button
+                label="Ver detalles"
+                variant="outline"
+                size="sm"
+                [fullWidth]="true"
+                (clicked)="openDetail(report)"
+              />
+              @if (report.type === 'LOST') {
+                <app-pet-button
+                  label="Yo lo vi"
+                  variant="primary"
+                  size="sm"
+                  [fullWidth]="true"
+                  (clicked)="navigateToReport()"
+                />
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal de detalle -->
+@if (selectedReport()) {
+  <app-modal
+    [isOpen]="true"
+    [title]="selectedReport()!.type === 'LOST' ? '🔍 Mascota perdida' : '💚 Mascota encontrada'"
+    (close)="closeDetail()"
+  >
+    <div class="flex flex-col gap-5">
+      <!-- Foto -->
+      @if (selectedReport()!.photoUrl) {
+        <img
+          [src]="selectedReport()!.photoUrl"
+          [alt]="selectedReport()!.petName ?? 'Mascota'"
+          class="w-full h-52 object-cover rounded-2xl"
+        />
+      } @else {
+        <div
+          class="w-full h-40 rounded-2xl flex items-center justify-center text-7xl"
+          style="background-color: var(--secondary-soft)"
+        >
+          {{ getEmoji(selectedReport()!.species) }}
+        </div>
+      }
+
+      <!-- Nombre y tipo -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-[var(--text-primary)]">
+            {{
+              selectedReport()!.petName ??
+                (selectedReport()!.type === 'FOUND' ? 'Sin nombre' : 'Desconocido')
+            }}
+          </h2>
+          <p class="text-sm text-[var(--text-secondary)]">
+            {{ selectedReport()!.species }}
+            @if (selectedReport()!.breed) {
+              · {{ selectedReport()!.breed }}
+            }
+          </p>
+        </div>
+        @if (selectedReport()!.type === 'LOST') {
+          <span
+            class="text-xs font-semibold px-3 py-1.5 rounded-full"
+            style="background-color: #fef3c7; color: #92400e"
+          >
+            Perdido/a
+          </span>
+        } @else {
+          <span
+            class="text-xs font-semibold px-3 py-1.5 rounded-full"
+            style="background-color: #d1fae5; color: #065f46"
+          >
+            Encontrado/a
+          </span>
+        }
+      </div>
+
+      <!-- Grid de características -->
+      <div class="grid grid-cols-2 gap-2">
+        @if (selectedReport()!.sex) {
+          <div class="rounded-xl p-3" style="background-color: var(--background)">
+            <p class="text-xs text-[var(--text-secondary)] mb-0.5">Sexo</p>
+            <p class="text-sm font-medium text-[var(--text-primary)]">
+              {{ sexLabel[selectedReport()!.sex!] }}
+            </p>
+          </div>
+        }
+        @if (selectedReport()!.size) {
+          <div class="rounded-xl p-3" style="background-color: var(--background)">
+            <p class="text-xs text-[var(--text-secondary)] mb-0.5">Tamaño</p>
+            <p class="text-sm font-medium text-[var(--text-primary)]">
+              {{ sizeLabel[selectedReport()!.size!] }}
+            </p>
+          </div>
+        }
+        <div class="rounded-xl p-3" style="background-color: var(--background)">
+          <p class="text-xs text-[var(--text-secondary)] mb-0.5">Color</p>
+          <p class="text-sm font-medium text-[var(--text-primary)]">
+            {{ selectedReport()!.color }}
+          </p>
+        </div>
+        @if (selectedReport()!.approximateAge !== undefined) {
+          <div class="rounded-xl p-3" style="background-color: var(--background)">
+            <p class="text-xs text-[var(--text-secondary)] mb-0.5">Edad aprox.</p>
+            <p class="text-sm font-medium text-[var(--text-primary)]">
+              {{ selectedReport()!.approximateAge }}
+              {{ selectedReport()!.approximateAge === 1 ? 'año' : 'años' }}
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- Marcas distintivas -->
+      @if (selectedReport()!.distinctiveMarks) {
+        <div class="rounded-xl p-3 border border-yellow-100" style="background-color: #fefce8">
+          <p class="text-xs font-medium text-yellow-700 mb-1 flex items-center gap-1">
+            <span class="material-icons text-sm">star</span>
+            Marcas distintivas
+          </p>
+          <p class="text-sm text-yellow-800">{{ selectedReport()!.distinctiveMarks }}</p>
+        </div>
+      }
+
+      <!-- Descripción -->
+      @if (selectedReport()!.description) {
+        <div>
+          <p class="text-xs text-[var(--text-secondary)] mb-1">Descripción</p>
+          <p class="text-sm text-[var(--text-primary)] leading-relaxed">
+            {{ selectedReport()!.description }}
+          </p>
+        </div>
+      }
+
+      <!-- Ubicación y fechas -->
+      <div class="border-t border-gray-100 pt-4 flex flex-col gap-2">
+        <div class="flex items-center gap-2 text-sm">
+          <span class="material-icons text-base text-[var(--text-secondary)]">place</span>
+          <span class="text-[var(--text-primary)]">
+            {{ getCityLabel(selectedReport()!.city) }}
+            @if (selectedReport()!.neighborhood) {
+              · {{ selectedReport()!.neighborhood }}
+            }
+          </span>
+        </div>
+        @if (selectedReport()!.address) {
+          <div class="flex items-center gap-2 text-sm">
+            <span class="material-icons text-base text-[var(--text-secondary)]">location_on</span>
+            <span class="text-[var(--text-secondary)]">{{ selectedReport()!.address }}</span>
+          </div>
+        }
+        <div class="flex items-center gap-2 text-sm">
+          <span class="material-icons text-base text-[var(--text-secondary)]">calendar_today</span>
+          <span class="text-[var(--text-secondary)]"
+            >Reportado el {{ formatDate(selectedReport()!.reportedAt) }}</span
+          >
+        </div>
+        @if (selectedReport()!.lastSeenAt) {
+          <div class="flex items-center gap-2 text-sm">
+            <span class="material-icons text-base text-[var(--text-secondary)]">access_time</span>
+            <span class="text-[var(--text-secondary)]"
+              >Visto por última vez: {{ formatDateTime(selectedReport()!.lastSeenAt!) }}</span
+            >
+          </div>
+        }
+      </div>
+
+      <!-- Contacto -->
+      <div
+        class="rounded-xl p-4 border border-gray-100"
+        style="background-color: var(--background)"
+      >
+        <p class="text-xs text-[var(--text-secondary)] mb-2">Reportado por</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          {{ selectedReport()!.reporterName }}
+        </p>
+        @if (selectedReport()!.reporterPhone) {
+          <a
+            [href]="'tel:' + selectedReport()!.reporterPhone"
+            class="inline-flex items-center gap-1.5 mt-1.5 text-sm font-medium text-[var(--primary)]"
+          >
+            <span class="material-icons text-base">phone</span>
+            {{ selectedReport()!.reporterPhone }}
+          </a>
+        }
+      </div>
+
+      <!-- Botón de acción para mascotas perdidas -->
+      @if (selectedReport()!.type === 'LOST') {
+        <app-pet-button
+          label="Reportar avistamiento"
+          variant="primary"
+          size="lg"
+          [fullWidth]="true"
+          (clicked)="navigateToReport()"
+        />
+      }
+    </div>
+  </app-modal>
+}

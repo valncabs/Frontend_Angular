@@ -1,0 +1,99 @@
+<div class="card-pet border border-gray-100 p-5 flex flex-col gap-4">
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <!-- Avatar -->
+    <div
+      class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0"
+      style="background-color: var(--secondary-soft)"
+    >
+      {{ getEmoji(pet.speciesName) }}
+    </div>
+
+    <!-- Name + species/breed -->
+    <div class="flex-1 min-w-0">
+      <h3 class="font-semibold text-[var(--text-primary)] text-base truncate">
+        {{ pet.name }}
+      </h3>
+      <p class="text-sm text-[var(--text-secondary)] truncate">
+        {{ pet.speciesName ?? 'Especie desconocida' }}
+        @if (pet.breedName) {
+          · {{ pet.breedName }}
+        }
+      </p>
+    </div>
+
+    <!-- Sterilized badge -->
+    @if (pet.sterilized) {
+      <span
+        class="text-xs font-medium px-2.5 py-1 rounded-full shrink-0"
+        style="background-color: #d1fae5; color: #065f46"
+      >
+        Esterilizado
+      </span>
+    }
+  </div>
+
+  <!-- Info grid -->
+  <div class="grid grid-cols-2 gap-2">
+    <div class="rounded-xl p-3" style="background-color: var(--background)">
+      <p class="text-xs text-[var(--text-secondary)] mb-0.5">Sexo</p>
+      <p class="text-sm font-medium text-[var(--text-primary)]">
+        {{ sexLabel[pet.sex] }}
+      </p>
+    </div>
+
+    <div class="rounded-xl p-3" style="background-color: var(--background)">
+      <p class="text-xs text-[var(--text-secondary)] mb-0.5">Tamaño</p>
+      <p class="text-sm font-medium text-[var(--text-primary)]">
+        {{ sizeLabel[pet.size] }}
+      </p>
+    </div>
+
+    @if (pet.weight) {
+      <div class="rounded-xl p-3" style="background-color: var(--background)">
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Peso</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{{ pet.weight }} kg</p>
+      </div>
+    }
+
+    @if (pet.approximateAge !== null && pet.approximateAge !== undefined) {
+      <div class="rounded-xl p-3" style="background-color: var(--background)">
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Edad aprox.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          {{ pet.approximateAge }} {{ pet.approximateAge === 1 ? 'año' : 'años' }}
+        </p>
+      </div>
+    }
+
+    <div class="rounded-xl p-3" style="background-color: var(--background)">
+      <p class="text-xs text-[var(--text-secondary)] mb-0.5">Color</p>
+      <p class="text-sm font-medium text-[var(--text-primary)] truncate">
+        {{ pet.color }}
+      </p>
+    </div>
+  </div>
+
+  @if (pet.description) {
+    <p class="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+      {{ pet.description }}
+    </p>
+  }
+
+  <!-- Actions -->
+  <div class="flex gap-2 mt-auto pt-2 border-t border-gray-100">
+    <app-pet-button
+      label="Editar"
+      variant="outline"
+      size="sm"
+      [fullWidth]="true"
+      (clicked)="onEdit()"
+    />
+    <app-pet-button
+      label="Eliminar"
+      variant="danger"
+      size="sm"
+      [fullWidth]="true"
+      (clicked)="onDelete()"
+    />
+  </div>
+</div>

@@ -1,0 +1,72 @@
+<div class="container-custom section-padding">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-[var(--text-primary)]">Mis mascotas</h1>
+      <p class="text-sm text-[var(--text-secondary)] mt-1">
+        @if (pets().length > 0) {
+          Tienes {{ pets().length }}
+          {{ pets().length === 1 ? 'mascota registrada' : 'mascotas registradas' }}
+        } @else {
+          Aún no tienes mascotas registradas
+        }
+      </p>
+    </div>
+
+    <app-pet-button label="Agregar mascota" variant="primary" (clicked)="openAddModal()" />
+  </div>
+
+  @if (pets().length > 0) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      @for (pet of pets(); track pet.id) {
+        <app-pet-card [pet]="pet" (edit)="openEditModal($event)" (delete)="requestDelete($event)" />
+      }
+    </div>
+  } @else {
+    <div
+      class="flex flex-col items-center justify-center text-center py-20 rounded-3xl border-2 border-dashed border-gray-200"
+      style="background-color: var(--background)"
+    >
+      <div
+        class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl mb-5"
+        style="background-color: var(--secondary-soft)"
+      >
+        🐾
+      </div>
+      <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">
+        No tienes mascotas registradas
+      </h2>
+      <p class="text-sm text-[var(--text-secondary)] max-w-xs mb-6">
+        Agrega a tu primera mascota y lleva un registro de toda su información en un solo lugar.
+      </p>
+      <app-pet-button
+        label="Agregar mi primera mascota"
+        variant="primary"
+        (clicked)="openAddModal()"
+      />
+    </div>
+  }
+</div>
+
+<app-add-pet-modal
+  [isOpen]="isModalOpen()"
+  [species]="species()"
+  [breeds]="breeds()"
+  [loading]="savingPet()"
+  [petToEdit]="editingPet()"
+  (close)="closeModal()"
+  (saved)="onSavedPet($event)"
+/>
+
+<app-confirm-dialog
+  [isOpen]="deletingPet() !== null"
+  title="¿Eliminar mascota?"
+  [message]="
+    '¿Seguro que quieres eliminar a ' +
+    (deletingPet()?.name ?? 'esta mascota') +
+    '? Esta acción no se puede deshacer.'
+  "
+  confirmLabel="Eliminar"
+  cancelLabel="Cancelar"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>

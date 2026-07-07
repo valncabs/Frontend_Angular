@@ -1,0 +1,45 @@
+@if (isOpen) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/50" (click)="onCancel()"></div>
+
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 z-10">
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+        style="background-color: #fee2e2"
+      >
+        <svg
+          class="w-6 h-6"
+          style="color: var(--danger)"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+          />
+        </svg>
+      </div>
+
+      <h3 class="text-lg font-semibold text-center text-[var(--text-primary)] mb-2">{{ title }}</h3>
+      <p class="text-sm text-center text-[var(--text-secondary)] mb-6">{{ message }}</p>
+
+      <div class="flex gap-3">
+        <app-pet-button
+          [label]="cancelLabel"
+          variant="outline"
+          [fullWidth]="true"
+          (clicked)="onCancel()"
+        />
+        <app-pet-button
+          [label]="confirmLabel"
+          variant="danger"
+          [fullWidth]="true"
+          (clicked)="onConfirm()"
+        />
+      </div>
+    </div>
+  </div>
+}

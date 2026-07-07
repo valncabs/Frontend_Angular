@@ -1,0 +1,128 @@
+src
+├── app
+│   ├── app.config.ts
+│   ├── app.html
+│   ├── app.routes.ts
+│   ├── app.ts
+│   ├── core
+│   │   └── services
+│   │       ├── auth.guard.ts
+│   │       └── chatbot.ts
+│   ├── features
+│   │   ├── admin
+│   │   │   ├── components
+│   │   │   │   └── admin-nav
+│   │   │   │       ├── admin-nav.html
+│   │   │   │       └── admin-nav.ts
+│   │   │   └── page
+│   │   │       ├── admin-page
+│   │   │       │   ├── admin-page.html
+│   │   │       │   └── admin-page.ts
+│   │   │       ├── admin-panel-page
+│   │   │       │   ├── admin-panel-page.html
+│   │   │       │   └── admin-panel-page.ts
+│   │   │       ├── admin-reportes-page
+│   │   │       │   ├── admin-reportes-page.html
+│   │   │       │   └── admin-reportes-page.ts
+│   │   │       └── power-bi
+│   │   │           ├── power-bi.html
+│   │   │           └── power-bi.ts
+│   │   ├── auth
+│   │   │   ├── components
+│   │   │   │   └── auth-layout
+│   │   │   │       ├── auth-layout.html
+│   │   │   │       └── auth-layout.ts
+│   │   │   └── page
+│   │   │       ├── login-page
+│   │   │       │   ├── login-page.html
+│   │   │       │   └── login-page.ts
+│   │   │       └── register-page
+│   │   │           ├── register-page.html
+│   │   │           └── register-page.ts
+│   │   ├── dash
+│   │   │   ├── components
+│   │   │   │   └── nav-dashboard
+│   │   │   │       ├── nav-dashboard.html
+│   │   │   │       └── nav-dashboard.ts
+│   │   │   └── page
+│   │   │       ├── dash-page
+│   │   │       │   ├── dash-page.html
+│   │   │       │   └── dash-page.ts
+│   │   │       ├── my-pets-page
+│   │   │       │   ├── my-pets-page.html
+│   │   │       │   └── my-pets-page.ts
+│   │   │       ├── page-configuration
+│   │   │       │   ├── page-configuration.html
+│   │   │       │   └── page-configuration.ts
+│   │   │       ├── page-my-profile
+│   │   │       │   ├── page-my-profile.html
+│   │   │       │   └── page-my-profile.ts
+│   │   │       ├── pet-reports
+│   │   │       │   ├── pet-reports.html
+│   │   │       │   ├── pet-reports.ts
+│   │   │       │   └── report-models.ts
+│   │   │       └── sighting-report
+│   │   │           ├── sighting-report.html
+│   │   │           ├── sighting-report-models.ts
+│   │   │           └── sighting-report.ts
+│   │   └── home
+│   │       ├── components
+│   │       │   ├── hero
+│   │       │   │   ├── hero.css
+│   │       │   │   ├── hero.html
+│   │       │   │   └── hero.ts
+│   │       │   └── nav
+│   │       │       ├── nav.html
+│   │       │       └── nav.ts
+│   │       └── page
+│   │           └── home-page
+│   │               ├── home-page.html
+│   │               └── home-page.ts
+│   └── shared
+│       └── components
+│           ├── button-pets
+│           │   ├── button-pets.html
+│           │   └── button-pets.ts
+│           ├── card-pets
+│           │   ├── card-pets.html
+│           │   └── card-pets.ts
+│           ├── chatbot
+│           │   ├── chatbot.css
+│           │   ├── chatbot.html
+│           │   └── chatbot.ts
+│           ├── confirm-dialog
+│           │   ├── confirm-dialog.html
+│           │   └── confirm-dialog.ts
+│           ├── email-input
+│           │   ├── email-input.html
+│           │   └── email-input.ts
+│           ├── footer
+│           │   ├── footer.html
+│           │   └── footer.ts
+│           ├── imput-pets
+│           │   ├── imput-pets.html
+│           │   └── imput-pets.ts
+│           ├── info-perfil
+│           │   ├── info-perfil.html
+│           │   └── info-perfil.ts
+│           ├── modal
+│           │   ├── modal.html
+│           │   └── modal.ts
+│           ├── my-pets
+│           │   ├── my-pets.html
+│           │   ├── my-pets.ts
+│           │   └── pet-models.ts
+│           ├── password-input
+│           │   ├── password-input.html
+│           │   └── password-input.ts
+│           ├── pets-modal
+│           │   ├── pets-modal.html
+│           │   └── pets-modal.ts
+│           └── select-pets
+│               ├── select-pets.html
+│               └── select-pets.ts
+├── index.html
+├── main.ts
+└── styles.css
+
+50 directories, 76 files

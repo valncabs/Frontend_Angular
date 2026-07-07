@@ -1,0 +1,38 @@
+<div class="flex flex-col gap-1.5">
+  @if (label) {
+    <label class="text-sm font-medium text-[var(--text-primary)]">
+      {{ label }}
+    </label>
+  }
+
+  @if (type === 'textarea') {
+    <textarea
+      [class]="baseInputClasses"
+      [placeholder]="placeholder"
+      [disabled]="isDisabled()"
+      [rows]="rows"
+      [value]="value()"
+      (input)="handleInput($event)"
+      (blur)="handleBlur()"
+    ></textarea>
+  } @else {
+    <input
+      [class]="baseInputClasses"
+      [type]="type"
+      [placeholder]="placeholder"
+      [disabled]="isDisabled()"
+      [value]="value()"
+      (input)="handleInput($event)"
+      (blur)="handleBlur()"
+    />
+  }
+
+  @if (hasError && errorMessage) {
+    <p class="text-xs text-[var(--danger)] flex items-center gap-1">
+      <span class="material-icons text-sm">error_outline</span>
+      {{ errorMessage }}
+    </p>
+  } @else if (hint) {
+    <p class="text-xs text-[var(--text-secondary)]">{{ hint }}</p>
+  }
+</div>

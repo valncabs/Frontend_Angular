@@ -1,0 +1,65 @@
+<!-- Se suscribe automáticamente al perfil de Auth0 usando el pipe async -->
+<div *ngIf="userProfile$ | async as profile; else loading" class="max-w-4xl mx-auto p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+  
+  <!-- Encabezado del Perfil -->
+  <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
+    <div class="relative">
+      <!-- Muestra la foto de perfil real de Auth0 (Google, GitHub, etc.) -->
+      <img [src]="profile.picture || 'https://unsplash.com'" 
+           alt="Avatar" class="w-24 h-24 rounded-full object-cover border-4 border-slate-50 shadow-sm">
+    </div>
+    <div class="text-center sm:text-left space-y-1">
+      <!-- Nombre de Auth0 -->
+      <h2 class="text-2xl font-bold text-slate-800">{{ profile.name }}</h2>
+      <p class="text-sm font-medium text-[var(--primary)] bg-orange-50 px-3 py-1 rounded-full inline-block">
+        Usuario Autenticado
+      </p>
+      <!-- Validación extraída del token de Auth0 -->
+      <p class="text-xs text-slate-400" *ngIf="profile.email_verified">
+        ✓ Cuenta verificada por Auth0
+      </p>
+    </div>
+  </div>
+
+  <!-- Vista de Información Personal (Modo Lectura/Bloqueado desde Proveedor de Identidad) -->
+  <div class="mt-6 space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      
+      <!-- Campo: Nombre Completo -->
+      <div class="flex flex-col space-y-2">
+        <label class="text-sm font-semibold text-slate-600">Nombre Registrado</label>
+        <input type="text" [value]="profile.name" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-500 bg-slate-50 cursor-not-allowed outline-none">
+      </div>
+
+      <!-- Campo: Correo Electrónico -->
+      <div class="flex flex-col space-y-2">
+        <label class="text-sm font-semibold text-slate-600">Correo Electrónico</label>
+        <input type="email" [value]="profile.email" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-500 bg-slate-50 cursor-not-allowed outline-none">
+      </div>
+
+      <!-- Campo: Apodo / Nickname -->
+      <div class="flex flex-col space-y-2">
+        <label class="text-sm font-semibold text-slate-600">Nombre de Usuario (Nickname)</label>
+        <input type="text" [value]="profile.nickname" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-500 bg-slate-50 cursor-not-allowed outline-none">
+      </div>
+
+      <!-- Campo: Identificador Único en Base de Datos -->
+      <div class="flex flex-col space-y-2">
+        <label class="text-sm font-semibold text-slate-400">Auth0 User ID</label>
+        <input type="text" [value]="profile.sub" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-slate-400 bg-slate-100 cursor-not-allowed outline-none">
+      </div>
+    </div>
+
+    <!-- Mensaje informativo -->
+    <div class="p-4 bg-gray-50 rounded-xl border border-gray-50 text-sm text-gray-700">
+       Los datos de este perfil están administrados por tu proveedor de identidad seguro externo a través de Auth0.
+    </div>
+  </div>
+</div>
+
+<!-- Plantilla de Carga por si tarda en resolver el Observable -->
+<ng-template #loading>
+  <div class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+  </div>
+</ng-template>

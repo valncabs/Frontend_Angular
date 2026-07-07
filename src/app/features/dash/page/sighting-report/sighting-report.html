@@ -1,0 +1,387 @@
+
+<div class="min-h-screen pb-16" style="background-color: var(--background)">
+  <!-- Header -->
+  <div
+    class="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-20"
+  >
+    <button
+      class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-[var(--text-secondary)] hover:bg-gray-50 transition-colors"
+      (click)="goBack()"
+    >
+      <span class="material-icons text-xl">arrow_back</span>
+    </button>
+    <div>
+      <h1 class="text-base font-semibold text-[var(--text-primary)] leading-tight">
+        Reportar avistamiento
+      </h1>
+      <p class="text-xs text-[var(--text-secondary)]">Ayuda a reunir una mascota con su familia</p>
+    </div>
+  </div>
+
+  <!-- Success state -->
+  @if (submitted()) {
+    <div class="flex flex-col items-center justify-center px-6 py-20 text-center">
+      <div
+        class="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+        style="background-color: #d1fae5"
+      >
+        <span class="material-icons text-4xl" style="color: #065f46">check_circle</span>
+      </div>
+      <h2 class="text-xl font-bold text-[var(--text-primary)] mb-2">¡Reporte enviado!</h2>
+      <p class="text-sm text-[var(--text-secondary)] mb-8 max-w-xs">
+        Tu reporte fue enviado correctamente. El dueño de la mascota será notificado.
+      </p>
+      <app-pet-button
+        label="Volver a reportes"
+        variant="primary"
+        size="md"
+        icon="arrow_back"
+        (clicked)="goBack()"
+      />
+    </div>
+  }
+
+  @if (!submitted()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      class="px-4 py-5 flex flex-col gap-6 max-w-2xl mx-auto"
+    >
+      <!-- Sección: información del avistamiento -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #e0f2fe"
+          >
+            <span class="material-icons text-base" style="color: #0369a1">info</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">Información del reporte</h2>
+        </div>
+
+        <app-pet-input
+          label="Título"
+          placeholder="Ej: Vi un perro labrador cerca del parque"
+          [hasError]="hasError('title')"
+          [errorMessage]="getError('title')"
+          formControlName="title"
+        />
+
+        <!-- Descripción como textarea nativo -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-[var(--text-primary)]">Descripción</label>
+          <textarea
+            formControlName="description"
+            placeholder="Describe la mascota, su estado, comportamiento y cualquier detalle relevante..."
+            rows="4"
+            class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[var(--text-primary)] resize-none focus:outline-none focus:ring-2 focus:border-[var(--primary)] transition-all"
+            [class.border-red-400]="hasError('description')"
+          ></textarea>
+          @if (hasError('description')) {
+            <p class="text-xs text-red-500 flex items-center gap-1">
+              <span class="material-icons text-sm">error_outline</span>
+              {{ getError('description') }}
+            </p>
+          }
+        </div>
+
+        <!-- Estado -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-[var(--text-primary)]">Estado</label>
+          <div class="grid grid-cols-2 gap-3">
+            @for (opt of statusOptions; track opt.value) {
+              <button
+                type="button"
+                class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium"
+                [class.border-[var(--primary)]]="form.get('status')?.value === opt.value"
+                [class.bg-white]="form.get('status')?.value !== opt.value"
+                [style.borderColor]="
+                  form.get('status')?.value === opt.value ? 'var(--primary)' : ''
+                "
+                [style.backgroundColor]="
+                  form.get('status')?.value === opt.value ? 'rgba(42,157,143,0.07)' : ''
+                "
+                [style.color]="
+                  form.get('status')?.value === opt.value
+                    ? 'var(--primary)'
+                    : 'var(--text-secondary)'
+                "
+                style="border-color: #e5e7eb"
+                (click)="
+                  form.get('status')?.setValue(opt.value); form.get('status')?.markAsTouched()
+                "
+              >
+                <span class="material-icons text-2xl">
+                  {{ opt.value === 'SIGHTED' ? 'visibility' : 'pets' }}
+                </span>
+                {{ opt.label }}
+              </button>
+            }
+          </div>
+          @if (hasError('status')) {
+            <p class="text-xs text-red-500 flex items-center gap-1">
+              <span class="material-icons text-sm">error_outline</span>
+              Selecciona el estado
+            </p>
+          }
+        </div>
+
+        <!-- Fecha y teléfono en grid -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-[var(--text-primary)]">
+              Fecha de avistamiento
+            </label>
+            <input
+              type="date"
+              formControlName="sightingDate"
+              [max]="''"
+              class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:border-[var(--primary)] transition-all"
+              [class.border-red-400]="hasError('sightingDate')"
+            />
+            @if (hasError('sightingDate')) {
+              <p class="text-xs text-red-500 flex items-center gap-1">
+                <span class="material-icons text-sm">error_outline</span>
+                {{ getError('sightingDate') }}
+              </p>
+            }
+          </div>
+
+          <app-pet-input
+            label="Teléfono de contacto (opcional)"
+            placeholder="310 000 0000"
+            [hasError]="hasError('contactPhone')"
+            [errorMessage]="getError('contactPhone')"
+            formControlName="contactPhone"
+          />
+        </div>
+      </section>
+
+      <hr class="border-gray-100" />
+
+      <!-- Sección: ubicación -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #fef9c3"
+          >
+            <span class="material-icons text-base" style="color: #854d0e">place</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">
+            Ubicación del avistamiento
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <!-- Departamento con ngModel -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-[var(--text-primary)]">Departamento</label>
+            <div class="relative">
+              <select
+                formControlName="department"
+                class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[var(--text-primary)] bg-white focus:outline-none focus:ring-2 focus:border-[var(--primary)] appearance-none transition-all"
+                [class.border-red-400]="hasError('department')"
+                (change)="onDepartmentChange($any($event.target).value)"
+              >
+                <option value="">Selecciona un departamento</option>
+                @for (dept of departmentOptions.slice(1); track dept.value) {
+                  <option [value]="dept.value">{{ dept.label }}</option>
+                }
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                <span class="material-icons text-base text-[var(--text-secondary)]"
+                  >expand_more</span
+                >
+              </div>
+            </div>
+            @if (hasError('department')) {
+              <p class="text-xs text-red-500 flex items-center gap-1">
+                <span class="material-icons text-sm">error_outline</span>
+                {{ getError('department') }}
+              </p>
+            }
+          </div>
+
+          <!-- Ciudad -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-[var(--text-primary)]">Ciudad</label>
+            <div class="relative">
+              <select
+                formControlName="city"
+                class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[var(--text-primary)] bg-white focus:outline-none focus:ring-2 focus:border-[var(--primary)] appearance-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                [class.border-red-400]="hasError('city')"
+                [disabled]="cityOptions().length === 0"
+              >
+                <option value="">
+                  {{
+                    cityOptions().length === 0
+                      ? 'Primero selecciona un departamento'
+                      : 'Selecciona una ciudad'
+                  }}
+                </option>
+                @for (city of cityOptions().slice(1); track city.value) {
+                  <option [value]="city.value">{{ city.label }}</option>
+                }
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                <span class="material-icons text-base text-[var(--text-secondary)]"
+                  >expand_more</span
+                >
+              </div>
+            </div>
+            @if (hasError('city')) {
+              <p class="text-xs text-red-500 flex items-center gap-1">
+                <span class="material-icons text-sm">error_outline</span>
+                {{ getError('city') }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <app-pet-input
+          label="Dirección"
+          placeholder="Calle, carrera, barrio..."
+          [hasError]="hasError('address')"
+          [errorMessage]="getError('address')"
+          formControlName="address"
+        />
+
+        <!-- Mapa -->
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-medium text-[var(--text-primary)]">
+              Ubicación en el mapa
+            </label>
+            <button
+              type="button"
+              class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full border border-gray-200 text-[var(--text-secondary)] hover:bg-gray-50 transition-colors"
+              [class.opacity-60]="locatingUser()"
+              (click)="locateUser()"
+            >
+              @if (locatingUser()) {
+                <span class="material-icons text-sm animate-spin">sync</span>
+                Ubicando...
+              } @else {
+                <span class="material-icons text-sm">my_location</span>
+                Mi ubicación
+              }
+            </button>
+          </div>
+
+          <!-- Buscador de dirección con autocompletado -->
+          <div class="relative">
+            <div class="relative">
+              <span
+                class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-base text-[var(--text-secondary)]"
+                >search</span
+              >
+              <input
+                type="text"
+                [value]="searchQuery()"
+                (input)="onSearchInput($any($event.target).value)"
+                placeholder="Buscar dirección, barrio o lugar..."
+                class="w-full rounded-xl border border-gray-200 pl-9 pr-9 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:border-[var(--primary)] transition-all"
+              />
+              @if (searching()) {
+                <span
+                  class="absolute right-3 top-1/2 -translate-y-1/2 material-icons text-base text-[var(--text-secondary)] animate-spin"
+                  >sync</span
+                >
+              }
+            </div>
+
+            <!-- Resultados de autocompletado -->
+            @if (searchResults().length > 0) {
+              <div
+                class="absolute top-full left-0 right-0 z-30 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 overflow-hidden"
+              >
+                @for (result of searchResults(); track result.place_id) {
+                  <button
+                    type="button"
+                    class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0 flex items-start gap-2 transition-colors"
+                    (click)="selectSearchResult(result)"
+                  >
+                    <span
+                      class="material-icons text-base text-[var(--text-secondary)] mt-0.5 shrink-0"
+                      >place</span
+                    >
+                    <span class="text-[var(--text-primary)] line-clamp-2">{{
+                      result.display_name
+                    }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Contenedor del mapa -->
+          <div
+            class="relative rounded-2xl overflow-hidden border border-gray-200"
+            style="height: 320px"
+          >
+            <div #mapContainer style="width: 100%; height: 100%"></div>
+
+            @if (!mapReady()) {
+              <div class="absolute inset-0 flex items-center justify-center bg-gray-50">
+                <div class="flex flex-col items-center gap-2 text-[var(--text-secondary)]">
+                  <span class="material-icons text-3xl animate-spin">sync</span>
+                  <span class="text-sm">Cargando mapa...</span>
+                </div>
+              </div>
+            }
+
+            <!-- Instrucción sobre el mapa -->
+            @if (mapReady() && !form.get('latitude')?.value) {
+              <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
+                <div
+                  class="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs text-[var(--text-secondary)] border border-gray-200 shadow whitespace-nowrap"
+                >
+                  Toca el mapa para marcar la ubicación
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Coordenadas -->
+          @if (latLngDisplay) {
+            <div
+              class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-100"
+              style="background-color: var(--background)"
+            >
+              <span class="material-icons text-sm text-[var(--primary)]">gps_fixed</span>
+              <span class="text-xs text-[var(--text-secondary)]">Coordenadas:</span>
+              <span class="text-xs font-mono font-medium text-[var(--text-primary)]">{{
+                latLngDisplay
+              }}</span>
+            </div>
+          }
+
+          @if (hasError('latitude')) {
+            <p class="text-xs text-red-500 flex items-center gap-1">
+              <span class="material-icons text-sm">error_outline</span>
+              Marca la ubicación en el mapa
+            </p>
+          }
+        </div>
+      </section>
+
+      <!-- Submit -->
+      <div class="pt-2">
+        <app-pet-button
+          label="Enviar reporte"
+          variant="primary"
+          size="lg"
+          [fullWidth]="true"
+          [loading]="submitting()"
+          type="submit"
+          icon="send"
+        />
+        <p class="text-xs text-center text-[var(--text-secondary)] mt-3">
+          Al enviar confirmas que la información es verídica y ayudas a reunir esta mascota con su
+          familia.
+        </p>
+      </div>
+    </form>
+  }
+</div>

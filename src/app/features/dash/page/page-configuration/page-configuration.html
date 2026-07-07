@@ -1,0 +1,85 @@
+<div class="max-w-4xl mx-auto space-y-6">
+  
+  <!-- Sección: Preferencias de Notificaciones -->
+  <div class="p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-slate-800">Preferencias de la aplicación</h2>
+      <p class="text-sm text-slate-400">Controla cómo interactúa Pet-Centric contigo.</p>
+    </div>
+
+    <div class="divide-y divide-slate-100">
+      <!-- Opción 1: Notificaciones Push -->
+      <div class="flex items-center justify-between py-4">
+        <div class="space-y-1 pr-4">
+          <label class="text-sm font-semibold text-slate-700 block">Notificaciones en tiempo real</label>
+          <span class="text-xs text-slate-400 block">Recibe alertas inmediatas en tu navegador sobre reportes de avistamientos cercanos.</span>
+        </div>
+        <button (click)="toggleSetting('notifications')" 
+                [class.bg-[var(--primary)]]="notificationsEnabled" 
+                [class.bg-slate-200]="!notificationsEnabled"
+                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
+          <span [class.translate-x-5]="notificationsEnabled" 
+                [class.translate-x-0]="!notificationsEnabled"
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+        </button>
+      </div>
+
+      <!-- Opción 2: Reportes por Email -->
+      <div class="flex items-center justify-between py-4">
+        <div class="space-y-1 pr-4">
+          <label class="text-sm font-semibold text-slate-700 block">Resumen semanal por correo</label>
+          <span class="text-xs text-slate-400 block">Recibe un boletín con las mascotas encontradas y estadísticas de tu zona.</span>
+        </div>
+        <button (click)="toggleSetting('email')" 
+                [class.bg-[var(--primary)]]="emailReportsEnabled" 
+                [class.bg-slate-200]="!emailReportsEnabled"
+                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
+          <span [class.translate-x-5]="emailReportsEnabled" 
+                [class.translate-x-0]="!emailReportsEnabled"
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección: Seguridad y Cuenta -->
+  <div class="p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-slate-800">Seguridad de la cuenta</h2>
+      <p class="text-sm text-slate-400">Configuraciones administradas de forma externa mediante Auth0.</p>
+    </div>
+
+    <div class="divide-y divide-slate-100">
+      <!-- Opción 3: Alertas de seguridad -->
+      <div class="flex items-center justify-between py-4">
+        <div class="space-y-1 pr-4">
+          <label class="text-sm font-semibold text-slate-700 block">Alertas de inicio de sesión</label>
+          <span class="text-xs text-slate-400 block">Te notificaremos si detectamos accesos sospechosos desde dispositivos nuevos.</span>
+        </div>
+        <button (click)="toggleSetting('alerts')" 
+                [class.bg-[var(--primary)]]="securityAlertsEnabled" 
+                [class.bg-slate-200]="!securityAlertsEnabled"
+                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
+          <span [class.translate-x-5]="securityAlertsEnabled" 
+                [class.translate-x-0]="!securityAlertsEnabled"
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+        </button>
+      </div>
+
+
+
+  <!-- Sección de Peligro: Cerrar Sesión -->
+  <div class="p-6 bg-red-50/50 rounded-2xl shadow-sm border border-red-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="text-center sm:text-left space-y-1">
+      <h3 class="text-sm font-bold text-red-800">Sesión activa</h3>
+      <p class="text-xs text-red-600/80">Si terminaste de gestionar tus mascotas, te recomendamos cerrar tu sesión actual de forma segura.</p>
+    </div>
+    <button (click)="logout()" class="w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-red-100 transition duration-200 flex items-center justify-center gap-2">
+      <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+      </svg>
+      Cerrar Sesión Activa
+    </button>
+  </div>
+
+</div>
