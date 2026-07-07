@@ -4,6 +4,9 @@ import { HomePage } from './features/home/page/home-page/home-page';
 
 import { LoginPage } from './features/auth/page/login-page/login-page';
 import { RegisterPage } from './features/auth/page/register-page/register-page';
+import { ForgotPasswordPage } from './features/auth/page/forgot-password-page/forgot-password-page';
+import { ResetPasswordPage } from './features/auth/page/reset-password-page/reset-password-page';
+import { VerifyEmailPage } from './features/auth/page/verify-email-page/verify-email-page';
 
 import { DashPage } from './features/dash/page/dash-page/dash-page';
 import { MyPets } from './features/dash/page/my-pets-page/my-pets-page';
@@ -40,6 +43,24 @@ export const routes: Routes = [
     path: 'registro',
     component: RegisterPage,
     title: 'Crear cuenta'
+  },
+
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordPage,
+    title: 'Recuperar contraseña'
+  },
+
+  {
+    path: 'reset-password',
+    component: ResetPasswordPage,
+    title: 'Restablecer contraseña'
+  },
+
+  {
+    path: 'verify-email',
+    component: VerifyEmailPage,
+    title: 'Verificar correo'
   },
 
   {

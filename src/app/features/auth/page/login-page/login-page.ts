@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 
-import { AuthLayoutComponent } from '../../components/auth-layout/auth-layout';
-import { EmailInputComponent } from '../../../../shared/components/email-input/email-input';
-import { PasswordInputComponent } from '../../../../shared/components/password-input/password-input';
+import { AuthLayoutComponent } from '../../../auth/components/auth-layaut/auth-layaut';
+import { EmailInputComponent } from '../../../auth/components/email-input/email-input';
+import { PasswordInputComponent } from '../../../auth/components/password-input/password-input';
 import { ModalComponent } from '../../../../shared/components/modal/modal';
 import { Router } from '@angular/router';
 
