@@ -1,5 +1,3 @@
-// ---------- Tipos base (compartidos con el backend) ----------
-
 export type PetSex = 'MALE' | 'FEMALE' | 'UNKNOWN';
 export type PetSize = 'SMALL' | 'MEDIUM' | 'LARGE';
 
@@ -111,8 +109,6 @@ export interface Pet {
   photoUrl?: string;
 }
 
-/** Alias: lo que arma el formulario reactivo es exactamente lo que espera
- * el backend en POST /pets, así que no se duplica el tipo. */
 export type CreatePetDto = CreatePetRequest;
 
 export interface PetFormPayload {

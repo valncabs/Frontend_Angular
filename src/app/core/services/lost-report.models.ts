@@ -23,7 +23,6 @@ export interface CreateLostReportRequest {
   longitude?: number | null;
 }
 
-/** El backend no permite modificar pet_id en un reporte ya creado. */
 export type UpdateLostReportRequest = Partial<Omit<CreateLostReportRequest, 'pet_id'>>;
 
 export interface LostReportResponse {
@@ -73,11 +72,6 @@ export interface LostReportFormPayload {
   photo: File | null;
 }
 
-/**
- * Normaliza campos numéricos que el backend puede serializar como string
- * (Decimal de Python en JSON no siempre viaja como number). Se usa al
- * consumir cualquier LostReportResponse/LostReportListItem del backend.
- */
 export function normalizeLostReportResponse(raw: LostReportResponse): LostReportResponse {
   return {
     ...raw,

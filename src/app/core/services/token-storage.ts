@@ -7,8 +7,6 @@ const EXPIRES_AT_KEY = 'expires_at';
 const USER_KEY = 'user';
 const ROL_KEY = 'rol';
 
-/** Compatibilidad con auth.guard.ts / admin.guard.ts existentes:
- * ambos leen localStorage 'token' y 'rol' directamente. */
 @Injectable({ providedIn: 'root' })
 export class TokenStorage {
   saveSession(

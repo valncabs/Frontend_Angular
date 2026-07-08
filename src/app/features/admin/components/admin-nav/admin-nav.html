@@ -1,45 +1,65 @@
-
 <nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-50">
   <div class="container-custom">
     <div class="flex items-center justify-between h-16">
-
       <!-- Logo -->
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm"
-          style="background: var(--primary)">
-          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="white">
-            <path d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/>
+        <div
+          class="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm"
+          style="background: var(--primary)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="20px"
+            viewBox="0 -960 960 960"
+            width="20px"
+            fill="white"
+          >
+            <path
+              d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"
+            />
           </svg>
         </div>
         <div>
-          <span class="font-bold text-slate-800 text-sm" style="font-family: 'Montserrat', sans-serif;">Pet-Centric</span>
+          <span
+            class="font-bold text-slate-800 text-sm"
+            style="font-family: 'Montserrat', sans-serif"
+            >Pet-Centric</span
+          >
           <p class="text-xs m-0" style="color: var(--text-secondary)">Administración</p>
         </div>
       </div>
 
       <!-- Links -->
       <div class="flex items-center gap-1">
-        <a routerLink="/admin/dashboard" routerLinkActive="!text-white !bg-[var(--primary)]"
-          class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition no-underline">
+        <a
+          routerLink="/admin/dashboard"
+          routerLinkActive="!text-white !bg-[var(--primary)]"
+          class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition no-underline"
+        >
           Gestion de Reportes
         </a>
-        <a routerLink="/admin/powerbi" routerLinkActive="!text-white !bg-[var(--primary)]"
-          class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition no-underline">
+        <a
+          routerLink="/admin/powerbi"
+          routerLinkActive="!text-white !bg-[var(--primary)]"
+          class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition no-underline"
+        >
           Power BI
         </a>
-        <a routerLink="/admin/perfil" routerLinkActive="!text-white !bg-[var(--primary)]"
-          class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition no-underline">
+        <a
+          routerLink="/admin/mi-perfil"
+          routerLinkActive="!text-white !bg-[var(--primary)]"
+          class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition no-underline"
+        >
           Perfil
         </a>
       </div>
 
-
-
-          <button (click)="logout()"
-            class="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 hover:bg-red-100 transition shadow-sm">
-            Cerrar sesión
-          </button>
-        </div>
-
+      <button
+        (click)="logout()"
+        class="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 hover:bg-red-100 transition shadow-sm"
+      >
+        Cerrar sesión
+      </button>
     </div>
+  </div>
 </nav>

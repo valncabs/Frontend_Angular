@@ -77,26 +77,31 @@ export const routes: Routes = [
       {
         path: 'mascotas',
         component: MyPets,
+        title: 'Mis mascotas',
       },
 
       {
         path: 'reportes',
         component: PetReportsComponent,
+        title: 'Reportes de mascotas',
       },
 
       {
         path: 'reportar-avistamiento',
         component: SightingReportComponent,
+        title: 'Reportar avistamiento de mascota',
       },
 
       {
         path: 'reportar-perdida',
         component: LostReportFormComponent,
+        title: 'Reportar mascota perdida',
       },
 
       {
         path: 'configuracion',
         component: PageConfiguration,
+        title: 'Configuración',
       },
 
       {
@@ -120,16 +125,24 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: AdminReportesPage,
+        title: 'Dashboard',
       },
 
       {
         path: 'panel',
         component: AdminPanelPage,
+        title: 'Panel de administración',
       },
 
       {
         path: 'powerbi',
         component: PowerBI,
+        title: 'Power BI',
+      },
+      {
+        path: 'mi-perfil',
+        component: PageMyProfile,
+        title: 'Mi perfil',
       },
     ],
   },

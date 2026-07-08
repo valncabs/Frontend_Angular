@@ -88,5 +88,4 @@ export const COLOMBIA_DEPARTMENTS: ColombianDepartment[] = [
   },
 ];
 
-/** Nombre fijo del país mientras no exista selector dinámico. */
 export const DEFAULT_COUNTRY = 'Colombia';
