@@ -1,16 +1,19 @@
 <div class="mb-6">
-<label
+  <label
     class="block text-[10px] font-medium tracking-widest uppercase mb-2"
-    style="color: var(--text-secondary);">
-    Email
-</label>
+    style="color: var(--text-secondary)"
+  >
+    {{ label }}
+  </label>
 
-<input
+  <input
     type="email"
-    placeholder="you@gmail.com"
+    [value]="value"
+    [disabled]="disabled"
+    [placeholder]="placeholder"
+    (input)="updateValue($event)"
+    (blur)="blur()"
     class="w-full bg-transparent text-sm pb-2 border-0 border-b focus:outline-none transition-colors duration-200 font-light placeholder-gray-300"
-    style="color: var(--text-primary); border-color: #e5e7eb;"
-    onfocus="this.style.borderColor='var(--primary)'"
-    onblur="this.style.borderColor='#e5e7eb'"
-/>
+    style="color: var(--text-primary); border-color: #e5e7eb"
+  />
 </div>

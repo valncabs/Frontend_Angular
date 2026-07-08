@@ -5,9 +5,18 @@ src
 │   ├── app.routes.ts
 │   ├── app.ts
 │   ├── core
+│   │   ├── guards
+│   │   │   ├── admin-guard.ts
+│   │   │   └── auth-guard.ts
 │   │   └── services
-│   │       ├── auth.guard.ts
-│   │       └── chatbot.ts
+│   │       ├── api-error.ts
+│   │       ├── auht.ts
+│   │       ├── auth.interceptor.ts
+│   │       ├── auth.models.ts
+│   │       ├── chatbot.ts
+│   │       ├── profile.models.ts
+│   │       ├── profile.ts
+│   │       └── token-storage.ts
 │   ├── features
 │   │   ├── admin
 │   │   │   ├── components
@@ -102,9 +111,6 @@ src
 │           ├── imput-pets
 │           │   ├── imput-pets.html
 │           │   └── imput-pets.ts
-│           ├── info-perfil
-│           │   ├── info-perfil.html
-│           │   └── info-perfil.ts
 │           ├── modal
 │           │   ├── modal.html
 │           │   └── modal.ts
@@ -121,8 +127,11 @@ src
 │           └── select-pets
 │               ├── select-pets.html
 │               └── select-pets.ts
+├── environments
+│   ├── environment.development.ts
+│   └── environment.ts
 ├── index.html
 ├── main.ts
 └── styles.css
 
-50 directories, 76 files
+51 directories, 84 files

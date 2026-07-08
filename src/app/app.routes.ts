@@ -13,6 +13,7 @@ import { MyPets } from './features/dash/page/my-pets-page/my-pets-page';
 import { PetReportsComponent } from './features/dash/page/pet-reports/pet-reports';
 import { SightingReportComponent } from './features/dash/page/sighting-report/sighting-report';
 import { PageConfiguration } from './features/dash/page/page-configuration/page-configuration';
+import { PageMyProfile } from './features/dash/page/page-my-profile/page-my-profile';
 
 import { AdminPage } from './features/admin/page/admin-page/admin-page';
 import { AdminReportesPage } from './features/admin/page/admin-reportes-page/admin-reportes-page';
@@ -20,29 +21,28 @@ import { AdminPanelPage } from './features/admin/page/admin-panel-page/admin-pan
 import { PowerBI } from './features/admin/page/power-bi/power-bi';
 
 export const routes: Routes = [
-
   {
     path: '',
     redirectTo: 'home',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   {
     path: 'home',
     component: HomePage,
-    title: 'Pet-Centric'
+    title: 'Pet-Centric',
   },
 
   {
     path: 'login',
     component: LoginPage,
-    title: 'Iniciar sesión'
+    title: 'Iniciar sesión',
   },
 
   {
     path: 'registro',
     component: RegisterPage,
-    title: 'Crear cuenta'
+    title: 'Crear cuenta',
   },
 
   {
@@ -67,68 +67,69 @@ export const routes: Routes = [
     path: 'dashboard',
     component: DashPage,
     children: [
-
       {
         path: '',
         redirectTo: 'mascotas',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
 
       {
         path: 'mascotas',
-        component: MyPets
+        component: MyPets,
       },
 
       {
         path: 'reportes',
-        component: PetReportsComponent
+        component: PetReportsComponent,
       },
 
       {
         path: 'reportar-avistamiento',
-        component: SightingReportComponent
+        component: SightingReportComponent,
       },
 
       {
         path: 'configuracion',
-        component: PageConfiguration
-      }
+        component: PageConfiguration,
+      },
 
-    ]
+      {
+        path: 'perfil',
+        component: PageMyProfile,
+        title: 'Mi perfil',
+      },
+    ],
   },
 
   {
     path: 'admin',
     component: AdminPage,
     children: [
-
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
 
       {
         path: 'dashboard',
-        component: AdminReportesPage
+        component: AdminReportesPage,
       },
 
       {
         path: 'panel',
-        component: AdminPanelPage
+        component: AdminPanelPage,
       },
 
       {
         path: 'powerbi',
-        component: PowerBI
-      }
-
-    ]
+        component: PowerBI,
+      },
+    ],
   },
 
   {
     path: '**',
-    redirectTo: 'home'
-  }
-
+    redirectTo: 'home',
+  },
 ];
