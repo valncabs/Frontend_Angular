@@ -7,7 +7,7 @@ import {
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, catchError, filter, switchMap, take, throwError } from 'rxjs';
-import { AuthService } from './auht';
+import { AuthService } from './auth';
 
 const PUBLIC_AUTH_PATHS = [
   '/auth/login',

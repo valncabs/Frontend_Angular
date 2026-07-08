@@ -1,19 +1,11 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router} from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PetButtonComponent } from '../../../../shared/components/button-pets/button-pets';
-import {
-  PetSelectComponent,
-  SelectOption,
-} from '../../../../shared/components/select-pets/select-pets';
+import { PetSelectComponent, SelectOption } from '../../components/select-pets/select-pets';
 import { ModalComponent } from '../../../../shared/components/modal/modal';
-import {
-  PetReport,
-  ReportFilters,
-  ReportType,
-  COLOMBIAN_CITIES,
-} from './report-models';
+import { PetReport, ReportFilters, ReportType, COLOMBIAN_CITIES } from './report-models';
 
 const MOCK_REPORTS: PetReport[] = [
   {
@@ -128,13 +120,7 @@ const MOCK_REPORTS: PetReport[] = [
 @Component({
   selector: 'app-pet-reports',
   standalone: true,
-  imports: [
-    CommonModule,
-    PetButtonComponent,
-    PetSelectComponent,
-    ModalComponent,
-    FormsModule,
-  ],
+  imports: [CommonModule, PetButtonComponent, PetSelectComponent, ModalComponent, FormsModule],
   templateUrl: './pet-reports.html',
 })
 export class PetReportsComponent implements OnInit {
@@ -193,7 +179,6 @@ export class PetReportsComponent implements OnInit {
     Perro: '🐶',
     Gato: '🐱',
     Ave: '🐦',
-
   };
 
   readonly sexLabel: Record<string, string> = {

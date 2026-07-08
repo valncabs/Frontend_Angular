@@ -57,6 +57,10 @@ export class PetSelectComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
+  isOptionSelected(optValue: string | number): boolean {
+    return String(optValue) === String(this.value());
+  }
+
   get selectClasses(): string {
     const base =
       'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-[var(--text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 appearance-none cursor-pointer';

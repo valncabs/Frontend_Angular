@@ -6,15 +6,12 @@
   }
 
   <div class="relative">
-    <select
-      [class]="selectClasses"
-      [disabled]="isDisabled()"
-      [value]="value()"
-      (change)="handleChange($event)"
-    >
-      <option value="" disabled selected hidden>{{ placeholder }}</option>
+    <select [class]="selectClasses" [disabled]="isDisabled()" (change)="handleChange($event)">
+      <option value="" disabled [selected]="!value()" hidden>{{ placeholder }}</option>
       @for (opt of options; track opt.value) {
-        <option [value]="opt.value">{{ opt.label }}</option>
+        <option [value]="opt.value" [selected]="isOptionSelected(opt.value)">
+          {{ opt.label }}
+        </option>
       }
     </select>
 

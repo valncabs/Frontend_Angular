@@ -1,160 +1,152 @@
 <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
   <div class="container-custom">
     <div class="flex items-center justify-between h-20">
-
       <!-- Logo -->
       <a routerLink="/" class="flex items-center gap-3 no-underline cursor-pointer">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--primary)] text-white text-xl shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#e3e3e3">
-            <path d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/>
+        <div
+          class="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--primary)] text-white text-xl shadow-md"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="30px"
+            viewBox="0 -960 960 960"
+            width="30px"
+            fill="#e3e3e3"
+          >
+            <path
+              d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"
+            />
           </svg>
         </div>
 
         <div>
-          <h1 class="text-xl font-bold m-0 text-slate-800">
-            Pet-Centric
-          </h1>
-          <span class="text-sm text-slate-500">
-            Encuentra a tu compañero
-          </span>
+          <h1 class="text-xl font-bold m-0 text-slate-800">Pet-Centric</h1>
+          <span class="text-sm text-slate-500"> Encuentra a tu compañero </span>
         </div>
       </a>
 
       <!-- Desktop -->
       <div class="hidden lg:flex items-center gap-6">
-
         <a
           routerLink="/dashboard/mascotas"
           routerLinkActive="text-[var(--primary)]"
-          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium">
+          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium"
+        >
           Mis mascotas
         </a>
 
         <a
-          routerLink="/dashboard/reportar-avistamiento"
+          routerLink="/dashboard/reportar-perdida"
           routerLinkActive="text-[var(--primary)]"
-          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium">
+          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium"
+        >
           Reportar mascota
         </a>
 
         <a
           routerLink="/dashboard/reportes"
           routerLinkActive="text-[var(--primary)]"
-          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium">
+          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium"
+        >
           Reportes
         </a>
 
         <a
           routerLink="/dashboard/mi-perfil"
           routerLinkActive="text-[var(--primary)]"
-          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium">
+          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium"
+        >
           Mi perfil
         </a>
 
         <a
           routerLink="/dashboard/configuracion"
           routerLinkActive="text-[var(--primary)]"
-          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium">
+          class="text-slate-600 hover:text-[var(--primary)] transition duration-200 no-underline font-medium"
+        >
           Configuración
         </a>
 
         <div class="pl-4 border-l border-slate-100">
           <button
             (click)="logout()"
-            class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition duration-200">
+            class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition duration-200"
+          >
             Cerrar sesión
           </button>
         </div>
-
       </div>
 
       <!-- Mobile Button -->
       <button
         class="lg:hidden w-12 h-12 rounded-2xl flex items-center justify-center text-slate-700 bg-slate-50 border border-slate-100 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300"
-        (click)="toggleMenu()">
-
+        (click)="toggleMenu()"
+      >
         {{ isMenuOpen ? '✕' : '☰' }}
-
       </button>
-
     </div>
 
     <!-- Mobile Menu -->
     @if (isMenuOpen) {
-
       <div class="lg:hidden mt-3 pb-4 animate-fade-in">
-
         <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-3 flex flex-col gap-1">
-
           <a
             routerLink="/dashboard/mascotas"
             (click)="toggleMenu()"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline">
-
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
             <i class="bi bi-heart"></i>
             <span>Mis Mascotas</span>
-
           </a>
 
           <a
             routerLink="/dashboard/reportar-avistamiento"
             (click)="toggleMenu()"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline">
-
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
             <i class="bi bi-geo-alt"></i>
             <span>Reportar Mascota</span>
-
           </a>
 
           <a
             routerLink="/dashboard/reportes"
             (click)="toggleMenu()"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline">
-
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
             <i class="bi bi-file-earmark-text"></i>
             <span>Reportes</span>
-
           </a>
 
           <a
             routerLink="/dashboard/mi-perfil"
             (click)="toggleMenu()"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline">
-
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
             <i class="bi bi-person"></i>
             <span>Mi Perfil</span>
-
           </a>
 
           <a
             routerLink="/dashboard/configuracion"
             (click)="toggleMenu()"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline">
-
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
             <i class="bi bi-gear"></i>
             <span>Configuración</span>
-
           </a>
 
           <div class="border-t my-2 border-slate-100"></div>
 
           <div class="p-2">
-
             <button
               (click)="logout()"
-              class="w-full text-center py-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl transition duration-200">
-
+              class="w-full text-center py-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl transition duration-200"
+            >
               Cerrar sesión
-
             </button>
-
           </div>
-
         </div>
-
       </div>
-
     }
-
   </div>
 </nav>

@@ -7,18 +7,18 @@
 
   @if (type === 'textarea') {
     <textarea
-      [class]="baseInputClasses"
+      [class]="inputClasses"
+      [rows]="rows"
       [placeholder]="placeholder"
       [disabled]="isDisabled()"
-      [rows]="rows"
       [value]="value()"
       (input)="handleInput($event)"
       (blur)="handleBlur()"
     ></textarea>
   } @else {
     <input
-      [class]="baseInputClasses"
       [type]="type"
+      [class]="inputClasses"
       [placeholder]="placeholder"
       [disabled]="isDisabled()"
       [value]="value()"

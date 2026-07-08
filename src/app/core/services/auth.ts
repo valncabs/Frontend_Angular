@@ -58,7 +58,6 @@ export class AuthService {
     this.currentUserSignal.set(null);
 
     if (refreshToken) {
-      // Fire-and-forget: no bloqueamos el logout visual esperando al backend.
       this.http
         .post(`${this.baseUrl}/logout`, { refresh_token: refreshToken })
         .subscribe({ error: () => {} });

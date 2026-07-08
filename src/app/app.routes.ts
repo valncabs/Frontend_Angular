@@ -19,6 +19,7 @@ import { AdminPage } from './features/admin/page/admin-page/admin-page';
 import { AdminReportesPage } from './features/admin/page/admin-reportes-page/admin-reportes-page';
 import { AdminPanelPage } from './features/admin/page/admin-panel-page/admin-panel-page';
 import { PowerBI } from './features/admin/page/power-bi/power-bi';
+import { LostReportFormComponent } from './features/dash/page/lost-report-form/lost-report-form';
 
 export const routes: Routes = [
   {
@@ -48,19 +49,19 @@ export const routes: Routes = [
   {
     path: 'forgot-password',
     component: ForgotPasswordPage,
-    title: 'Recuperar contraseña'
+    title: 'Recuperar contraseña',
   },
 
   {
     path: 'reset-password',
     component: ResetPasswordPage,
-    title: 'Restablecer contraseña'
+    title: 'Restablecer contraseña',
   },
 
   {
     path: 'verify-email',
     component: VerifyEmailPage,
-    title: 'Verificar correo'
+    title: 'Verificar correo',
   },
 
   {
@@ -89,12 +90,17 @@ export const routes: Routes = [
       },
 
       {
+        path: 'reportar-perdida',
+        component: LostReportFormComponent,
+      },
+
+      {
         path: 'configuracion',
         component: PageConfiguration,
       },
 
       {
-        path: 'perfil',
+        path: 'mi-perfil',
         component: PageMyProfile,
         title: 'Mi perfil',
       },

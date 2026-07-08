@@ -7,7 +7,7 @@ import { AuthLayoutComponent } from '../../../auth/components/auth-layaut/auth-l
 import { EmailInputComponent } from '../../../auth/components/email-input/email-input';
 import { PasswordInputComponent } from '../../../auth/components/password-input/password-input';
 import { ModalComponent } from '../../../../shared/components/modal/modal';
-import { AuthService } from '../../../../core/services/auht';
+import { AuthService } from '../../../../core/services/auth';
 import { parseApiError } from '../../../../core/services/api-error';
 
 @Component({

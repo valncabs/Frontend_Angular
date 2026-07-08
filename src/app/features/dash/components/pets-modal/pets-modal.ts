@@ -12,11 +12,17 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { ModalComponent } from '../modal/modal';
-import { PetInputComponent } from '../imput-pets/imput-pets';
+import { ModalComponent } from '../../../../shared/components/modal/modal';
+import { PetInputComponent } from '../../../../features/dash/components/pet-input/pet-input';
 import { PetSelectComponent, SelectOption } from '../select-pets/select-pets';
-import { PetButtonComponent } from '../button-pets/button-pets';
-import { CreatePetDto, Species, Breed, Pet, PetFormPayload } from '../my-pets/pet-models';
+import { PetButtonComponent } from '../../../../shared/components/button-pets/button-pets';
+import {
+  CreatePetDto,
+  Species,
+  Breed,
+  Pet,
+  PetFormPayload,
+} from '../../../../core/services/pet.models';
 
 @Component({
   selector: 'app-add-pet-modal',
@@ -53,15 +59,14 @@ export class AddPetModalComponent implements OnInit, OnChanges {
   readonly sexOptions: SelectOption[] = [
     { value: 'MALE', label: 'Macho' },
     { value: 'FEMALE', label: 'Hembra' },
+    { value: 'UNKNOWN', label: 'No especificado' },
   ];
 
   readonly sizeOptions: SelectOption[] = [
     { value: 'SMALL', label: 'Pequeño' },
     { value: 'MEDIUM', label: 'Mediano' },
     { value: 'LARGE', label: 'Grande' },
-    { value: 'EXTRA_LARGE', label: 'Extra grande' },
   ];
-
   get speciesOptions(): SelectOption[] {
     return this.species.map((s) => ({ value: s.id, label: s.name }));
   }
@@ -79,7 +84,9 @@ export class AddPetModalComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    this.buildForm();
+    if (!this.form) {
+      this.buildForm();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -120,7 +127,7 @@ export class AddPetModalComponent implements OnInit, OnChanges {
           approximate_age: null,
           sterilized: false,
           distinctive_marks: '',
-          description: ''
+          description: '',
         });
         this.photoPreview.set(null);
       }
@@ -148,7 +155,7 @@ export class AddPetModalComponent implements OnInit, OnChanges {
       } else {
         this.filteredBreeds = [];
       }
-      
+
       if (!this.petToEdit) {
         this.form.get('breed_id')?.setValue('', { emitEvent: false });
       }

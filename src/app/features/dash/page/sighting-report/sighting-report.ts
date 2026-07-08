@@ -12,8 +12,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { PetInputComponent } from '../../../../shared/components/imput-pets/imput-pets';
-import { SelectOption } from '../../../../shared/components/select-pets/select-pets';
+import { PetInputComponent } from '../../components/pet-input/pet-input';
+import { SelectOption } from '../../components/select-pets/select-pets';
 import { PetButtonComponent } from '../../../../shared/components/button-pets/button-pets';
 
 import { SightingReportDto, COLOMBIA_DEPARTMENTS } from './sighting-report-models';
