@@ -179,15 +179,18 @@ export class MyPets implements OnInit {
   }
 
   private handleSaveSuccess(pet: PetResponse, photo: File | null): void {
+    const editing = this.editingPet();
+    const previousPhotoUrl = editing?.photoUrl;
+
     if (photo) {
       this.petsService.uploadImage(pet.id, photo, true).subscribe({
         next: (imgResponse) => this.finishSave(pet, imgResponse.data.url),
-        // Si la mascota se guardó pero la imagen falló, igual mostramos la mascota:
-        // no queremos que un error de Cloudinary bloquee todo el registro.
-        error: () => this.finishSave(pet, undefined),
+        // Si la mascota se guardó pero la nueva imagen falló al subir,
+        // conservamos la foto anterior en vez de perderla.
+        error: () => this.finishSave(pet, previousPhotoUrl),
       });
     } else {
-      this.finishSave(pet, undefined);
+      this.finishSave(pet, previousPhotoUrl);
     }
   }
 

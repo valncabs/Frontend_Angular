@@ -49,8 +49,26 @@ export class TokenStorage {
     return localStorage.getItem(ROL_KEY);
   }
 
+  getExpiresAt(): number | null {
+    const raw = localStorage.getItem(EXPIRES_AT_KEY);
+    return raw ? Number(raw) : null;
+  }
+
+  /** true si hay algo guardado en localStorage (no implica que sea válido). */
   hasSession(): boolean {
     return !!this.getAccessToken();
+  }
+
+  /** true si hay un access token vigente (no expirado). Esto es lo que
+   * debe usar el guard, no hasSession(). */
+  isExpired(): boolean {
+    const expiresAt = this.getExpiresAt();
+    if (!expiresAt) return true;
+    return Date.now() >= expiresAt;
+  }
+
+  hasValidSession(): boolean {
+    return this.hasSession() && !this.isExpired();
   }
 
   clear(): void {

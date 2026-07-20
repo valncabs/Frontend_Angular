@@ -12,12 +12,17 @@ import {
   LostReportResponse,
   UpdateLostReportRequest,
   normalizeLostReportResponse,
-} from './lost-report.models';
+} from './lost-report-models';
 
 export interface LostReportListParams {
   page?: number;
   pageSize?: number;
   search?: string;
+  status?: string;
+  speciesId?: string;
+  city?: string;
+  dateFrom?: string; // 'YYYY-MM-DD'
+  dateTo?: string;
   sort?: string;
   order?: 'asc' | 'desc';
 }
@@ -41,6 +46,11 @@ export class LostReportsService {
       .set('page_size', params.pageSize ?? 20);
 
     if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.status) httpParams = httpParams.set('status', params.status);
+    if (params.speciesId) httpParams = httpParams.set('species_id', params.speciesId);
+    if (params.city) httpParams = httpParams.set('city', params.city);
+    if (params.dateFrom) httpParams = httpParams.set('date_from', params.dateFrom);
+    if (params.dateTo) httpParams = httpParams.set('date_to', params.dateTo);
     if (params.sort) httpParams = httpParams.set('sort', params.sort);
     if (params.order) httpParams = httpParams.set('order', params.order);
 
@@ -48,11 +58,30 @@ export class LostReportsService {
       params: httpParams,
     });
   }
+  // agregar junto a close():
+  adminClose(reportId: string): Observable<ApiSuccessResponse<LostReportResponse>> {
+    return this.http
+      .post<ApiSuccessResponse<LostReportResponse>>(`${this.baseUrl}/${reportId}/admin-close`, {})
+      .pipe(map((res) => ({ ...res, data: normalizeLostReportResponse(res.data) })));
+  }
+
+  adminDelete(reportId: string): Observable<ApiSuccessResponse<null>> {
+    return this.http.delete<ApiSuccessResponse<null>>(`${this.baseUrl}/${reportId}/admin-delete`);
+  }
+  mine(): Observable<ApiSuccessResponse<PaginatedResponse<LostReportListItem>>> {
+    return this.http.get<ApiSuccessResponse<PaginatedResponse<LostReportListItem>>>(
+      `${this.baseUrl}/mine`,
+    );
+  }
 
   getById(reportId: string): Observable<ApiSuccessResponse<LostReportResponse>> {
     return this.http
       .get<ApiSuccessResponse<LostReportResponse>>(`${this.baseUrl}/${reportId}`)
       .pipe(map((res) => ({ ...res, data: normalizeLostReportResponse(res.data) })));
+  }
+
+  delete(reportId: string): Observable<ApiSuccessResponse<null>> {
+    return this.http.delete<ApiSuccessResponse<null>>(`${this.baseUrl}/${reportId}`);
   }
 
   update(

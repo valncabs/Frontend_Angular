@@ -1,136 +1,177 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { PetButtonComponent } from '../../../../shared/components/button-pets/button-pets';
 import { PetSelectComponent, SelectOption } from '../../components/select-pets/select-pets';
+import { PetInputComponent } from '../../components/pet-input/pet-input';
 import { ModalComponent } from '../../../../shared/components/modal/modal';
-import { PetReport, ReportFilters, ReportType, COLOMBIAN_CITIES } from './report-models';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
+import { COLOMBIAN_CITIES } from './report-models';
+import { ReportsFacade } from '../../../../core/services/reports';
+import { CatalogService } from '../../../../core/services/catalog';
+import { ProfileService } from '../../../../core/services/profile';
+import { LostReportsService } from '../../../../core/services/lost-reports';
+import { FoundReportsService } from '../../../../core/services/found-reports';
+import { PetsService } from '../../../../core/services/pets';
+import { AuthService } from '../../../../core/services/auth';
+import { parseApiError } from '../../../../core/services/api-error';
+import {
+  FOUND_STATUS_LABELS,
+  LOST_STATUS_LABELS,
+  MyReportItem,
+  UnifiedReportItem,
+} from '../../../../core/services/report-models';
+import { SpeciesResponse } from '../../../../core/services/pet.models';
+import { LostReportResponse } from '../../../../core/services/lost-report-models';
+import { FoundReportResponse } from '../../../../core/services/report-models';
 
-const MOCK_REPORTS: PetReport[] = [
-  {
-    id: 'r-1',
-    type: 'LOST',
-    petName: 'Max',
-    species: 'Perro',
-    speciesId: 'sp-1',
-    breed: 'Labrador Retriever',
-    sex: 'MALE',
-    color: 'Dorado',
-    size: 'LARGE',
-    approximateAge: 3,
-    distinctiveMarks: 'Collar azul con placa de identificación',
-    description: 'Se perdió cerca del parque El Virrey. Es muy amigable y obedece a su nombre.',
-    reporterName: 'Carlos Mejía',
-    reporterPhone: '310 456 7890',
-    city: 'bogota',
-    neighborhood: 'Chico Norte',
-    address: 'Cra 15 # 88-20',
-    reportedAt: '2025-06-10T14:30:00',
-    lastSeenAt: '2025-06-10T08:00:00',
-  },
-  {
-    id: 'r-2',
-    type: 'FOUND',
-    species: 'Gato',
-    speciesId: 'sp-2',
-    breed: 'Siamés',
-    sex: 'FEMALE',
-    color: 'Crema con puntos oscuros',
-    size: 'SMALL',
-    approximateAge: 2,
-    description:
-      'Encontrada deambulando sola. Está en buen estado y parece estar acostumbrada a vivir en casa.',
-    reporterName: 'Laura Gómez',
-    reporterPhone: '315 789 0123',
-    city: 'medellin',
-    neighborhood: 'El Poblado',
-    reportedAt: '2025-06-11T09:15:00',
-  },
-  {
-    id: 'r-3',
-    type: 'LOST',
-    petName: 'Luna',
-    species: 'Gato',
-    speciesId: 'sp-2',
-    sex: 'FEMALE',
-    color: 'Negra con mancha blanca en el pecho',
-    size: 'MEDIUM',
-    approximateAge: 5,
-    distinctiveMarks: 'Ojos verdes, usa collar rojo',
-    description: 'Gata muy cariñosa. Se escapó cuando abrieron la puerta.',
-    reporterName: 'Ana Torres',
-    reporterPhone: '320 111 2233',
-    city: 'barranquilla',
-    neighborhood: 'Alto Prado',
-    reportedAt: '2025-06-12T18:00:00',
-    lastSeenAt: '2025-06-12T17:30:00',
-  },
-  {
-    id: 'r-4',
-    type: 'FOUND',
-    species: 'Perro',
-    speciesId: 'sp-1',
-    breed: 'Pastor Alemán',
-    sex: 'MALE',
-    color: 'Negro y café',
-    size: 'LARGE',
-    approximateAge: 4,
-    distinctiveMarks: 'Sin collar, cicatriz pequeña en la pata delantera izquierda',
-    description:
-      'Encontrado cerca del Terminal de Transporte. Parece asustado pero no es agresivo.',
-    reporterName: 'Pedro Ruiz',
-    city: 'cali',
-    reportedAt: '2025-06-09T11:45:00',
-  },
-  {
-    id: 'r-5',
-    type: 'LOST',
-    petName: 'Coco',
-    species: 'Ave',
-    speciesId: 'sp-3',
-    color: 'Verde con pico amarillo',
-    approximateAge: 1,
-    description:
-      'Loro pequeño que habla. Dice "Coco quiere agua" y "hola". Se escapó por la ventana.',
-    reporterName: 'Sofía Herrera',
-    reporterPhone: '313 567 8901',
-    city: 'barranquilla',
-    neighborhood: 'Riomar',
-    reportedAt: '2025-06-13T07:30:00',
-    lastSeenAt: '2025-06-13T07:00:00',
-  },
-  {
-    id: 'r-6',
-    type: 'FOUND',
-    species: 'Perro',
-    speciesId: 'sp-1',
-    color: 'Blanco con manchas cafés',
-    size: 'SMALL',
-    description:
-      'Perrita encontrada en el parque. Muy tranquila y limpia, probablemente tiene dueño.',
-    reporterName: 'Miguel Sánchez',
-    reporterPhone: '318 234 5678',
-    city: 'bogota',
-    neighborhood: 'Usaquén',
-    reportedAt: '2025-06-13T16:20:00',
-  },
-];
+type ReportDetail =
+  | { kind: 'LOST'; data: LostReportResponse }
+  | { kind: 'FOUND'; data: FoundReportResponse };
+
+type Tab = 'ALL' | 'MINE';
 
 @Component({
   selector: 'app-pet-reports',
   standalone: true,
-  imports: [CommonModule, PetButtonComponent, PetSelectComponent, ModalComponent, FormsModule],
+  imports: [
+    CommonModule,
+    PetButtonComponent,
+    PetSelectComponent,
+    PetInputComponent,
+    ModalComponent,
+    ConfirmDialogComponent,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './pet-reports.html',
 })
 export class PetReportsComponent implements OnInit {
   private router = inject(Router);
+  private fb = inject(FormBuilder);
+  private reportsFacade = inject(ReportsFacade);
+  private catalogService = inject(CatalogService);
+  private profileService = inject(ProfileService);
+  private lostReportsService = inject(LostReportsService);
+  private foundReportsService = inject(FoundReportsService);
+  private petsService = inject(PetsService);
+  private authService = inject(AuthService);
+
+  activeTab = signal<Tab>('ALL');
+
+  reports = signal<UnifiedReportItem[]>([]);
+  myReports = signal<MyReportItem[]>([]);
+  species = signal<SpeciesResponse[]>([]);
+  isLoading = signal(false);
+  generalError = signal<string | null>(null);
+
+  selectedItem = signal<UnifiedReportItem | null>(null);
+  selectedDetail = signal<ReportDetail | null>(null);
+  loadingDetail = signal(false);
+
+  currentUserId = computed(() => this.authService.currentUser()?.id ?? null);
+
+  filterType = signal<'ALL' | 'LOST' | 'FOUND'>('ALL');
+  filterSpecies = signal('');
+  filterCity = signal('');
+
+  // ---------- Confirmación: marcar como encontrada ----------
+  reportToMarkAsFound = signal<MyReportItem | null>(null);
+
+  // ---------- Confirmación: eliminar ----------
+  reportToDelete = signal<MyReportItem | null>(null);
+
+  // ---------- Avistamientos de un reporte de pérdida (modal grande) ----------
+  sightingsModalOpen = signal(false);
+  sightingsForReport = signal<MyReportItem | null>(null);
+  sightings = signal<FoundReportResponse[]>([]);
+  loadingSightings = signal(false);
+  sightingActionError = signal<string | null>(null);
+
+  openSightingsModal(item: MyReportItem): void {
+    this.sightingsForReport.set(item);
+    this.sightingsModalOpen.set(true);
+    this.loadSightings(item.id);
+  }
+
+  closeSightingsModal(): void {
+    this.sightingsModalOpen.set(false);
+    this.sightingsForReport.set(null);
+    this.sightings.set([]);
+    this.sightingActionError.set(null);
+  }
+  sightingPhotos = signal<Record<string, string>>({});
+
+  private loadSightings(lostReportId: string): void {
+    this.loadingSightings.set(true);
+    this.foundReportsService.listByLostReport(lostReportId).subscribe({
+      next: (response) => {
+        this.sightings.set(response.data);
+        this.loadingSightings.set(false);
+        this.loadSightingPhotos(response.data);
+      },
+      error: () => {
+        this.sightingActionError.set('No pudimos cargar los avistamientos.');
+        this.loadingSightings.set(false);
+      },
+    });
+  }
+
+  private loadSightingPhotos(sightings: FoundReportResponse[]): void {
+    if (sightings.length === 0) return;
+
+    const requests = sightings.map((s) =>
+      this.foundReportsService.listImages(s.id).pipe(
+        map((res) => {
+          const images = res.data;
+          const primary = images.find((img) => img.is_primary) ?? images[0];
+          return { id: s.id, url: primary?.url };
+        }),
+        catchError(() => of({ id: s.id, url: undefined })),
+      ),
+    );
+
+    forkJoin(requests).subscribe((results) => {
+      const photoMap: Record<string, string> = {};
+      results.forEach((r) => {
+        if (r.url) photoMap[r.id] = r.url;
+      });
+      this.sightingPhotos.set(photoMap);
+    });
+  }
+
+  sightingStatusLabel(status: string): string {
+    return FOUND_STATUS_LABELS[status as keyof typeof FOUND_STATUS_LABELS] ?? status;
+  }
+
+  // ---------- Edición ----------
+  editingReportItem = signal<MyReportItem | null>(null);
+  savingEdit = signal(false);
+  editGeneralError = signal<string | null>(null);
+  editForm: FormGroup = this.fb.group({
+    title: ['', [Validators.required, Validators.maxLength(150)]],
+    description: ['', [Validators.required, Validators.maxLength(1000)]],
+    contactPhone: [''],
+    address: [''],
+    date: ['', Validators.required],
+    reward: [null],
+  });
 
   get filterTypeValue() {
     return this.filterType();
   }
   set filterTypeValue(v: string) {
-    this.filterType.set(v);
+    this.filterType.set(v as 'ALL' | 'LOST' | 'FOUND');
+    this.reload();
   }
 
   get filterSpeciesValue() {
@@ -138,6 +179,7 @@ export class PetReportsComponent implements OnInit {
   }
   set filterSpeciesValue(v: string) {
     this.filterSpecies.set(v);
+    this.reload();
   }
 
   get filterCityValue() {
@@ -145,13 +187,8 @@ export class PetReportsComponent implements OnInit {
   }
   set filterCityValue(v: string) {
     this.filterCity.set(v);
-    this.locationError.set('');
+    this.reload();
   }
-  reports = signal<PetReport[]>(MOCK_REPORTS);
-  filters = signal<ReportFilters>({ type: 'ALL', speciesId: '', city: '' });
-  selectedReport = signal<PetReport | null>(null);
-  loadingLocation = signal(false);
-  locationError = signal('');
 
   readonly typeOptions: SelectOption[] = [
     { value: 'ALL', label: 'Todos los reportes' },
@@ -159,14 +196,12 @@ export class PetReportsComponent implements OnInit {
     { value: 'FOUND', label: 'Mascotas encontradas' },
   ];
 
-  readonly speciesOptions: SelectOption[] = [
-    { value: '', label: 'Todas las especies' },
-    { value: 'sp-1', label: 'Perro' },
-    { value: 'sp-2', label: 'Gato' },
-    { value: 'sp-3', label: 'Ave' },
-    { value: 'sp-4', label: 'Conejo' },
-    { value: 'sp-5', label: 'Reptil' },
-  ];
+  get speciesOptions(): SelectOption[] {
+    return [
+      { value: '', label: 'Todas las especies' },
+      ...this.species().map((s) => ({ value: s.id, label: s.name })),
+    ];
+  }
 
   get cityOptions(): SelectOption[] {
     return [
@@ -175,106 +210,414 @@ export class PetReportsComponent implements OnInit {
     ];
   }
 
-  readonly speciesEmoji: Record<string, string> = {
-    Perro: '🐶',
-    Gato: '🐱',
-    Ave: '🐦',
-  };
-
+  readonly speciesEmoji: Record<string, string> = { Perro: '🐶', Gato: '🐱', Ave: '🐦' };
   readonly sexLabel: Record<string, string> = {
     MALE: 'Macho',
     FEMALE: 'Hembra',
+    UNKNOWN: 'No especificado',
   };
-
   readonly sizeLabel: Record<string, string> = {
     SMALL: 'Pequeño',
     MEDIUM: 'Mediano',
     LARGE: 'Grande',
-    EXTRA_LARGE: 'Extra grande',
   };
-  filterType = signal('ALL');
-  filterSpecies = signal('');
-  filterCity = signal('');
 
-  filteredReports = computed(() => {
-    return this.reports().filter((r) => {
-      if (this.filterType() !== 'ALL' && r.type !== this.filterType()) return false;
-      if (this.filterSpecies() && r.speciesId !== this.filterSpecies()) return false;
-      if (this.filterCity() && r.city !== this.filterCity()) return false;
-      return true;
-    });
-  });
-
-  lostCount = computed(() => this.filteredReports().filter((r) => r.type === 'LOST').length);
-  foundCount = computed(() => this.filteredReports().filter((r) => r.type === 'FOUND').length);
+  lostCount = computed(() => this.reports().filter((r) => r.kind === 'LOST').length);
+  foundCount = computed(() => this.reports().filter((r) => r.kind === 'FOUND').length);
 
   ngOnInit(): void {
-    this.requestUserLocation();
+    this.catalogService.listSpecies().subscribe({
+      next: (response) => this.species.set(response.data),
+      error: () => {},
+    });
+
+    this.loadDefaultCityFromProfile();
   }
 
-  requestUserLocation(): void {
-    if (!navigator.geolocation) return;
-    this.loadingLocation.set(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        const city = this.detectCityFromCoords(latitude, longitude);
-        if (city) {
-          this.filters.update((f) => ({ ...f, city }));
-        }
-        this.loadingLocation.set(false);
-      },
-      () => {
-        this.locationError.set('No se pudo obtener tu ubicación');
-        this.loadingLocation.set(false);
-      },
-    );
-  }
-
-  private detectCityFromCoords(lat: number, lng: number): string {
-    const cities: { city: string; lat: number; lng: number }[] = [
-      { city: 'bogota', lat: 4.711, lng: -74.0721 },
-      { city: 'medellin', lat: 6.2442, lng: -75.5812 },
-      { city: 'cali', lat: 3.4516, lng: -76.532 },
-      { city: 'barranquilla', lat: 10.9685, lng: -74.7813 },
-      { city: 'cartagena', lat: 10.391, lng: -75.4794 },
-    ];
-
-    let nearest = '';
-    let minDist = Infinity;
-    for (const c of cities) {
-      const d = Math.sqrt(Math.pow(lat - c.lat, 2) + Math.pow(lng - c.lng, 2));
-      if (d < minDist) {
-        minDist = d;
-        nearest = c.city;
-      }
+  switchTab(tab: Tab): void {
+    this.activeTab.set(tab);
+    if (tab === 'MINE') {
+      this.loadMyReports();
+    } else {
+      this.reload();
     }
-    return minDist < 1.5 ? nearest : '';
   }
 
-  onTypeFilter(value: string): void {
-    this.filters.update((f) => ({ ...f, type: value as ReportType | 'ALL' }));
+  private refreshAllLists(): void {
+    this.reload();
+    this.loadMyReports();
   }
 
-  onSpeciesFilter(value: string): void {
-    this.filters.update((f) => ({ ...f, speciesId: value }));
+  isResolved(item: UnifiedReportItem | MyReportItem): boolean {
+    return item.kind === 'LOST' && (item.status === 'FOUND' || item.status === 'Encontrada');
   }
 
-  onCityFilter(value: string): void {
-    this.filters.update((f) => ({ ...f, city: value }));
+  isOwnReport(item: UnifiedReportItem): boolean {
+    return item.createdBy === this.currentUserId();
   }
 
-  openDetail(report: PetReport): void {
-    this.selectedReport.set(report);
+  private loadDefaultCityFromProfile(): void {
+    this.isLoading.set(true);
+    this.profileService.getMyProfile().subscribe({
+      next: (response) => {
+        const city = this.matchCityValue(response.data.city);
+        if (city) this.filterCity.set(city);
+        this.reload();
+      },
+      error: () => this.reload(),
+    });
+  }
+
+  private matchCityValue(cityName: string): string | null {
+    const found = COLOMBIAN_CITIES.find((c) => c.label.toLowerCase() === cityName?.toLowerCase());
+    return found?.value ?? null;
+  }
+
+  private reload(): void {
+    this.isLoading.set(true);
+    this.generalError.set(null);
+    this.reportsFacade
+      .listCombined({
+        type: 'ALL',
+        speciesId: this.filterSpecies() || undefined,
+        city: this.filterCity() ? this.getCityLabel(this.filterCity()) : undefined,
+      })
+      .subscribe({
+        next: (items) => {
+          const filtered = this.applyClientFilters(items);
+          this.reports.set(filtered);
+          this.isLoading.set(false);
+          this.attachPhotos(filtered, this.reports);
+        },
+        error: () => {
+          this.generalError.set('No pudimos cargar los reportes.');
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  private applyClientFilters(items: UnifiedReportItem[]): UnifiedReportItem[] {
+    let result = items;
+
+    const type = this.filterType();
+    if (type === 'LOST') {
+      result = result.filter((item) => item.kind === 'LOST' && !this.isResolved(item));
+    } else if (type === 'FOUND') {
+      result = result.filter((item) => item.kind === 'FOUND' || this.isResolved(item));
+    }
+
+    const speciesId = this.filterSpecies();
+    if (speciesId) {
+      result = result.filter((item) => item.kind === 'LOST' || item.speciesId === speciesId);
+    }
+
+    return result;
+  }
+
+  private attachPhotos(
+    items: UnifiedReportItem[],
+    target: typeof this.reports | typeof this.myReports,
+  ): void {
+    if (items.length === 0) return;
+
+    const requests = items.map((item) => {
+      if (item.kind === 'LOST') {
+        if (!item.petId) return of(undefined);
+        return this.petsService.listImages(item.petId).pipe(
+          map((res) => {
+            const images = res.data;
+            const primary = images.find((img) => img.is_primary) ?? images[0];
+            return primary?.url;
+          }),
+          catchError(() => of(undefined)),
+        );
+      }
+
+      return this.foundReportsService.listImages(item.id).pipe(
+        map((res) => {
+          const images = res.data;
+          const primary = images.find((img) => img.is_primary) ?? images[0];
+          return primary?.url;
+        }),
+        catchError(() => of(undefined)),
+      );
+    });
+
+    forkJoin(requests).subscribe((urls) => {
+      (target as any).update((current: UnifiedReportItem[]) =>
+        current.map((item, index) => (urls[index] ? { ...item, photoUrl: urls[index] } : item)),
+      );
+    });
+  }
+
+  private loadMyReports(): void {
+    this.isLoading.set(true);
+
+    forkJoin([
+      this.lostReportsService.mine().pipe(catchError(() => of({ data: { items: [] } } as any))),
+      this.foundReportsService.mine().pipe(catchError(() => of({ data: { items: [] } } as any))),
+    ]).subscribe(([lostRes, foundRes]) => {
+      const lostItems: MyReportItem[] = lostRes.data.items.map((item: any) => ({
+        id: item.id,
+        kind: 'LOST',
+        title: item.title,
+        status: LOST_STATUS_LABELS[item.status as keyof typeof LOST_STATUS_LABELS] ?? item.status,
+        city: item.city,
+        speciesId: null,
+        petId: item.pet_id ?? null,
+        date: item.lost_date,
+        publishedAt: item.published_at,
+        createdBy: item.created_by,
+        canMarkAsFound: item.status === 'PUBLISHED',
+      }));
+
+      const foundItems: MyReportItem[] = foundRes.data.items.map((item: any) => ({
+        id: item.id,
+        kind: 'FOUND',
+        title: item.title,
+        status: FOUND_STATUS_LABELS[item.status as keyof typeof FOUND_STATUS_LABELS] ?? item.status,
+        city: item.city,
+        speciesId: item.species_id,
+        petId: null,
+        date: item.found_date,
+        publishedAt: item.published_at,
+        createdBy: item.created_by,
+        canMarkAsFound: false,
+      }));
+
+      const combined = [...lostItems, ...foundItems].sort((a, b) =>
+        b.publishedAt.localeCompare(a.publishedAt),
+      );
+      this.myReports.set(combined);
+      this.isLoading.set(false);
+      this.attachPhotos(combined, this.myReports);
+    });
+  }
+
+  // ---------- Marcar como encontrada (con confirmación) ----------
+
+  requestMarkAsFound(item: MyReportItem): void {
+    this.reportToMarkAsFound.set(item);
+  }
+
+  confirmMarkAsFound(): void {
+    const item = this.reportToMarkAsFound();
+    if (!item) return;
+
+    this.lostReportsService.markAsFound(item.id).subscribe({
+      next: () => {
+        this.reportToMarkAsFound.set(null);
+        this.refreshAllLists();
+      },
+      error: () => {
+        this.generalError.set('No pudimos actualizar el estado del reporte.');
+        this.reportToMarkAsFound.set(null);
+      },
+    });
+  }
+
+  cancelMarkAsFound(): void {
+    this.reportToMarkAsFound.set(null);
+  }
+
+  markAsMatch(sighting: FoundReportResponse): void {
+    this.foundReportsService.match(sighting.id).subscribe({
+      next: () => {
+        this.loadSightings(this.sightingsForReport()!.id);
+        this.refreshAllLists();
+      },
+      error: () => this.sightingActionError.set('No pudimos marcar la coincidencia.'),
+    });
+  }
+
+  unmatchSighting(sighting: FoundReportResponse): void {
+    this.foundReportsService.unmatch(sighting.id).subscribe({
+      next: () => {
+        this.loadSightings(this.sightingsForReport()!.id);
+        this.refreshAllLists();
+      },
+      error: () => this.sightingActionError.set('No pudimos descartar la coincidencia.'),
+    });
+  }
+
+  confirmSightingFound(sighting: FoundReportResponse): void {
+    this.foundReportsService.confirmFound(sighting.id).subscribe({
+      next: () => {
+        this.loadSightings(this.sightingsForReport()!.id);
+        this.refreshAllLists();
+      },
+      error: () => this.sightingActionError.set('No pudimos confirmar el encuentro.'),
+    });
+  }
+  // ---------- Eliminar (con confirmación) ----------
+
+  requestDeleteReport(item: MyReportItem): void {
+    this.reportToDelete.set(item);
+  }
+
+  confirmDeleteReport(): void {
+    const item = this.reportToDelete();
+    if (!item) return;
+
+    const delete$ =
+      item.kind === 'LOST'
+        ? this.lostReportsService.delete(item.id)
+        : this.foundReportsService.delete(item.id);
+
+    delete$.subscribe({
+      next: () => {
+        this.myReports.update((list) => list.filter((r) => r.id !== item.id));
+        this.reportToDelete.set(null);
+      },
+      error: () => {
+        this.generalError.set('No pudimos eliminar el reporte.');
+        this.reportToDelete.set(null);
+      },
+    });
+  }
+
+  cancelDeleteReport(): void {
+    this.reportToDelete.set(null);
+  }
+
+  // ---------- Editar ----------
+
+  openEditReport(item: MyReportItem): void {
+    this.editingReportItem.set(item);
+    this.editGeneralError.set(null);
+
+    if (item.kind === 'LOST') {
+      this.lostReportsService.getById(item.id).subscribe({
+        next: (response) => {
+          this.editForm.patchValue({
+            title: response.data.title,
+            description: response.data.description,
+            contactPhone: response.data.contact_phone,
+            address: response.data.address,
+            date: response.data.lost_date,
+            reward: response.data.reward,
+          });
+        },
+      });
+    } else {
+      this.foundReportsService.getById(item.id).subscribe({
+        next: (response) => {
+          this.editForm.patchValue({
+            title: response.data.title,
+            description: response.data.description,
+            contactPhone: response.data.contact_phone,
+            address: response.data.address,
+            date: response.data.found_date,
+            reward: null,
+          });
+        },
+      });
+    }
+  }
+
+  closeEditReport(): void {
+    this.editingReportItem.set(null);
+    this.editForm.reset();
+  }
+
+  submitEditReport(): void {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    const item = this.editingReportItem();
+    if (!item) return;
+
+    this.savingEdit.set(true);
+    this.editGeneralError.set(null);
+    const raw = this.editForm.getRawValue();
+
+    if (item.kind === 'LOST') {
+      const payload = {
+        title: raw.title,
+        description: raw.description,
+        contact_phone: raw.contactPhone || null,
+        address: raw.address || null,
+        lost_date: raw.date,
+        reward: raw.reward !== null && raw.reward !== '' ? Number(raw.reward) : null,
+      };
+      this.lostReportsService.update(item.id, payload).subscribe({
+        next: () => this.onEditSaved(),
+        error: (error) => this.onEditError(error),
+      });
+    } else {
+      const payload = {
+        title: raw.title,
+        description: raw.description,
+        contact_phone: raw.contactPhone || null,
+        address: raw.address || null,
+        found_date: raw.date,
+      };
+      this.foundReportsService.update(item.id, payload).subscribe({
+        next: () => this.onEditSaved(),
+        error: (error) => this.onEditError(error),
+      });
+    }
+  }
+
+  private onEditSaved(): void {
+    this.savingEdit.set(false);
+    this.closeEditReport();
+    this.refreshAllLists();
+  }
+
+  private onEditError(error: any): void {
+    this.savingEdit.set(false);
+    const parsed = parseApiError(error);
+    this.editGeneralError.set(parsed.message);
+  }
+
+  editFieldError(field: string): string | null {
+    const control = this.editForm.get(field);
+    if (control?.touched && control.hasError('required')) return 'Este campo es obligatorio.';
+    return null;
+  }
+
+  // ---------- Detalle ----------
+
+  openDetail(item: UnifiedReportItem | MyReportItem): void {
+    this.selectedItem.set(item);
+    this.selectedDetail.set(null);
+    this.loadingDetail.set(true);
+
+    if (item.kind === 'LOST') {
+      this.lostReportsService.getById(item.id).subscribe({
+        next: (response) => {
+          this.selectedDetail.set({ kind: 'LOST', data: response.data });
+          this.loadingDetail.set(false);
+        },
+        error: () => this.loadingDetail.set(false),
+      });
+    } else {
+      this.foundReportsService.getById(item.id).subscribe({
+        next: (response) => {
+          this.selectedDetail.set({ kind: 'FOUND', data: response.data });
+          this.loadingDetail.set(false);
+        },
+        error: () => this.loadingDetail.set(false),
+      });
+    }
   }
 
   closeDetail(): void {
-    this.selectedReport.set(null);
+    this.selectedItem.set(null);
+    this.selectedDetail.set(null);
+  }
+
+  speciesName(speciesId: string | null): string {
+    if (!speciesId) return '';
+    return this.species().find((s) => s.id === speciesId)?.name ?? '';
   }
 
   getEmoji(speciesName?: string): string {
-    if (!speciesName) return this.speciesEmoji['default'];
-    return this.speciesEmoji[speciesName] ?? this.speciesEmoji['default'];
+    if (!speciesName) return '🐾';
+    return this.speciesEmoji[speciesName] ?? '🐾';
   }
 
   getCityLabel(value: string): string {
@@ -298,7 +641,8 @@ export class PetReportsComponent implements OnInit {
     });
   }
 
-  navigateToReport(): void {
-    this.router.navigate(['/reportar']);
+  navigateToReport(item?: UnifiedReportItem): void {
+    const queryParams = item?.kind === 'LOST' ? { lostReportId: item.id } : {};
+    this.router.navigate(['/dashboard/reportar-avistamiento'], { queryParams });
   }
 }

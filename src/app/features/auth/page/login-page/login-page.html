@@ -12,6 +12,11 @@
     @if (generalError()) {
       <div class="mb-4 rounded-xl p-3 text-xs" style="background-color: #fef3c7; color: #92400e">
         {{ generalError() }}
+        @if (showResendLink()) {
+          <a class="underline font-medium ml-1 cursor-pointer" (click)="openResendVerification()">
+            Reenviar verificación
+          </a>
+        }
       </div>
     }
 
@@ -26,8 +31,8 @@
     }
 
     <div class="flex justify-end mb-10">
-      <a
-        class="text-[11px] hover:opacity-100 opacity-80 cursor-pointer"
+      
+       <a class="text-[11px] hover:opacity-100 opacity-80 cursor-pointer"
         style="color: var(--primary)"
         (click)="showForgotPassword = true"
       >
@@ -44,8 +49,8 @@
         {{ isSubmitting() ? 'Ingresando...' : 'Iniciar sesión' }}
       </button>
 
-      <a
-        (click)="irARegistro()"
+      
+       <a (click)="irARegistro()"
         class="w-full py-3 rounded-full border text-xs font-medium tracking-widest uppercase text-center cursor-pointer"
         style="color: var(--primary); border-color: var(--primary)"
       >
@@ -72,6 +77,28 @@
 
       <button type="submit" [disabled]="isSendingForgot()" class="btn-primary-custom w-full mt-3">
         {{ isSendingForgot() ? 'Enviando...' : 'Enviar enlace' }}
+      </button>
+    </form>
+  </app-modal>
+
+  <app-modal
+    [isOpen]="showResendVerification"
+    title="Reenviar verificación"
+    (close)="showResendVerification = false"
+  >
+    <form [formGroup]="resendForm" (ngSubmit)="submitResendVerification()" novalidate>
+      <p class="text-sm mb-4">
+        Ingresa tu correo electrónico para enviarte un nuevo enlace de verificación.
+      </p>
+
+      @if (resendMessage()) {
+        <p class="text-xs mb-3" style="color: var(--primary)">{{ resendMessage() }}</p>
+      }
+
+      <app-email-input [formControl]="resendForm.controls.email"></app-email-input>
+
+      <button type="submit" [disabled]="isSendingResend()" class="btn-primary-custom w-full mt-3">
+        {{ isSendingResend() ? 'Enviando...' : 'Enviar enlace' }}
       </button>
     </form>
   </app-modal>

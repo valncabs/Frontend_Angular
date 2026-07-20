@@ -10,6 +10,8 @@ import { ModalComponent } from '../../../../shared/components/modal/modal';
 import { AuthService } from '../../../../core/services/auth';
 import { parseApiError } from '../../../../core/services/api-error';
 
+const UNVERIFIED_EMAIL_MESSAGE = 'Debes verificar tu correo antes de iniciar sesión.';
+
 @Component({
   selector: 'app-login-page',
   standalone: true,
@@ -29,10 +31,12 @@ export class LoginPage {
   private readonly router = inject(Router);
 
   showForgotPassword = false;
+  showResendVerification = false;
 
   readonly isSubmitting = signal(false);
   readonly generalError = signal<string | null>(null);
   readonly fieldErrors = signal<Record<string, string>>({});
+  readonly showResendLink = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -46,15 +50,14 @@ export class LoginPage {
   readonly isSendingForgot = signal(false);
   readonly forgotMessage = signal<string | null>(null);
 
-  submit(): void {
-    console.log('form value:', this.form.getRawValue());
-    console.log('form valid:', this.form.valid);
-    console.log(
-      'form errors:',
-      this.form.controls.email.errors,
-      this.form.controls.password.errors,
-    );
+  readonly resendForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+  });
 
+  readonly isSendingResend = signal(false);
+  readonly resendMessage = signal<string | null>(null);
+
+  submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -62,6 +65,7 @@ export class LoginPage {
 
     this.generalError.set(null);
     this.fieldErrors.set({});
+    this.showResendLink.set(false);
     this.isSubmitting.set(true);
 
     this.authService.login(this.form.getRawValue()).subscribe({
@@ -75,6 +79,11 @@ export class LoginPage {
         const parsed = parseApiError(error);
         this.generalError.set(parsed.message);
         this.fieldErrors.set(parsed.fieldErrors);
+
+        if (parsed.message === UNVERIFIED_EMAIL_MESSAGE) {
+          this.showResendLink.set(true);
+          this.resendForm.patchValue({ email: this.form.controls.email.value });
+        }
       },
     });
   }
@@ -95,9 +104,34 @@ export class LoginPage {
       },
       error: () => {
         this.isSendingForgot.set(false);
-        // Por seguridad, el backend no revela si el correo existe o no —
-        // mostramos el mismo mensaje incluso si falla.
         this.forgotMessage.set('Si el correo existe, te enviamos un enlace de recuperación.');
+      },
+    });
+  }
+
+  openResendVerification(): void {
+    this.showResendVerification = true;
+    this.resendMessage.set(null);
+  }
+
+  submitResendVerification(): void {
+    if (this.resendForm.invalid) {
+      this.resendForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSendingResend.set(true);
+    this.resendMessage.set(null);
+
+    this.authService.resendVerification(this.resendForm.getRawValue()).subscribe({
+      next: () => {
+        this.isSendingResend.set(false);
+        this.resendMessage.set('Si el correo existe y no ha sido verificado, te enviamos un nuevo enlace.');
+      },
+      error: () => {
+        // El backend no revela existencia/estado del correo: mismo mensaje siempre.
+        this.isSendingResend.set(false);
+        this.resendMessage.set('Si el correo existe y no ha sido verificado, te enviamos un nuevo enlace.');
       },
     });
   }

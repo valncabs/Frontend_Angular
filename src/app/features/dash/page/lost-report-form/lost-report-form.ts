@@ -13,7 +13,7 @@ import {
 
 import { PetsService } from '../../../../core/services/pets';
 import { LostReportsService } from '../../../../core/services/lost-reports';
-import { CreateLostReportRequest } from '../../../../core/services/lost-report.models';
+import { CreateLostReportRequest } from '../../../../core/services/lost-report-models';
 import {
   COLOMBIA_DEPARTMENTS,
   DEFAULT_COUNTRY,

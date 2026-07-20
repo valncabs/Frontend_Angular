@@ -1,23 +1,62 @@
 <app-auth-layout>
   <p class="mb-1 text-2xl font-semibold" style="color: var(--text-primary)">Crear cuenta</p>
-
   <p class="mb-10 text-xs font-light" style="color: var(--text-secondary)">Registra tus datos</p>
 
-  <app-email-input label="Correo electrónico"> </app-email-input>
-  <app-password-input label="Confirmar contraseña"> </app-password-input>
-  <app-password-input label="Confirmar contraseña"> </app-password-input>
+  @if (registered()) {
+    <div class="mb-6 rounded-xl p-4 text-sm" style="background-color: #d1fae5; color: #065f46">
+      Registro exitoso. Revisa tu correo para verificar tu cuenta antes de iniciar sesión.
+    </div>
 
-  <div class="flex flex-col gap-3">
-    <button type="button" class="btn-primary-custom w-full text-xs tracking-widest uppercase">
-      Registrarse
-    </button>
-
-    <button
-      routerLink="/login"
-      class="w-full py-3 rounded-full border text-xs font-medium tracking-widest uppercase text-center"
+    
+      <a routerLink="/login"
+      class="w-full py-3 rounded-full border text-xs font-medium tracking-widest uppercase text-center block"
       style="color: var(--primary); border-color: var(--primary)"
     >
-      Iniciar sesión
-    </button>
-  </div>
+      Ir a iniciar sesión
+    </a>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (generalError()) {
+        <div class="mb-4 rounded-xl p-3 text-xs" style="background-color: #fef3c7; color: #92400e">
+          {{ generalError() }}
+        </div>
+      }
+
+      <app-email-input label="Correo electrónico" [formControl]="form.controls.email"></app-email-input>
+      @if (fieldError('email')) {
+        <p class="text-xs mb-2" style="color: #b91c1c">{{ fieldError('email') }}</p>
+      }
+
+      <app-password-input label="Contraseña" [formControl]="form.controls.password"></app-password-input>
+      @if (fieldError('password')) {
+        <p class="text-xs mb-2" style="color: #b91c1c">{{ fieldError('password') }}</p>
+      }
+
+      <app-password-input
+        label="Confirmar contraseña"
+        [formControl]="form.controls.confirmPassword"
+      ></app-password-input>
+      @if (fieldError('confirmPassword')) {
+        <p class="text-xs mb-2" style="color: #b91c1c">{{ fieldError('confirmPassword') }}</p>
+      }
+
+      <div class="flex flex-col gap-3 mt-4">
+        <button
+          type="submit"
+          [disabled]="isSubmitting()"
+          class="btn-primary-custom w-full text-xs tracking-widest uppercase"
+        >
+          {{ isSubmitting() ? 'Registrando...' : 'Registrarse' }}
+        </button>
+
+        
+        <a routerLink="/login"
+          class="w-full py-3 rounded-full border text-xs font-medium tracking-widest uppercase text-center cursor-pointer"
+          style="color: var(--primary); border-color: var(--primary)"
+        >
+          Iniciar sesión
+        </a>
+      </div>
+    </form>
+  }
 </app-auth-layout>

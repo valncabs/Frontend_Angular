@@ -1,0 +1,342 @@
+<div class="p-6 space-y-6" style="background: var(--background)">
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestión de Usuarios</h1>
+      <p class="text-sm mt-0.5" style="color: var(--text-secondary)">
+        Administra roles, estados y crea nuevos administradores
+      </p>
+    </div>
+    <app-pet-button label="Crear administrador" icon="person_add" (clicked)="openCreateModal()" />
+  </div>
+
+  <!-- STATS -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="card-pet p-5 border border-slate-100 shadow-sm">
+      <p class="text-xs font-medium mb-2" style="color: var(--text-secondary)">Total usuarios</p>
+      <p class="text-3xl font-bold text-slate-800">{{ total() }}</p>
+    </div>
+    <div class="card-pet p-5 border border-slate-100 shadow-sm">
+      <p class="text-xs font-medium mb-2" style="color: var(--text-secondary)">Página actual</p>
+      <p class="text-3xl font-bold" style="color: #1e40af">
+        {{ page() }} / {{ totalPages() || 1 }}
+      </p>
+    </div>
+  </div>
+
+  @if (generalError()) {
+    <div class="rounded-xl p-3 text-sm" style="background-color: #fef3c7; color: #92400e">
+      {{ generalError() }}
+    </div>
+  }
+
+  <!-- FILTROS -->
+  <div class="flex flex-wrap gap-3">
+    <input
+      type="text"
+      placeholder="Buscar por email..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="onSearchChange($event)"
+      class="flex-1 min-w-60 px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+    />
+    <select
+      [ngModel]="filterRole()"
+      (ngModelChange)="onRoleFilterChange($event)"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none"
+    >
+      @for (r of roleOptions; track r) {
+        <option [value]="r">{{ r === 'ALL' ? 'Todos los roles' : r }}</option>
+      }
+    </select>
+    <select
+      [ngModel]="filterStatus()"
+      (ngModelChange)="onStatusFilterChange($event)"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none"
+    >
+      <option value="ALL">Todos los estados</option>
+      <option value="ACTIVE">Activos</option>
+      <option value="INACTIVE">Inactivos</option>
+    </select>
+  </div>
+
+  <!-- TABLA -->
+  <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+    @if (isLoading()) {
+      <div class="px-6 py-16 text-center text-sm" style="color: var(--text-secondary)">
+        Cargando usuarios...
+      </div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead class="border-b border-slate-100" style="background: var(--background)">
+          <tr>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Email
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Nombre
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Rol
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Estado
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Verificado
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Creado
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-semibold text-slate-800">{{ u.email }}</td>
+              <td class="px-6 py-4 text-slate-700">{{ fullName(u) }}</td>
+              <td class="px-6 py-4">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                  [style.background]="u.role === 'ADMIN' ? '#dbeafe' : '#f3f4f6'"
+                  [style.color]="u.role === 'ADMIN' ? '#1e40af' : '#6b7280'"
+                >
+                  {{ u.role ?? 'Sin rol' }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                  [style.background]="u.is_active ? '#dcfce7' : '#fee2e2'"
+                  [style.color]="u.is_active ? 'var(--success)' : 'var(--danger)'"
+                >
+                  {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-6 py-4" style="color: var(--text-secondary)">
+                {{ u.email_verified ? 'Sí' : 'No' }}
+              </td>
+              <td class="px-6 py-4" style="color: var(--text-secondary)">
+                {{ u.created_at | date: 'dd/MM/yyyy' }}
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex gap-2">
+                  <button
+                    (click)="openRoleDialog(u)"
+                    [disabled]="actionInProgress() === u.id"
+                    class="px-3 py-1.5 rounded-xl text-xs font-medium transition disabled:opacity-50"
+                    style="background: #dbeafe; color: #1e40af"
+                  >
+                    Cambiar rol
+                  </button>
+                  <button
+                    (click)="openStatusDialog(u)"
+                    [disabled]="actionInProgress() === u.id"
+                    class="px-3 py-1.5 rounded-xl text-xs font-medium transition disabled:opacity-50"
+                    [style.background]="u.is_active ? '#fee2e2' : '#dcfce7'"
+                    [style.color]="u.is_active ? 'var(--danger)' : 'var(--success)'"
+                  >
+                    {{ u.is_active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="px-6 py-16 text-center">
+                <p class="text-4xl mb-3">👤</p>
+                <p class="font-medium text-slate-500">No hay usuarios que coincidan</p>
+                <p class="text-xs mt-1" style="color: var(--text-secondary)">
+                  Intenta con otro filtro
+                </p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+          <p class="text-xs" style="color: var(--text-secondary)">
+            {{ total() }} usuarios en total
+          </p>
+          <div class="flex gap-2">
+            <button
+              (click)="goToPage(page() - 1)"
+              [disabled]="page() <= 1"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 disabled:opacity-40"
+            >
+              Anterior
+            </button>
+            <button
+              (click)="goToPage(page() + 1)"
+              [disabled]="page() >= totalPages()"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 disabled:opacity-40"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- CONFIRMAR CAMBIO DE ESTADO -->
+<app-confirm-dialog
+  [isOpen]="statusDialogOpen()"
+  title="{{ statusDialogUser()?.is_active ? '¿Desactivar usuario?' : '¿Activar usuario?' }}"
+  message="{{ statusDialogUser()?.email }}"
+  [confirmLabel]="statusDialogUser()?.is_active ? 'Desactivar' : 'Activar'"
+  (confirmed)="confirmStatusChange()"
+  (cancelled)="cancelStatusDialog()"
+/>
+
+<!-- MODAL CAMBIAR ROL -->
+@if (roleDialogOpen()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/50" (click)="cancelRoleDialog()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 z-10">
+      <h3 class="text-lg font-semibold text-center mb-2">Cambiar rol</h3>
+      <p class="text-sm text-center mb-4" style="color: var(--text-secondary)">
+        {{ roleDialogUser()?.email }}
+      </p>
+      <select
+        [ngModel]="roleDialogValue()"
+        (ngModelChange)="roleDialogValue.set($event)"
+        class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm mb-6"
+      >
+        @for (r of assignableRoles; track r) {
+          <option [value]="r">{{ r }}</option>
+        }
+      </select>
+      <div class="flex gap-3">
+        <app-pet-button
+          label="Cancelar"
+          variant="outline"
+          [fullWidth]="true"
+          (clicked)="cancelRoleDialog()"
+        />
+        <app-pet-button
+          label="Guardar"
+          variant="primary"
+          [fullWidth]="true"
+          [loading]="actionInProgress() === roleDialogUser()?.id"
+          (clicked)="confirmRoleChange()"
+        />
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL CREAR ADMINISTRADOR -->
+@if (createModalOpen()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/50" (click)="closeCreateModal()"></div>
+    <div
+      class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 z-10 max-h-[90vh] overflow-y-auto"
+    >
+      <h3 class="text-lg font-semibold mb-4">Crear administrador</h3>
+
+      @if (createError()) {
+        <div class="rounded-xl p-3 text-sm mb-4" style="background-color: #fef3c7; color: #92400e">
+          {{ createError() }}
+        </div>
+      }
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input
+          type="email"
+          placeholder="Correo electrónico"
+          [ngModel]="createForm().email"
+          (ngModelChange)="updateCreateForm('email', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm md:col-span-2"
+        />
+        <input
+          type="password"
+          placeholder="Contraseña (mín. 8 caracteres)"
+          [ngModel]="createForm().password"
+          (ngModelChange)="updateCreateForm('password', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm md:col-span-2"
+        />
+        <input
+          type="text"
+          placeholder="Nombres"
+          [ngModel]="createForm().first_name"
+          (ngModelChange)="updateCreateForm('first_name', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm"
+        />
+        <input
+          type="text"
+          placeholder="Apellidos"
+          [ngModel]="createForm().last_name"
+          (ngModelChange)="updateCreateForm('last_name', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm"
+        />
+        <select
+          [ngModel]="createForm().document_type"
+          (ngModelChange)="updateCreateForm('document_type', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm"
+        >
+          <option value="">Tipo de documento</option>
+          @for (dt of documentTypes; track dt) {
+            <option [value]="dt">{{ dt }}</option>
+          }
+        </select>
+        <input
+          type="text"
+          placeholder="Número de documento"
+          [ngModel]="createForm().document_number"
+          (ngModelChange)="updateCreateForm('document_number', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm"
+        />
+        <input
+          type="tel"
+          placeholder="Teléfono"
+          [ngModel]="createForm().phone"
+          (ngModelChange)="updateCreateForm('phone', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm md:col-span-2"
+        />
+        <select
+          [ngModel]="createForm().department"
+          (ngModelChange)="updateCreateForm('department', $event)"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm"
+        >
+          <option value="">Departamento</option>
+          @for (dep of departments; track dep.value) {
+            <option [value]="dep.value">{{ dep.label }}</option>
+          }
+        </select>
+        <select
+          [ngModel]="createForm().city"
+          (ngModelChange)="updateCreateForm('city', $event)"
+          [disabled]="!createForm().department"
+          class="px-4 py-2.5 rounded-2xl border border-slate-200 text-sm disabled:opacity-50"
+        >
+          <option value="">Ciudad</option>
+          @for (c of citiesForSelectedDepartment(); track c.value) {
+            <option [value]="c.value">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <app-pet-button
+          label="Cancelar"
+          variant="outline"
+          [fullWidth]="true"
+          (clicked)="closeCreateModal()"
+        />
+        <app-pet-button
+          label="Crear"
+          variant="primary"
+          [fullWidth]="true"
+          [loading]="createLoading()"
+          (clicked)="submitCreateAdmin()"
+        />
+      </div>
+    </div>
+  </div>
+}

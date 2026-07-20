@@ -9,13 +9,26 @@ src
 │   │   │   ├── admin-guard.ts
 │   │   │   └── auth-guard.ts
 │   │   └── services
+│   │       ├── admin-reports.models.ts
+│   │       ├── admin-reports.ts
+│   │       ├── admin-users.models.ts
+│   │       ├── admin-users.ts
 │   │       ├── api-error.ts
-│   │       ├── auht.ts
 │   │       ├── auth.interceptor.ts
 │   │       ├── auth.models.ts
+│   │       ├── auth.ts
+│   │       ├── catalog.ts
 │   │       ├── chatbot.ts
+│   │       ├── colombia-locations.ts
+│   │       ├── found-reports.ts
+│   │       ├── lost-report-models.ts
+│   │       ├── lost-reports.ts
+│   │       ├── pet.models.ts
+│   │       ├── pets.ts
 │   │       ├── profile.models.ts
 │   │       ├── profile.ts
+│   │       ├── report-models.ts
+│   │       ├── reports.ts
 │   │       └── token-storage.ts
 │   ├── features
 │   │   ├── admin
@@ -33,30 +46,73 @@ src
 │   │   │       ├── admin-reportes-page
 │   │   │       │   ├── admin-reportes-page.html
 │   │   │       │   └── admin-reportes-page.ts
+│   │   │       ├── admin-users-page
+│   │   │       │   ├── admin-users-page.html
+│   │   │       │   └── admin-users-page.ts
 │   │   │       └── power-bi
 │   │   │           ├── power-bi.html
 │   │   │           └── power-bi.ts
 │   │   ├── auth
 │   │   │   ├── components
-│   │   │   │   └── auth-layout
-│   │   │   │       ├── auth-layout.html
-│   │   │   │       └── auth-layout.ts
+│   │   │   │   ├── auth-card
+│   │   │   │   │   ├── auth-card.html
+│   │   │   │   │   └── auth-card.ts
+│   │   │   │   ├── auth-layaut
+│   │   │   │   │   ├── auth-layaut.html
+│   │   │   │   │   └── auth-layaut.ts
+│   │   │   │   ├── email-input
+│   │   │   │   │   ├── email-input.html
+│   │   │   │   │   └── email-input.ts
+│   │   │   │   └── password-input
+│   │   │   │       ├── password-input.html
+│   │   │   │       └── password-input.ts
 │   │   │   └── page
+│   │   │       ├── forgot-password-page
+│   │   │       │   ├── forgot-password-page.html
+│   │   │       │   └── forgot-password-page.ts
 │   │   │       ├── login-page
 │   │   │       │   ├── login-page.html
 │   │   │       │   └── login-page.ts
-│   │   │       └── register-page
-│   │   │           ├── register-page.html
-│   │   │           └── register-page.ts
+│   │   │       ├── register-page
+│   │   │       │   ├── register-page.html
+│   │   │       │   └── register-page.ts
+│   │   │       ├── reset-password-page
+│   │   │       │   ├── reset-password-page.html
+│   │   │       │   └── reset-password-page.ts
+│   │   │       └── verify-email-page
+│   │   │           ├── verify-email-page.html
+│   │   │           └── verify-email-page.ts
 │   │   ├── dash
 │   │   │   ├── components
-│   │   │   │   └── nav-dashboard
-│   │   │   │       ├── nav-dashboard.html
-│   │   │   │       └── nav-dashboard.ts
+│   │   │   │   ├── my-pets
+│   │   │   │   │   ├── my-pets.html
+│   │   │   │   │   ├── my-pets.ts
+│   │   │   │   │   └── pet-models.ts
+│   │   │   │   ├── nav-dashboard
+│   │   │   │   │   ├── nav-dashboard.html
+│   │   │   │   │   └── nav-dashboard.ts
+│   │   │   │   ├── pet-card
+│   │   │   │   │   ├── pet-card.html
+│   │   │   │   │   └── pet-card.ts
+│   │   │   │   ├── pet-input
+│   │   │   │   │   ├── pet-input.html
+│   │   │   │   │   └── pet-input.ts
+│   │   │   │   ├── pet-select
+│   │   │   │   │   ├── pet-select.html
+│   │   │   │   │   └── pet-select.ts
+│   │   │   │   ├── pets-modal
+│   │   │   │   │   ├── pets-modal.html
+│   │   │   │   │   └── pets-modal.ts
+│   │   │   │   └── select-pets
+│   │   │   │       ├── select-pets.html
+│   │   │   │       └── select-pets.ts
 │   │   │   └── page
 │   │   │       ├── dash-page
 │   │   │       │   ├── dash-page.html
 │   │   │       │   └── dash-page.ts
+│   │   │       ├── lost-report-form
+│   │   │       │   ├── lost-report-form.html
+│   │   │       │   └── lost-report-form.ts
 │   │   │       ├── my-pets-page
 │   │   │       │   ├── my-pets-page.html
 │   │   │       │   └── my-pets-page.ts
@@ -92,9 +148,6 @@ src
 │           ├── button-pets
 │           │   ├── button-pets.html
 │           │   └── button-pets.ts
-│           ├── card-pets
-│           │   ├── card-pets.html
-│           │   └── card-pets.ts
 │           ├── chatbot
 │           │   ├── chatbot.css
 │           │   ├── chatbot.html
@@ -102,31 +155,15 @@ src
 │           ├── confirm-dialog
 │           │   ├── confirm-dialog.html
 │           │   └── confirm-dialog.ts
-│           ├── email-input
-│           │   ├── email-input.html
-│           │   └── email-input.ts
 │           ├── footer
 │           │   ├── footer.html
 │           │   └── footer.ts
-│           ├── imput-pets
-│           │   ├── imput-pets.html
-│           │   └── imput-pets.ts
-│           ├── modal
-│           │   ├── modal.html
-│           │   └── modal.ts
-│           ├── my-pets
-│           │   ├── my-pets.html
-│           │   ├── my-pets.ts
-│           │   └── pet-models.ts
-│           ├── password-input
-│           │   ├── password-input.html
-│           │   └── password-input.ts
-│           ├── pets-modal
-│           │   ├── pets-modal.html
-│           │   └── pets-modal.ts
-│           └── select-pets
-│               ├── select-pets.html
-│               └── select-pets.ts
+│           ├── location-picker
+│           │   ├── location-picker.html
+│           │   └── location-picker.ts
+│           └── modal
+│               ├── modal.html
+│               └── modal.ts
 ├── environments
 │   ├── environment.development.ts
 │   └── environment.ts
@@ -134,4 +171,4 @@ src
 ├── main.ts
 └── styles.css
 
-51 directories, 84 files
+59 directories, 113 files

@@ -1,220 +1,403 @@
 <div class="p-6 space-y-6" style="background: var(--background)">
-
   <!-- HEADER -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold text-slate-800">Gestión de Reportes</h1>
       <p class="text-sm mt-0.5" style="color: var(--text-secondary)">
-        Administra todos los reportes de mascotas de la plataforma
+        Mascotas perdidas y avistamientos, en una sola vista
       </p>
     </div>
-    <button (click)="openCreate()" class="btn-primary-custom text-sm font-medium">
-      + Nuevo reporte
-    </button>
+    <app-pet-button
+      label="Exportar a PDF"
+      icon="picture_as_pdf"
+      [loading]="exportLoading()"
+      (clicked)="exportToPdf()"
+    />
   </div>
 
   <!-- STATS -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="card-pet p-5 border border-slate-100 shadow-sm">
-      <div class="flex items-center justify-between mb-2">
-        <p class="text-xs font-medium" style="color: var(--text-secondary)">Total reportes</p>
-        <span class="text-xl"></span>
-      </div>
-      <p class="text-3xl font-bold text-slate-800">{{ reports().length }}</p>
-    </div>
-    <div class="card-pet p-5 border border-slate-100 shadow-sm">
-      <div class="flex items-center justify-between mb-2">
-        <p class="text-xs font-medium" style="color: var(--text-secondary)">Perdidos</p>
-        <span class="text-xl"></span>
-      </div>
-      <p class="text-3xl font-bold" style="color: var(--danger)">
-        {{ reports().filter(r => r.type === 'LOST').length }}
+      <p class="text-xs font-medium mb-2" style="color: var(--text-secondary)">
+        Resultados con estos filtros
       </p>
+      <p class="text-3xl font-bold text-slate-800">{{ total() }}</p>
     </div>
     <div class="card-pet p-5 border border-slate-100 shadow-sm">
-      <div class="flex items-center justify-between mb-2">
-        <p class="text-xs font-medium" style="color: var(--text-secondary)">Encontrados</p>
-        <span class="text-xl"></span>
-      </div>
-      <p class="text-3xl font-bold" style="color: var(--success)">
-        {{ reports().filter(r => r.type === 'FOUND').length }}
+      <p class="text-xs font-medium mb-2" style="color: var(--text-secondary)">Página actual</p>
+      <p class="text-3xl font-bold" style="color: #1e40af">
+        {{ page() }} / {{ totalPages() || 1 }}
       </p>
     </div>
   </div>
 
+  @if (generalError()) {
+    <div class="rounded-xl p-3 text-sm" style="background-color: #fef3c7; color: #92400e">
+      {{ generalError() }}
+    </div>
+  }
+
   <!-- FILTROS -->
-  <div class="flex flex-wrap gap-3">
-    <input type="text" placeholder="Buscar por mascota, reportante o ciudad..."
-      [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)"
-      class="flex-1 min-w-60 px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" />
-    <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)"
-      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none">
-      <option value="ALL">Todos</option>
-      <option value="LOST">Perdidos</option>
-      <option value="FOUND">Encontrados</option>
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 flex flex-wrap gap-3">
+    <input
+      type="text"
+      placeholder="Buscar por título..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event); onFilterChange()"
+      class="flex-1 min-w-48 px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+    />
+
+    <select
+      [ngModel]="filterType()"
+      (ngModelChange)="filterType.set($event); filterStatus.set(''); onFilterChange()"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm"
+    >
+      @for (t of typeOptions; track t) {
+        <option [value]="t">
+          {{ t === 'ALL' ? 'Todos los tipos' : t === 'LOST' ? 'Perdidas' : 'Avistamientos' }}
+        </option>
+      }
     </select>
+
+    <select
+      [ngModel]="filterSpecies()"
+      (ngModelChange)="filterSpecies.set($event); onFilterChange()"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm"
+    >
+      <option value="">Todas las especies</option>
+      @for (s of species(); track s.id) {
+        <option [value]="s.id">{{ s.name }}</option>
+      }
+    </select>
+
+    <select
+      [ngModel]="filterStatus()"
+      (ngModelChange)="filterStatus.set($event); onFilterChange()"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm"
+    >
+      @for (s of statusOptions(); track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select>
+
+    <input
+      type="text"
+      placeholder="Ciudad..."
+      [ngModel]="filterCity()"
+      (ngModelChange)="filterCity.set($event); onFilterChange()"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm w-40"
+    />
+
+    <input
+      type="date"
+      [ngModel]="filterDateFrom()"
+      (ngModelChange)="filterDateFrom.set($event); onFilterChange()"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm"
+    />
+    <input
+      type="date"
+      [ngModel]="filterDateTo()"
+      (ngModelChange)="filterDateTo.set($event); onFilterChange()"
+      class="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm"
+    />
   </div>
 
   <!-- TABLA -->
   <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-    <table class="w-full text-sm">
-      <thead class="border-b border-slate-100" style="background: var(--background)">
-        <tr>
-          <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">Mascota</th>
-          <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">Tipo</th>
-          <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">Reportante</th>
-          <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">Ciudad</th>
-          <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">Fecha</th>
-          <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (r of filteredReports(); track r.id) {
-          <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-            <td class="px-6 py-4">
-              <p class="font-semibold text-slate-800">{{ r.petName ?? 'Sin nombre' }}</p>
-              <p class="text-xs" style="color: var(--text-secondary)">{{ r.species }} · {{ r.color }}</p>
-            </td>
-            <td class="px-6 py-4">
-              <span class="px-3 py-1 rounded-full text-xs font-medium"
-                [style.background]="r.type === 'LOST' ? '#fee2e2' : '#dcfce7'"
-                [style.color]="r.type === 'LOST' ? 'var(--danger)' : 'var(--success)'">
-                {{ r.type === 'LOST' ? 'Perdido' : 'Encontrado' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-slate-700">{{ r.reporterName }}</td>
-            <td class="px-6 py-4 text-slate-700">{{ cityLabel(r.city) }}</td>
-            <td class="px-6 py-4" style="color: var(--text-secondary)">
-              {{ r.reportedAt | date:'dd/MM/yyyy' }}
-            </td>
-            <td class="px-6 py-4">
-              <div class="flex gap-2">
-                <button (click)="openEdit(r)"
-                  class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition">
-                  Editar
-                </button>
-                <button (click)="confirmDelete(r.id)"
-                  class="px-3 py-1.5 rounded-xl text-xs font-medium transition"
-                  style="background: #fee2e2; color: var(--danger)">
-                  Eliminar
-                </button>
-              </div>
-            </td>
-          </tr>
-        } @empty {
+    @if (isLoading()) {
+      <div class="px-6 py-16 text-center text-sm" style="color: var(--text-secondary)">
+        Cargando reportes...
+      </div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead class="border-b border-slate-100" style="background: var(--background)">
           <tr>
-            <td colspan="6" class="px-6 py-16 text-center">
-              <p class="text-4xl mb-3"></p>
-              <p class="font-medium text-slate-500">No hay reportes que coincidan</p>
-              <p class="text-xs mt-1" style="color: var(--text-secondary)">Intenta con otros filtros</p>
-            </td>
+            <th class="w-10"></th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Tipo
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Título
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Estado
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Ciudad
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Fecha
+            </th>
+            <th class="text-left px-6 py-4 font-medium" style="color: var(--text-secondary)">
+              Acciones
+            </th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (r of reports(); track r.id) {
+            <tr
+              class="border-b border-slate-50 hover:bg-slate-50 transition cursor-pointer"
+              (click)="toggleExpand(r)"
+            >
+              <td class="px-4 text-center text-slate-400">
+                {{ expandedId() === r.id ? '▾' : '▸' }}
+              </td>
+              <td class="px-6 py-4">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                  [style.background]="r.type === 'LOST' ? '#fee2e2' : '#dbeafe'"
+                  [style.color]="r.type === 'LOST' ? 'var(--danger)' : '#1e40af'"
+                >
+                  {{ r.type === 'LOST' ? 'Perdida' : 'Avistamiento' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 font-semibold text-slate-800">{{ r.title }}</td>
+              <td class="px-6 py-4">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                  style="background: #f3f4f6; color: #6b7280"
+                >
+                  {{ statusLabel(r.status) }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-slate-700">{{ r.city }}</td>
+              <td class="px-6 py-4" style="color: var(--text-secondary)">
+                {{ r.date | date: 'dd/MM/yyyy' }}
+              </td>
+              <td class="px-6 py-4" (click)="$event.stopPropagation()">
+                <div class="flex flex-wrap gap-2">
+                  @if (r.type === 'FOUND' && r.status === 'MATCHED') {
+                    <button
+                      (click)="approve(r.id)"
+                      [disabled]="actionInProgress() === r.id"
+                      class="px-3 py-1.5 rounded-xl text-xs font-medium disabled:opacity-50"
+                      style="background: #dcfce7; color: var(--success)"
+                    >
+                      Aprobar
+                    </button>
+                    <button
+                      (click)="reject(r.id)"
+                      [disabled]="actionInProgress() === r.id"
+                      class="px-3 py-1.5 rounded-xl text-xs font-medium disabled:opacity-50"
+                      style="background: #fee2e2; color: var(--danger)"
+                    >
+                      Rechazar
+                    </button>
+                  }
+                  @if (r.status !== 'CLOSED') {
+                    <button
+                      (click)="openConfirm(r, 'CLOSE')"
+                      [disabled]="actionInProgress() === r.id"
+                      class="px-3 py-1.5 rounded-xl text-xs font-medium disabled:opacity-50"
+                      style="background: #f3f4f6; color: #6b7280"
+                    >
+                      Cerrar
+                    </button>
+                  }
+                  <button
+                    (click)="openConfirm(r, 'DELETE')"
+                    [disabled]="actionInProgress() === r.id"
+                    class="px-3 py-1.5 rounded-xl text-xs font-medium disabled:opacity-50"
+                    style="background: #fee2e2; color: var(--danger)"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
 
-  <!-- MODAL CREAR/EDITAR -->
-  @if (showModal()) {
-    <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <h2 class="text-lg font-bold text-slate-800 mb-5">
-          {{ editingReport()?.petName ? 'Editar reporte' : 'Nuevo reporte' }}
-        </h2>
+            @if (expandedId() === r.id) {
+              <tr>
+                <td colspan="7" class="px-6 py-5 bg-slate-50 border-b border-slate-100">
+                  @if (expandedLoading()) {
+                    <p class="text-sm text-center py-6" style="color: var(--text-secondary)">
+                      Cargando detalle...
+                    </p>
+                  } @else if (expandedError()) {
+                    <p class="text-sm text-center py-6" style="color: var(--danger)">
+                      {{ expandedError() }}
+                    </p>
+                  } @else if (expandedDetail(); as d) {
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <!-- Info general -->
+                      <div class="space-y-2">
+                        <h4
+                          class="text-xs font-semibold uppercase"
+                          style="color: var(--text-secondary)"
+                        >
+                          Información del reporte
+                        </h4>
+                        <p class="text-sm">
+                          <b>Descripción:</b> {{ d.description || 'Sin descripción' }}
+                        </p>
+                        <p class="text-sm"><b>Dirección:</b> {{ d.address || '—' }}</p>
+                        <p class="text-sm">
+                          <b>Ubicación:</b> {{ d.city }}, {{ d.department }}, {{ d.country }}
+                        </p>
+                        <p class="text-sm"><b>Contacto:</b> {{ d.contactPhone || '—' }}</p>
+                        <p class="text-sm">
+                          <b>Publicado:</b> {{ d.publishedAt | date: 'dd/MM/yyyy HH:mm' }}
+                        </p>
+                        @if (d.closedAt) {
+                          <p class="text-sm">
+                            <b>Cerrado:</b> {{ d.closedAt | date: 'dd/MM/yyyy HH:mm' }}
+                          </p>
+                        }
+                        @if (d.kind === 'LOST') {
+                          <p class="text-sm">
+                            <b>Recompensa:</b> {{ d.reward ? '$' + d.reward : 'No ofrece' }}
+                          </p>
+                        }
+                        @if (d.kind === 'FOUND' && d.lostReportId) {
+                          <p class="text-sm">
+                            <b>Vinculado a reporte de pérdida:</b> {{ d.lostReportId }}
+                          </p>
+                        }
+                      </div>
 
-        @if (editingReport(); as r) {
-          <div class="flex flex-col gap-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Nombre de la mascota</label>
-                <input [(ngModel)]="r.petName" type="text"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" />
-              </div>
-              <div>
-                <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Tipo</label>
-                <select [(ngModel)]="r.type"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none">
-                  <option value="LOST">Perdido</option>
-                  <option value="FOUND">Encontrado</option>
-                </select>
-              </div>
-            </div>
+                      <!-- Info de la mascota (solo LOST) -->
+                      <div class="space-y-2">
+                        <h4
+                          class="text-xs font-semibold uppercase"
+                          style="color: var(--text-secondary)"
+                        >
+                          Mascota
+                        </h4>
+                        @if (d.kind === 'LOST') {
+                          <p class="text-sm"><b>Nombre:</b> {{ d.petName }}</p>
+                          <p class="text-sm"><b>Especie:</b> {{ speciesName(d.petSpeciesId) }}</p>
+                          <p class="text-sm"><b>Sexo:</b> {{ d.petSex }}</p>
+                          <p class="text-sm"><b>Color:</b> {{ d.petColor }}</p>
+                          <p class="text-sm"><b>Tamaño:</b> {{ d.petSize }}</p>
+                          <p class="text-sm">
+                            <b>Edad aprox.:</b> {{ d.petApproximateAge ?? '—' }}
+                          </p>
+                          <p class="text-sm">
+                            <b>Marcas distintivas:</b> {{ d.petDistinctiveMarks || '—' }}
+                          </p>
 
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Especie</label>
-                <input [(ngModel)]="r.species" type="text"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" />
-              </div>
-              <div>
-                <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Color</label>
-                <input [(ngModel)]="r.color" type="text"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" />
-              </div>
-            </div>
+                          @if (petGallery().length) {
+                            <div class="flex flex-wrap gap-2 pt-2">
+                              @for (img of petGallery(); track img.url) {
+                                <img
+                                  [src]="img.url"
+                                  (click)="openLightbox(img.url)"
+                                  class="w-20 h-20 object-cover rounded-xl border border-slate-200 cursor-pointer hover:opacity-80 hover:ring-2 hover:ring-[var(--primary)] transition"
+                                />
+                              }
+                            </div>
+                          } @else {
+                            <p class="text-xs" style="color: var(--text-secondary)">
+                              Esta mascota no tiene fotos propias cargadas.
+                            </p>
+                          }
+                        } @else {
+                          <p class="text-sm"><b>Especie:</b> {{ speciesName(d.speciesId) }}</p>
+                          @if (d.approvedAt) {
+                            <p class="text-sm">
+                              <b>Aprobado:</b> {{ d.approvedAt | date: 'dd/MM/yyyy HH:mm' }}
+                            </p>
+                          }
+                        }
+                      </div>
 
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Reportado por</label>
-                <input [(ngModel)]="r.reporterName" type="text"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" />
-              </div>
-              <div>
-                <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Teléfono</label>
-                <input [(ngModel)]="r.reporterPhone" type="text"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" />
-              </div>
-            </div>
+                      <!-- Fotos del reporte -->
+                      <div class="space-y-2">
+                        <h4
+                          class="text-xs font-semibold uppercase"
+                          style="color: var(--text-secondary)"
+                        >
+                          Fotos del {{ d.kind === 'LOST' ? 'reporte de pérdida' : 'avistamiento' }}
+                        </h4>
+                        @if (reportGallery().length) {
+                          <div class="flex flex-wrap gap-2">
+                            @for (img of reportGallery(); track img.url) {
+                              <img
+                                [src]="img.url"
+                                (click)="openLightbox(img.url)"
+                                class="w-24 h-24 object-cover rounded-xl border-2 cursor-pointer hover:opacity-80 transition"
+                                [style.border-color]="img.isPrimary ? 'var(--primary)' : '#e2e8f0'"
+                              />
+                            }
+                          </div>
+                        } @else {
+                          <p class="text-xs" style="color: var(--text-secondary)">
+                            No se subieron fotos para este reporte.
+                          </p>
+                        }
+                      </div>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          } @empty {
+            <tr>
+              <td colspan="7" class="px-6 py-16 text-center">
+                <p class="text-4xl mb-3">📋</p>
+                <p class="font-medium text-slate-500">No hay reportes que coincidan</p>
+                <p class="text-xs mt-1" style="color: var(--text-secondary)">
+                  Intenta con otro filtro
+                </p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
 
-            <div>
-              <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Ciudad</label>
-              <select [(ngModel)]="r.city"
-                class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none">
-                @for (city of cities; track city.value) {
-                  <option [value]="city.value">{{ city.label }}</option>
-                }
-              </select>
-            </div>
-
-            <div>
-              <label class="text-xs mb-1 block" style="color: var(--text-secondary)">Descripción</label>
-              <textarea [(ngModel)]="r.description" rows="3"
-                class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"></textarea>
-            </div>
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+          <p class="text-xs" style="color: var(--text-secondary)">
+            {{ total() }} reportes en total
+          </p>
+          <div class="flex gap-2">
+            <button
+              (click)="goToPage(page() - 1)"
+              [disabled]="page() <= 1"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 disabled:opacity-40"
+            >
+              Anterior
+            </button>
+            <button
+              (click)="goToPage(page() + 1)"
+              [disabled]="page() >= totalPages()"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 disabled:opacity-40"
+            >
+              Siguiente
+            </button>
           </div>
-        }
-
-        <div class="flex justify-end gap-3 mt-6">
-          <button (click)="closeModal()"
-            class="px-5 py-2.5 rounded-full border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition">
-            Cancelar
-          </button>
-          <button (click)="saveReport()" class="btn-primary-custom text-sm">
-            Guardar
-          </button>
         </div>
-      </div>
-    </div>
-  }
-
-  <!-- CONFIRMAR ELIMINAR -->
-  @if (showDeleteConfirm()) {
-    <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm text-center">
-        <div class="text-4xl mb-3">🗑️</div>
-        <h3 class="font-bold text-slate-800 mb-2">¿Eliminar reporte?</h3>
-        <p class="text-sm mb-6" style="color: var(--text-secondary)">Esta acción no se puede deshacer.</p>
-        <div class="flex gap-3 justify-center">
-          <button (click)="showDeleteConfirm.set(null)"
-            class="px-5 py-2.5 rounded-full border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition">
-            Cancelar
-          </button>
-          <button (click)="deleteReport(showDeleteConfirm()!)" class="btn-secondary text-sm">
-            Eliminar
-          </button>
-        </div>
-      </div>
-    </div>
-  }
-
+      }
+    }
+  </div>
 </div>
+
+<app-confirm-dialog
+  [isOpen]="confirmDialogOpen()"
+  title="{{
+    confirmDialogMode() === 'CLOSE' ? '¿Cerrar este reporte?' : '¿Eliminar este reporte?'
+  }}"
+  message="{{ confirmDialogTarget()?.title }}"
+  [confirmLabel]="confirmDialogMode() === 'CLOSE' ? 'Cerrar' : 'Eliminar'"
+  (confirmed)="runConfirm()"
+  (cancelled)="cancelConfirm()"
+/>
+@if (lightboxImage(); as imgUrl) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-6"
+    style="background: rgba(15, 23, 42, 0.85)"
+    (click)="closeLightbox()"
+  >
+    <button
+      (click)="closeLightbox()"
+      class="absolute top-5 right-6 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl font-bold hover:bg-white/10 transition"
+    >
+      ✕
+    </button>
+    <img
+      [src]="imgUrl"
+      (click)="$event.stopPropagation()"
+      class="max-w-full max-h-full rounded-2xl shadow-2xl object-contain"
+    />
+  </div>
+}

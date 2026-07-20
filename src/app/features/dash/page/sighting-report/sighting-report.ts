@@ -10,20 +10,32 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { PetInputComponent } from '../../components/pet-input/pet-input';
-import { SelectOption } from '../../components/select-pets/select-pets';
+import { PetSelectComponent, SelectOption } from '../../components/select-pets/select-pets';
 import { PetButtonComponent } from '../../../../shared/components/button-pets/button-pets';
+import { FoundReportsService } from '../../../../core/services/found-reports';
+import { LostReportsService } from '../../../../core/services/lost-reports';
+import { CatalogService } from '../../../../core/services/catalog';
+import { parseApiError } from '../../../../core/services/api-error';
+import { SpeciesResponse } from '../../../../core/services/pet.models';
+import { LostReportResponse } from '../../../../core/services/lost-report-models';
 
-import { SightingReportDto, COLOMBIA_DEPARTMENTS } from './sighting-report-models';
+import { COLOMBIA_DEPARTMENTS } from './sighting-report-models';
 
 declare const L: any;
 
 @Component({
   selector: 'app-sighting-report',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PetInputComponent, PetButtonComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PetInputComponent,
+    PetSelectComponent,
+    PetButtonComponent,
+  ],
   templateUrl: './sighting-report.html',
 })
 export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -31,6 +43,10 @@ export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy
 
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private foundReportsService = inject(FoundReportsService);
+  private lostReportsService = inject(LostReportsService);
+  private catalogService = inject(CatalogService);
 
   form!: FormGroup;
   submitting = signal(false);
@@ -40,19 +56,46 @@ export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy
   searchQuery = signal('');
   searchResults = signal<any[]>([]);
   searching = signal(false);
+  generalError = signal<string | null>(null);
+  fieldErrors = signal<Record<string, string>>({});
+
+  species = signal<SpeciesResponse[]>([]);
+
+  /** Si viene de "Yo lo vi" sobre un reporte de pérdida específico, este id
+   * vincula el avistamiento con ese lost_report para notificar al dueño. */
+  private lostReportId: string | null = null;
+  petContext = signal<LostReportResponse | null>(null);
+  petContextPhoto = signal<string | null>(null);
+  loadingPetContext = signal(false);
+
+  photoPreview = signal<string | null>(null);
+  photoError = '';
+  private selectedPhoto: File | null = null;
 
   private map: any = null;
   private marker: any = null;
-  private leafletLoaded = false;
   private searchDebounce: any = null;
   private suppressSearchSync = false;
 
   coords = signal<{ lat: number; lng: number } | null>(null);
 
-  readonly statusOptions: SelectOption[] = [
-    { value: 'SIGHTED', label: 'La vi / avistamiento' },
-    { value: 'IN_POSSESSION', label: 'La tengo en posesión' },
-  ];
+  readonly sexLabel: Record<string, string> = {
+    MALE: 'Macho',
+    FEMALE: 'Hembra',
+    UNKNOWN: 'No especificado',
+  };
+  readonly sizeLabel: Record<string, string> = {
+    SMALL: 'Pequeño',
+    MEDIUM: 'Mediano',
+    LARGE: 'Grande',
+  };
+
+  get speciesOptions(): SelectOption[] {
+    return [
+      { value: '', label: 'Selecciona una especie' },
+      ...this.species().map((s) => ({ value: s.id, label: s.name })),
+    ];
+  }
 
   readonly departmentOptions: SelectOption[] = [
     { value: '', label: 'Selecciona un departamento' },
@@ -76,15 +119,47 @@ export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy
     this.form?.get('city')?.setValue(v);
   }
 
-  get statusValue() {
-    return this.form?.get('status')?.value ?? '';
+  get speciesValue() {
+    return this.form?.get('species_id')?.value ?? '';
   }
-  set statusValue(v: string) {
-    this.form?.get('status')?.setValue(v);
+  set speciesValue(v: string) {
+    this.form?.get('species_id')?.setValue(v);
   }
 
   ngOnInit(): void {
     this.buildForm();
+    this.lostReportId = this.route.snapshot.queryParamMap.get('lostReportId');
+
+    this.catalogService.listSpecies().subscribe({
+      next: (response) => this.species.set(response.data),
+      error: () => {},
+    });
+
+    if (this.lostReportId) {
+      this.loadPetContext(this.lostReportId);
+    }
+  }
+
+  private loadPetContext(lostReportId: string): void {
+    this.loadingPetContext.set(true);
+    this.lostReportsService.getById(lostReportId).subscribe({
+      next: (response) => {
+        this.petContext.set(response.data);
+        // Especie ya conocida: precarga el campo y lo bloquea implícitamente
+        // (el usuario está reportando la misma especie que se perdió).
+        this.form.patchValue({ species_id: response.data.pet_species_id });
+        this.loadingPetContext.set(false);
+      },
+      error: () => this.loadingPetContext.set(false),
+    });
+
+    this.lostReportsService.listImages(lostReportId).subscribe({
+      next: (response) => {
+        const primary = response.data.find((img) => img.is_primary) ?? response.data[0];
+        if (primary) this.petContextPhoto.set(primary.url);
+      },
+      error: () => {},
+    });
   }
 
   ngAfterViewInit(): void {
@@ -100,9 +175,9 @@ export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy
 
   private buildForm(): void {
     this.form = this.fb.group({
+      species_id: ['', Validators.required],
       title: ['', [Validators.required, Validators.maxLength(150)]],
       description: ['', [Validators.required, Validators.maxLength(1000)]],
-      status: ['', Validators.required],
       sightingDate: ['', Validators.required],
       contactPhone: ['', [Validators.pattern(/^[0-9\s\+\-]{7,15}$/)]],
       department: ['', Validators.required],
@@ -287,6 +362,34 @@ export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy
     this.form.get('city')?.setValue('');
   }
 
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.photoError = 'El archivo debe ser una imagen';
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.photoError = 'La imagen no puede superar los 5MB';
+      input.value = '';
+      return;
+    }
+
+    this.photoError = '';
+    this.selectedPhoto = file;
+    const reader = new FileReader();
+    reader.onload = () => this.photoPreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  removePhoto(): void {
+    this.selectedPhoto = null;
+    this.photoPreview.set(null);
+  }
+
   hasError(field: string): boolean {
     const c = this.form.get(field);
     return !!(c?.invalid && c?.touched);
@@ -294,7 +397,7 @@ export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy
 
   getError(field: string): string {
     const c = this.form.get(field);
-    if (!c?.errors) return '';
+    if (!c?.errors) return this.fieldErrors()[field] ?? '';
     if (c.errors['required']) return 'Este campo es obligatorio';
     if (c.errors['maxlength']) return 'Máximo de caracteres excedido';
     if (c.errors['pattern']) return 'Formato de teléfono inválido';
@@ -306,18 +409,64 @@ export class SightingReportComponent implements OnInit, AfterViewInit, OnDestroy
       this.form.markAllAsTouched();
       return;
     }
-    this.submitting.set(true);
-    const payload: SightingReportDto = { ...this.form.value };
 
-    setTimeout(() => {
-      console.log('Reporte enviado:', payload);
-      this.submitting.set(false);
-      this.submitted.set(true);
-    }, 1000);
+    this.submitting.set(true);
+    this.generalError.set(null);
+    this.fieldErrors.set({});
+
+    const raw = this.form.getRawValue();
+    const departmentLabel =
+      COLOMBIA_DEPARTMENTS.find((d) => d.value === raw.department)?.label ?? raw.department;
+    const cityLabel = this.cityOptions().find((c) => c.value === raw.city)?.label ?? raw.city;
+
+    const payload = {
+      species_id: raw.species_id,
+      lost_report_id: this.lostReportId,
+      title: raw.title,
+      description: raw.description,
+      found_date: raw.sightingDate,
+      contact_phone: raw.contactPhone || null,
+      country: 'Colombia',
+      department: departmentLabel,
+      city: cityLabel,
+      address: raw.address,
+      latitude: raw.latitude,
+      longitude: raw.longitude,
+    };
+
+    this.foundReportsService.create(payload).subscribe({
+      next: (response) => {
+        if (this.selectedPhoto) {
+          this.foundReportsService
+            .uploadImage(response.data.id, this.selectedPhoto, true)
+            .subscribe({
+              next: () => {
+                this.submitting.set(false);
+                this.submitted.set(true);
+              },
+              // Si la mascota se guardó pero la imagen falló, igual mostramos éxito:
+              // el reporte ya existe, la foto es complementaria.
+              error: () => {
+                this.submitting.set(false);
+                this.submitted.set(true);
+              },
+            });
+        } else {
+          this.submitting.set(false);
+          this.submitted.set(true);
+        }
+      },
+      error: (error) => {
+        this.submitting.set(false);
+        const parsed = parseApiError(error);
+        this.generalError.set(parsed.message);
+        this.fieldErrors.set(parsed.fieldErrors);
+      },
+    });
   }
 
   goBack(): void {
-    this.router.navigate(['/reportes']);
+    this.router.navigate(['/dashboard/reportes']);
   }
 
   get latLngDisplay(): string {

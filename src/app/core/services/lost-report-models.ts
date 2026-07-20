@@ -43,11 +43,20 @@ export interface LostReportResponse {
   longitude: number | null;
   published_at: string;
   closed_at: string | null;
+  pet_name: string;
+  pet_species_id: string;
+  pet_breed_id: string | null;
+  pet_sex: string;
+  pet_color: string;
+  pet_size: string;
+  pet_approximate_age: number | null;
+  pet_distinctive_marks: string | null;
 }
 
 export interface LostReportListItem {
   id: string;
   pet_id: string;
+  created_by: string;
   title: string;
   status: LostReportStatus;
   city: string;

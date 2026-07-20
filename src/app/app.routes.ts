@@ -20,6 +20,8 @@ import { AdminReportesPage } from './features/admin/page/admin-reportes-page/adm
 import { AdminPanelPage } from './features/admin/page/admin-panel-page/admin-panel-page';
 import { PowerBI } from './features/admin/page/power-bi/power-bi';
 import { LostReportFormComponent } from './features/dash/page/lost-report-form/lost-report-form';
+import { authGuard, adminGuard } from './core/guards/auth-guard';
+import { AdminUsersPage } from './features/admin/page/admin-users-page/admin-users-page';
 
 export const routes: Routes = [
   {
@@ -67,6 +69,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashPage,
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -115,6 +118,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminPage,
+    canActivate: [authGuard, adminGuard],
     children: [
       {
         path: '',
@@ -143,6 +147,11 @@ export const routes: Routes = [
         path: 'mi-perfil',
         component: PageMyProfile,
         title: 'Mi perfil',
+      },
+      {
+        path: 'usuarios',
+        component: AdminUsersPage,
+        title: 'Gestión de usuarios',
       },
     ],
   },
