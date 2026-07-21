@@ -30,7 +30,7 @@ export interface ChatResponse {
 })
 export class ChatbotService {
 
-  private readonly api = 'http://127.0.0.1:8000/ask';
+  private readonly api = 'https://rag-neww.onrender.com/ask';
 
   constructor(
     private http: HttpClient
