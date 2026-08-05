@@ -1,0 +1,173 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4">
+  @if (generalError()) {
+    <div class="rounded-xl p-3 text-sm" style="background-color: #fef3c7; color: #92400e">
+      {{ generalError() }}
+    </div>
+  }
+
+  <!-- Documento -->
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="field">
+      <label class="text-xs text-[var(--text-secondary)] mb-1 block">Tipo de documento</label>
+      <select
+        formControlName="document_type"
+        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+      >
+        <option value="" disabled>Selecciona una opción</option>
+        @for (opt of documentTypeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      @if (fieldError('document_type')) {
+        <span class="text-xs" style="color: #b91c1c">{{ fieldError('document_type') }}</span>
+      }
+    </div>
+
+    <div class="field">
+      <label class="text-xs text-[var(--text-secondary)] mb-1 block">Número de documento</label>
+      <input
+        type="text"
+        formControlName="document_number"
+        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+      />
+      @if (fieldError('document_number')) {
+        <span class="text-xs" style="color: #b91c1c">{{ fieldError('document_number') }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Nombre -->
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="field">
+      <label class="text-xs text-[var(--text-secondary)] mb-1 block">Nombres</label>
+      <input
+        type="text"
+        formControlName="first_name"
+        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+      />
+      @if (fieldError('first_name')) {
+        <span class="text-xs" style="color: #b91c1c">{{ fieldError('first_name') }}</span>
+      }
+    </div>
+
+    <div class="field">
+      <label class="text-xs text-[var(--text-secondary)] mb-1 block">Apellidos</label>
+      <input
+        type="text"
+        formControlName="last_name"
+        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+      />
+      @if (fieldError('last_name')) {
+        <span class="text-xs" style="color: #b91c1c">{{ fieldError('last_name') }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Contacto -->
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="field">
+      <label class="text-xs text-[var(--text-secondary)] mb-1 block">Teléfono</label>
+      <input
+        type="tel"
+        formControlName="phone"
+        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+      />
+      @if (fieldError('phone')) {
+        <span class="text-xs" style="color: #b91c1c">{{ fieldError('phone') }}</span>
+      }
+    </div>
+
+    <div class="field">
+      <label class="text-xs text-[var(--text-secondary)] mb-1 block">Fecha de nacimiento</label>
+      <input
+        type="date"
+        formControlName="birth_date"
+        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+      />
+      @if (fieldError('birth_date')) {
+        <span class="text-xs block" style="color: #b91c1c">{{ fieldError('birth_date') }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Género -->
+  <div class="field">
+    <label class="text-xs text-[var(--text-secondary)] mb-1 block">Género</label>
+    <select
+      formControlName="gender"
+      class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+    >
+      <option value="">Prefiero no decirlo</option>
+      @for (opt of genderOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Ubicación -->
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <app-pet-select
+      label="Departamento"
+      placeholder="Selecciona un departamento"
+      formControlName="department"
+      [options]="departmentOptions"
+      [hasError]="!!fieldError('department')"
+      [errorMessage]="fieldError('department') ?? ''"
+    />
+
+    <app-pet-select
+      label="Ciudad"
+      placeholder="Selecciona una ciudad"
+      formControlName="city"
+      [options]="cityOptions()"
+      [hasError]="!!fieldError('city')"
+      [errorMessage]="fieldError('city') ?? ''"
+    />
+  </div>
+
+  <div class="field">
+    <label class="text-xs text-[var(--text-secondary)] mb-1 block">Dirección</label>
+    <input
+      type="text"
+      formControlName="address"
+      placeholder="Se completa al buscar o mover el mapa"
+      class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)] bg-gray-50 cursor-not-allowed"
+    />
+    <span class="text-xs text-[var(--text-secondary)]">
+      Se ajusta automáticamente según lo que busques o muevas en el mapa
+    </span>
+    @if (fieldError('address')) {
+      <span class="text-xs block" style="color: #b91c1c">{{ fieldError('address') }}</span>
+    }
+  </div>
+
+  <app-location-picker
+    [initialLat]="form.get('latitude')?.value ?? null"
+    [initialLng]="form.get('longitude')?.value ?? null"
+    (locationPicked)="onLocationPicked($event)"
+  />
+
+  @if (fieldError('latitude')) {
+    <p class="text-xs" style="color: #b91c1c">Marca tu ubicación en el mapa.</p>
+  }
+
+  <div class="flex gap-3">
+    @if (mode === 'edit') {
+      <app-pet-button
+        label="Cancelar"
+        variant="secondary"
+        size="lg"
+        type="button"
+        (click)="cancelled.emit()"
+      />
+    }
+    <app-pet-button
+      [label]="submitLabel"
+      variant="primary"
+      size="lg"
+      [fullWidth]="mode === 'create'"
+      [disabled]="isSubmitting()"
+      type="submit"
+    />
+  </div>
+</form>

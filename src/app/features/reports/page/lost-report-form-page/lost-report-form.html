@@ -1,0 +1,311 @@
+<div class="min-h-screen pb-16" style="background-color: var(--background)">
+  <div
+    class="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-20"
+  >
+    <button
+      class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-[var(--text-secondary)] hover:bg-gray-50 transition-colors"
+      (click)="goBack()"
+    >
+      <span class="material-icons text-xl">arrow_back</span>
+    </button>
+    <div>
+      <h1 class="text-base font-semibold text-[var(--text-primary)] leading-tight">
+        {{ isEditMode() ? 'Editar reporte de mascota perdida' : 'Reportar mascota perdida' }}
+      </h1>
+      <p class="text-xs text-[var(--text-secondary)]">
+        Entre más detalles, más fácil será reunirla con su familia
+      </p>
+    </div>
+  </div>
+
+  @if (submitted()) {
+    <div class="flex flex-col items-center justify-center px-6 py-20 text-center">
+      <div
+        class="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+        style="background-color: #d1fae5"
+      >
+        <span class="material-icons text-4xl" style="color: #065f46">check_circle</span>
+      </div>
+      <h2 class="text-xl font-bold text-[var(--text-primary)] mb-2">¡Reporte guardado!</h2>
+      <p class="text-sm text-[var(--text-secondary)] mb-8 max-w-xs">
+        Tu reporte fue publicado correctamente.
+      </p>
+      <app-pet-button
+        label="Volver a reportes"
+        variant="primary"
+        size="md"
+        icon="arrow_back"
+        (clicked)="goBack()"
+      />
+    </div>
+  }
+
+  @if (!submitted()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      class="px-4 py-5 flex flex-col gap-6 max-w-2xl mx-auto"
+    >
+      @if (generalError()) {
+        <div
+          class="bg-red-50 border border-red-100 text-[var(--danger)] text-sm rounded-xl px-4 py-3"
+        >
+          {{ generalError() }}
+        </div>
+      }
+
+      <!-- Sección: mascota y datos del reporte -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #e0f2fe"
+          >
+            <span class="material-icons text-base" style="color: #0369a1">pets</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">Datos del reporte</h2>
+        </div>
+
+        @if (!isEditMode()) {
+          <app-pet-select
+            label="Mascota *"
+            placeholder="Selecciona tu mascota"
+            formControlName="pet_id"
+            [options]="petOptions()"
+            [hasError]="hasError('pet_id')"
+            [errorMessage]="getError('pet_id')"
+          />
+
+          @if (petIdError()) {
+            <p class="text-xs text-red-500 flex items-center gap-1">
+              <span class="material-icons text-sm">error_outline</span>
+              {{ petIdError() }}
+            </p>
+          } @else if (blockedPetsCount() > 0) {
+            <p class="text-xs text-[var(--text-secondary)] flex items-center gap-1">
+              <span class="material-icons text-sm">pets</span>
+              {{ blockedPetsCount() }}
+              {{ blockedPetsCount() === 1 ? 'mascota tiene' : 'mascotas tienen' }}
+              un reporte de pérdida activo y no pueden seleccionarse hasta marcarlas
+              como encontradas.
+            </p>
+          }
+        }
+
+        <app-pet-input
+          label="Título *"
+          placeholder="Ej: Se perdió mi golden retriever cerca del parque"
+          formControlName="title"
+          [hasError]="hasError('title')"
+          [errorMessage]="getError('title')"
+        />
+
+        <app-pet-input
+          label="Descripción"
+          type="textarea"
+          [rows]="4"
+          placeholder="Describe a tu mascota, comportamiento, señas particulares..."
+          formControlName="description"
+          [hasError]="hasError('description')"
+          [errorMessage]="getError('description')"
+        />
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-[var(--text-primary)]">Fecha de pérdida *</label>
+            <input
+              type="date"
+              formControlName="lost_date"
+              class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:border-[var(--primary)] transition-all"
+              [class.border-red-400]="hasError('lost_date')"
+            />
+            @if (hasError('lost_date')) {
+              <p class="text-xs text-red-500 flex items-center gap-1">
+                <span class="material-icons text-sm">error_outline</span>
+                {{ getError('lost_date') }}
+              </p>
+            }
+          </div>
+
+          <app-pet-input
+            label="Recompensa (opcional)"
+            type="number"
+            placeholder="0"
+            hint="En pesos colombianos"
+            formControlName="reward"
+            [hasError]="hasError('reward')"
+            [errorMessage]="getError('reward')"
+          />
+        </div>
+
+        <app-pet-input
+          label="Teléfono de contacto (opcional)"
+          placeholder="310 000 0000"
+          formControlName="contact_phone"
+          [hasError]="hasError('contact_phone')"
+          [errorMessage]="getError('contact_phone')"
+        />
+      </section>
+
+      <hr class="border-gray-100" />
+
+      <!-- Sección: ubicación -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #fef9c3"
+          >
+            <span class="material-icons text-base" style="color: #854d0e">place</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">
+            Última ubicación conocida
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <app-pet-select
+            label="Departamento *"
+            placeholder="Selecciona un departamento"
+            formControlName="department"
+            [options]="departmentOptions"
+            [hasError]="hasError('department')"
+            [errorMessage]="getError('department')"
+          />
+
+          <app-pet-select
+            label="Ciudad *"
+            placeholder="Selecciona una ciudad"
+            formControlName="city"
+            [options]="cityOptions()"
+            [hasError]="hasError('city')"
+            [errorMessage]="getError('city')"
+          />
+        </div>
+
+        <app-pet-input
+          label="Dirección *"
+          placeholder="Se completa al buscar o mover el mapa"
+          hint="Se ajusta automáticamente según lo que busques o muevas en el mapa"
+          formControlName="address"
+          [hasError]="hasError('address')"
+          [errorMessage]="getError('address')"
+        />
+
+        <app-location-picker
+          [initialLat]="form.get('latitude')?.value"
+          [initialLng]="form.get('longitude')?.value"
+          (locationPicked)="onLocationPicked($event)"
+        />
+
+        @if (hasError('latitude')) {
+          <p class="text-xs text-red-500 flex items-center gap-1">
+            <span class="material-icons text-sm">error_outline</span>
+            Marca la ubicación en el mapa
+          </p>
+        }
+      </section>
+
+      <hr class="border-gray-100" />
+
+      <!-- Sección: fotos del reporte -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #f3e8ff"
+          >
+            <span class="material-icons text-base" style="color: #7e22ce">photo_camera</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">
+            Fotos del reporte (opcional)
+          </h2>
+        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          class="hidden"
+          #photosInput
+          (change)="onPhotosSelected($event)"
+        />
+
+        @if (isEditMode() && existingImages().length > 0) {
+          <div class="flex flex-wrap gap-3">
+            @for (img of existingImages(); track img.id) {
+              <div class="relative w-28 h-28">
+                <img
+                  [src]="img.url"
+                  alt="Foto del reporte"
+                  class="w-28 h-28 rounded-2xl object-cover border border-gray-200"
+                />
+                @if (img.is_primary) {
+                  <span
+                    class="absolute top-1 left-1 text-[10px] px-1.5 py-0.5 rounded-full bg-black/60 text-white"
+                    >Principal</span
+                  >
+                }
+                <button
+                  type="button"
+                  (click)="removeExistingImage(img)"
+                  title="Eliminar imagen"
+                  class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[var(--danger)] text-white flex items-center justify-center text-xs shadow"
+                >
+                  <span class="material-icons text-xs">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (newPhotos().length > 0) {
+          <div class="flex flex-wrap gap-3">
+            @for (p of newPhotos(); track p.preview; let i = $index) {
+              <div class="relative w-28 h-28">
+                <img
+                  [src]="p.preview"
+                  alt="Nueva foto"
+                  class="w-28 h-28 rounded-2xl object-cover border border-gray-200"
+                />
+                <button
+                  type="button"
+                  (click)="removeNewPhoto(i)"
+                  title="Quitar foto"
+                  class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[var(--danger)] text-white flex items-center justify-center text-xs shadow"
+                >
+                  <span class="material-icons text-xs">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <button
+          type="button"
+          (click)="photosInput.click()"
+          class="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
+        >
+          <span class="material-icons text-xl">add_a_photo</span>
+          <span class="text-xs">Subir fotos</span>
+        </button>
+
+        @if (photoError()) {
+          <p class="text-xs text-[var(--danger)]">{{ photoError() }}</p>
+        }
+      </section>
+
+      <div class="pt-2">
+        <app-pet-button
+          [label]="isEditMode() ? 'Guardar cambios' : 'Publicar reporte'"
+          variant="primary"
+          size="lg"
+          [fullWidth]="true"
+          [loading]="submitting() || uploadingPhotos()"
+          type="submit"
+          icon="send"
+        />
+      </div>
+    </form>
+  }
+</div>

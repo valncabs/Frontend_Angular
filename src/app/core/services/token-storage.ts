@@ -32,6 +32,14 @@ export class TokenStorage {
     localStorage.setItem(EXPIRES_AT_KEY, String(expiresAt));
   }
 
+  /** Reemplaza el objeto `user` guardado (usado tras GET /auth/me o al
+   * completar el perfil), sin tocar tokens ni expiración. */
+  setUser(user: LoginUserData): void {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    const primaryRole = user.roles.includes('ADMIN') ? 'ADMIN' : (user.roles[0] ?? 'USER');
+    localStorage.setItem(ROL_KEY, primaryRole);
+  }
+
   getAccessToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
   }
@@ -54,13 +62,10 @@ export class TokenStorage {
     return raw ? Number(raw) : null;
   }
 
-  /** true si hay algo guardado en localStorage (no implica que sea válido). */
   hasSession(): boolean {
     return !!this.getAccessToken();
   }
 
-  /** true si hay un access token vigente (no expirado). Esto es lo que
-   * debe usar el guard, no hasSession(). */
   isExpired(): boolean {
     const expiresAt = this.getExpiresAt();
     if (!expiresAt) return true;

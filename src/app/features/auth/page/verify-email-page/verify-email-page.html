@@ -3,12 +3,16 @@
     <div class="text-center">
       @switch (state()) {
         @case ('loading') {
-          <div class="text-6xl mb-5" style="color: var(--primary)">⏳</div>
+          <div class="text-6xl mb-5 flex justify-center" style="color: var(--primary)">
+            <lucide-angular name="loader-circle" [size]="56" class="animate-spin"></lucide-angular>
+          </div>
           <h2 class="text-2xl font-bold">Verificando tu correo...</h2>
           <p class="mt-3 text-gray-500">Esto tomará solo un momento.</p>
         }
         @case ('success') {
-          <div class="text-6xl mb-5 text-green-500">✔</div>
+          <div class="text-6xl mb-5 text-green-500 flex justify-center">
+            <lucide-angular name="badge-check" [size]="56"></lucide-angular>
+          </div>
           <h2 class="text-2xl font-bold">¡Correo verificado!</h2>
           <p class="mt-3 text-gray-500">Tu cuenta fue confirmada correctamente. Ya puedes iniciar sesión.</p>
           <a routerLink="/login" class="mt-8 inline-block w-full bg-[var(--primary)] text-white py-3 rounded-xl">
@@ -16,7 +20,9 @@
           </a>
         }
         @default {
-          <div class="text-6xl mb-5 text-red-500">✖</div>
+          <div class="text-6xl mb-5 text-red-500 flex justify-center">
+            <lucide-angular name="circle-x" [size]="56"></lucide-angular>
+          </div>
           <h2 class="text-2xl font-bold">No se pudo confirmar el correo</h2>
           <p class="mt-3 text-gray-500">
             El enlace de verificación es inválido, ha expirado o el correo ya fue confirmado.

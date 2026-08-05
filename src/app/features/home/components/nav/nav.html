@@ -76,7 +76,11 @@
         class="lg:hidden w-12 h-12 rounded-2xl flex items-center justify-center text-slate-700 bg-slate-50 border border-slate-100 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300"
         (click)="toggleMenu()"
       >
-        {{ isMenuOpen ? '✕' : '☰' }}
+        @if (isMenuOpen) {
+          <lucide-angular name="x" [size]="20"></lucide-angular>
+        } @else {
+          <lucide-angular name="menu" [size]="20"></lucide-angular>
+        }
       </button>
     </div>
 

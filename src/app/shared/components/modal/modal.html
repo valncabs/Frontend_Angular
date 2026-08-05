@@ -1,6 +1,6 @@
 @if (isOpen) {
   <div class="fixed inset-0 z-50 overflow-y-auto">
-    <div class="fixed inset-0 bg-black/50" (click)="closeModal()"></div>
+    <div class="fixed inset-0 bg-black/50" (click)="onBackdropClick()"></div>
 
     <div class="flex min-h-full items-center justify-center p-4">
       <div
@@ -13,11 +13,13 @@
 
         <ng-content></ng-content>
 
-        <div class="flex justify-end mt-6">
-          <button class="px-5 py-2 rounded-lg bg-[#2A9D8F] text-white" (click)="closeModal()">
-            Cerrar
-          </button>
-        </div>
+        @if (dismissible) {
+          <div class="flex justify-end mt-6">
+            <button class="px-5 py-2 rounded-lg bg-[#2A9D8F] text-white" (click)="closeModal()">
+              Cerrar
+            </button>
+          </div>
+        }
       </div>
     </div>
   </div>

@@ -8,6 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
 
 import { AuthCard } from '../../../auth/components/auth-card/auth-card';
 import { AuthLayoutComponent } from '../../../auth/components/auth-layaut/auth-layaut';
@@ -24,7 +25,7 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-reset-password-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, AuthCard, AuthLayoutComponent, PasswordInputComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, LucideAngularModule, AuthCard, AuthLayoutComponent, PasswordInputComponent],
   templateUrl: './reset-password-page.html',
 })
 export class ResetPasswordPage implements OnInit {

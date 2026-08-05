@@ -8,20 +8,23 @@ import { ForgotPasswordPage } from './features/auth/page/forgot-password-page/fo
 import { ResetPasswordPage } from './features/auth/page/reset-password-page/reset-password-page';
 import { VerifyEmailPage } from './features/auth/page/verify-email-page/verify-email-page';
 
-import { DashPage } from './features/dash/page/dash-page/dash-page';
-import { MyPets } from './features/dash/page/my-pets-page/my-pets-page';
-import { PetReportsComponent } from './features/dash/page/pet-reports/pet-reports';
-import { SightingReportComponent } from './features/dash/page/sighting-report/sighting-report';
-import { PageConfiguration } from './features/dash/page/page-configuration/page-configuration';
-import { PageMyProfile } from './features/dash/page/page-my-profile/page-my-profile';
+import { DashPage } from './features/dashboard-shell/page/dash-page/dash-page';
+import { MyPetsPage } from './features/pets/page/my-pets-page/my-pets-page';
+import { PetReportsComponent } from './features/reports/page/pet-reports/pet-reports';
+import { SightingReportComponent } from './features/reports/page/sighting-report-page/sighting-report';
+import { LostReportFormComponent } from './features/reports/page/lost-report-form-page/lost-report-form';
+import { PageConfiguration } from './features/settings/page/page-configuration/page-configuration';
+import { PageMyProfile } from './features/profile/page/page-my-profile/page-my-profile';
+import { MessagingPageComponent } from './features/messaging/page/messaging-page/messaging-page';
 
 import { AdminPage } from './features/admin/page/admin-page/admin-page';
 import { AdminReportesPage } from './features/admin/page/admin-reportes-page/admin-reportes-page';
 import { AdminPanelPage } from './features/admin/page/admin-panel-page/admin-panel-page';
-import { PowerBI } from './features/admin/page/power-bi/power-bi';
-import { LostReportFormComponent } from './features/dash/page/lost-report-form/lost-report-form';
-import { authGuard, adminGuard } from './core/guards/auth-guard';
 import { AdminUsersPage } from './features/admin/page/admin-users-page/admin-users-page';
+import { PowerBI } from './features/admin/page/power-bi/power-bi';
+
+import { authGuard } from './core/guards/auth-guard';
+import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
   {
@@ -79,7 +82,7 @@ export const routes: Routes = [
 
       {
         path: 'mascotas',
-        component: MyPets,
+        component: MyPetsPage,
         title: 'Mis mascotas',
       },
 
@@ -112,6 +115,12 @@ export const routes: Routes = [
         component: PageMyProfile,
         title: 'Mi perfil',
       },
+
+      {
+        path: 'mensajes',
+        component: MessagingPageComponent,
+        title: 'Mensajes',
+      },
     ],
   },
 
@@ -143,15 +152,23 @@ export const routes: Routes = [
         component: PowerBI,
         title: 'Power BI',
       },
+
       {
         path: 'mi-perfil',
         component: PageMyProfile,
         title: 'Mi perfil',
       },
+
       {
         path: 'usuarios',
         component: AdminUsersPage,
         title: 'Gestión de usuarios',
+      },
+
+      {
+        path: 'mensajes',
+        component: MessagingPageComponent,
+        title: 'Mensajes',
       },
     ],
   },

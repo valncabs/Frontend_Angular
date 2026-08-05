@@ -1,0 +1,245 @@
+<app-modal [isOpen]="isOpen" [title]="modalTitle" (close)="onClose()">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <!-- Foto de la Mascota -->
+    <div class="mb-5">
+      <label class="text-sm font-medium text-[var(--text-primary)] mb-1.5 block">
+        Foto de la mascota
+      </label>
+
+      <input
+        type="file"
+        accept="image/*"
+        class="hidden"
+        #fileInput
+        (change)="onPhotoSelected($event)"
+      />
+
+      @if (photoPreview()) {
+        <div class="relative w-28 h-28">
+          <button
+            type="button"
+            (click)="viewerOpen.set(true)"
+            class="group relative block w-28 h-28 rounded-2xl overflow-hidden border border-gray-200"
+            aria-label="Ver foto en grande"
+          >
+            <img
+              [src]="photoPreview()"
+              [alt]="'Foto de la mascota'"
+              class="w-28 h-28 rounded-2xl object-cover transition-transform duration-300 group-hover:scale-110"
+            />
+          </button>
+          <button
+            type="button"
+            (click)="removePhoto()"
+            class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[var(--danger)] text-white flex items-center justify-center text-xs shadow"
+            aria-label="Quitar foto"
+          >
+            <lucide-angular name="x" [size]="12" [color]="'#ffffff'"></lucide-angular>
+          </button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          (click)="fileInput.click()"
+          class="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          <span class="text-xs">Subir foto</span>
+        </button>
+      }
+
+      @if (photoError) {
+        <p class="text-xs text-[var(--danger)] mt-1.5">{{ photoError }}</p>
+      }
+    </div>
+
+    <!-- Sección: Identificación -->
+    <p class="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-3">
+      Identificación
+    </p>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <app-pet-select
+        label="Especie *"
+        placeholder="Selecciona especie"
+        formControlName="species_id"
+        [options]="speciesOptions"
+        [hasError]="hasError('species_id')"
+        [errorMessage]="getError('species_id')"
+      />
+
+      @if (breedsLoading()) {
+        <app-pet-select
+          label="Raza"
+          placeholder="Cargando razas..."
+          formControlName="breed_id"
+          [options]="[]"
+        />
+      } @else if (breedOptions.length > 0) {
+        <app-pet-select
+          label="Raza"
+          placeholder="Selecciona raza"
+          formControlName="breed_id"
+          [options]="breedOptions"
+        />
+      } @else {
+        <app-pet-select
+          label="Raza"
+          placeholder="Selecciona especie primero"
+          formControlName="breed_id"
+          [options]="[]"
+          [hint]="
+            !form.get('species_id')?.value
+              ? 'Selecciona especie primero'
+              : 'No hay razas disponibles'
+          "
+        />
+      }
+    </div>
+
+    <div class="mb-4">
+      <app-pet-input
+        label="Nombre *"
+        placeholder="Ej: Firulais"
+        formControlName="name"
+        [hasError]="hasError('name')"
+        [errorMessage]="getError('name')"
+      />
+    </div>
+
+    <!-- Sección: Características -->
+    <p
+      class="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-3 mt-5"
+    >
+      Características
+    </p>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <app-pet-select
+        label="Sexo *"
+        placeholder="Selecciona sexo"
+        formControlName="sex"
+        [options]="sexOptions"
+        [hasError]="hasError('sex')"
+        [errorMessage]="getError('sex')"
+      />
+
+      <app-pet-select
+        label="Tamaño *"
+        placeholder="Selecciona tamaño"
+        formControlName="size"
+        [options]="sizeOptions"
+        [hasError]="hasError('size')"
+        [errorMessage]="getError('size')"
+      />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <app-pet-input
+        label="Color *"
+        placeholder="Ej: Café con blanco"
+        formControlName="color"
+        [hasError]="hasError('color')"
+        [errorMessage]="getError('color')"
+      />
+
+      <app-pet-input
+        label="Peso (kg)"
+        placeholder="Ej: 5.50"
+        type="number"
+        formControlName="weight"
+        hint="Opcional"
+        [hasError]="hasError('weight')"
+        [errorMessage]="getError('weight')"
+      />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <app-pet-input
+        label="Edad aproximada"
+        placeholder="Años"
+        type="number"
+        formControlName="approximate_age"
+        hint="Opcional"
+        [hasError]="hasError('approximate_age')"
+        [errorMessage]="getError('approximate_age')"
+      />
+
+      <!-- Toggle de Esterilización -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium text-[var(--text-primary)]">Esterilizado/a</label>
+        <div class="flex items-center gap-3 h-[42px]">
+          <button
+            type="button"
+            role="switch"
+            [attr.aria-checked]="form.get('sterilized')?.value"
+            (click)="form.get('sterilized')?.setValue(!form.get('sterilized')?.value)"
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+            [class.bg-[var(--primary)]]="form.get('sterilized')?.value"
+            [class.bg-gray-200]="!form.get('sterilized')?.value"
+          >
+            <span
+              class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition duration-200"
+              [class.translate-x-5]="form.get('sterilized')?.value"
+              [class.translate-x-0]="!form.get('sterilized')?.value"
+            ></span>
+          </button>
+          <span class="text-sm text-[var(--text-secondary)]">
+            {{ form.get('sterilized')?.value ? 'Sí' : 'No' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Detalles adicionales -->
+    <p
+      class="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-3 mt-5"
+    >
+      Detalles adicionales
+    </p>
+
+    <div class="mb-4">
+      <app-pet-input
+        label="Marcas distintivas"
+        placeholder="Ej: Mancha negra en la oreja derecha"
+        type="textarea"
+        formControlName="distinctive_marks"
+        [rows]="2"
+        hint="Opcional"
+      />
+    </div>
+
+    <div class="mb-2">
+      <app-pet-input
+        label="Descripción"
+        placeholder="Cuéntanos sobre tu mascota..."
+        type="textarea"
+        formControlName="description"
+        [rows]="3"
+        hint="Opcional"
+      />
+    </div>
+
+    <!-- Acciones del Footer -->
+    <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+      <app-pet-button label="Cancelar" variant="outline" (click)="onClose()" />
+      <app-pet-button [label]="submitLabel" variant="primary" type="submit" [loading]="loading" />
+    </div>
+  </form>
+</app-modal>
+
+@if (photoPreview()) {
+  <app-image-viewer
+    [isOpen]="viewerOpen()"
+    [src]="photoPreview()"
+    alt="Vista previa de la foto de la mascota"
+    (close)="viewerOpen.set(false)"
+  />
+}

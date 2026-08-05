@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
 
 import { AuthLayoutComponent } from '../../../auth/components/auth-layaut/auth-layaut';
 import { AuthCard } from '../../../auth/components/auth-card/auth-card';
@@ -11,7 +12,7 @@ type VerifyState = 'loading' | 'success' | 'error';
 @Component({
   selector: 'app-verify-email-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, AuthLayoutComponent, AuthCard],
+  imports: [CommonModule, RouterLink, LucideAngularModule, AuthLayoutComponent, AuthCard],
   templateUrl: './verify-email-page.html',
 })
 export class VerifyEmailPage implements OnInit {

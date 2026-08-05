@@ -1,0 +1,121 @@
+<div class="min-h-screen" style="background-color: var(--background)">
+  <div class="px-4 pt-6 pb-4">
+    <h1 class="text-2xl font-bold text-[var(--text-primary)]">Mi perfil</h1>
+    @if (viewState() === 'incomplete') {
+      <p class="text-sm text-[var(--text-secondary)]">
+        Necesitamos algunos datos tuyos para poder ayudarte a reportar y buscar mascotas.
+      </p>
+    }
+  </div>
+
+  <div class="px-4 pb-8 max-w-xl mx-auto">
+    <!-- Cargando -->
+    @if (viewState() === 'loading') {
+      <div class="card-pet border border-gray-100 p-5 text-sm text-[var(--text-secondary)]">
+        Cargando tu perfil...
+      </div>
+    }
+
+    <!-- Perfil aún no completado: mismo formulario que usa el modal global -->
+    @if (viewState() === 'incomplete') {
+      <div class="card-pet border border-gray-100 p-5">
+        <app-profile-form mode="create" (saved)="onProfileCreated($event)" />
+      </div>
+    }
+
+    <!-- Modo edición -->
+    @if (viewState() === 'edit' && profile()) {
+      <div class="card-pet border border-gray-100 p-5">
+        <app-profile-form
+          mode="edit"
+          submitLabel="Guardar cambios"
+          [initialValue]="profile()"
+          (saved)="onProfileUpdated($event)"
+          (cancelled)="cancelEdit()"
+        />
+      </div>
+    }
+
+    <!-- Vista de solo lectura -->
+    @if (viewState() === 'view' && profile(); as p) {
+      <div class="card-pet border border-gray-100 p-5 flex flex-col gap-4">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <p class="text-xs text-[var(--text-secondary)]">Nombres</p>
+            <p class="text-sm text-[var(--text-primary)]">{{ p.first_name }} {{ p.last_name }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-[var(--text-secondary)]">Documento</p>
+            <p class="text-sm text-[var(--text-primary)]">
+              {{ p.document_type }} {{ p.document_number }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-[var(--text-secondary)]">Teléfono</p>
+            <p class="text-sm text-[var(--text-primary)]">{{ p.phone }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-[var(--text-secondary)]">Fecha de nacimiento</p>
+            <p class="text-sm text-[var(--text-primary)]">
+              {{ p.birth_date || 'No especificada' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-[var(--text-secondary)]">Género</p>
+            <p class="text-sm text-[var(--text-primary)]">{{ p.gender || 'No especificado' }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-[var(--text-secondary)]">Ubicación</p>
+            <p class="text-sm text-[var(--text-primary)]">
+              {{ p.city }}, {{ p.department }}, {{ p.country }}
+            </p>
+          </div>
+          @if (p.address) {
+            <div class="sm:col-span-2">
+              <p class="text-xs text-[var(--text-secondary)]">Dirección</p>
+              <p class="text-sm text-[var(--text-primary)]">{{ p.address }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="flex gap-3 pt-2 border-t border-gray-100">
+          <app-pet-button
+            label="Editar perfil"
+            variant="primary"
+            [fullWidth]="true"
+            (clicked)="startEdit()"
+          />
+          <app-pet-button
+            label="Eliminar cuenta"
+            variant="danger"
+            [fullWidth]="true"
+            (clicked)="openDeleteDialog()"
+          />
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<app-confirm-dialog
+  [isOpen]="showDeleteDialog()"
+  title="Eliminar cuenta"
+  message="Esta acción es irreversible. Ingresa tu contraseña para confirmar la eliminación de tu cuenta."
+  confirmLabel="Eliminar cuenta"
+  cancelLabel="Cancelar"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+>
+  <div class="mb-4">
+    <input
+      type="password"
+      placeholder="Tu contraseña"
+      [value]="deletePassword()"
+      (input)="onPasswordInput($event)"
+      class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-[var(--text-primary)]"
+    />
+    @if (deleteError()) {
+      <p class="text-xs mt-1" style="color: #b91c1c">{{ deleteError() }}</p>
+    }
+  </div>
+</app-confirm-dialog>

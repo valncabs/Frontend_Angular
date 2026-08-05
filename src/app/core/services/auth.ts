@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TokenStorage } from './token-storage';
+
 import {
   ApiSuccessResponse,
   ChangePasswordRequest,
@@ -19,6 +20,8 @@ import {
   ResetPasswordRequest,
   VerifyEmailRequest,
 } from './auth.models';
+import { MeResponse } from './auth.models';
+import { DeleteAccountRequest } from './auth.models';
 
 /** Margen de seguridad: refrescar el token este tiempo antes de que expire,
  * para no dejar ventanas donde el access token ya caducó. */
@@ -37,6 +40,7 @@ export class AuthService {
 
   readonly currentUser = this.currentUserSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
+  readonly profileCompleted = computed(() => this.currentUserSignal()?.profile_completed ?? false);
 
   constructor() {
     // Al recargar la app (F5, nueva pestaña), retomar el ciclo de refresco
@@ -61,7 +65,10 @@ export class AuthService {
   }
 
   register(payload: RegisterRequest): Observable<ApiSuccessResponse<RegisterResponse>> {
-    return this.http.post<ApiSuccessResponse<RegisterResponse>>(`${this.baseUrl}/register`, payload);
+    return this.http.post<ApiSuccessResponse<RegisterResponse>>(
+      `${this.baseUrl}/register`,
+      payload,
+    );
   }
 
   verifyEmail(payload: VerifyEmailRequest): Observable<ApiSuccessResponse<null>> {
@@ -112,6 +119,22 @@ export class AuthService {
     }
   }
 
+  markProfileCompleted(): void {
+    const user = this.currentUserSignal();
+    if (!user) return;
+    const updated: LoginUserData = { ...user, profile_completed: true };
+    this.tokenStorage.setUser(updated);
+    this.currentUserSignal.set(updated);
+  }
+
+  refreshMe(): Observable<ApiSuccessResponse<MeResponse>> {
+    return this.http.get<ApiSuccessResponse<MeResponse>>(`${this.baseUrl}/me`).pipe(
+      tap((response) => {
+        this.tokenStorage.setUser(response.data);
+        this.currentUserSignal.set(response.data);
+      }),
+    );
+  }
   getAccessToken(): string | null {
     return this.tokenStorage.getAccessToken();
   }
@@ -149,5 +172,11 @@ export class AuthService {
       clearTimeout(this.refreshTimerId);
       this.refreshTimerId = null;
     }
+  }
+
+  deleteAccount(payload: DeleteAccountRequest): Observable<ApiSuccessResponse<null>> {
+    return this.http
+      .delete<ApiSuccessResponse<null>>(`${this.baseUrl}/me`, { body: payload })
+      .pipe(tap(() => this.logout()));
   }
 }

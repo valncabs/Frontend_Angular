@@ -1,0 +1,15 @@
+@if (isOpen && src) {
+  <div class="image-viewer-overlay" (click)="onClose()">
+    <div class="image-viewer-content" (click)="onImageClick($event)">
+      <img [src]="src" [alt]="alt" class="image-viewer-img" />
+      <button
+        type="button"
+        class="image-viewer-close"
+        (click)="onClose()"
+        aria-label="Cerrar imagen"
+      >
+        <lucide-angular name="x" [size]="22" [color]="'#ef4444'"></lucide-angular>
+      </button>
+    </div>
+  </div>
+}

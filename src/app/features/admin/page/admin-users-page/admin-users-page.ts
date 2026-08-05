@@ -1,13 +1,14 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminUsersService } from '../../../../core/services/admin-users';
+import { LucideAngularModule } from 'lucide-angular';
+import { AdminUsersService } from '../../data-access/admin-users';
 import {
   AdminUserListItem,
   ASSIGNABLE_ROLES,
   CreateAdminRequest,
-} from '../../../../core/services/admin-users.models';
-import { DocumentType } from '../../../../core/services/profile.models';
+} from '../../data-access/admin-users.models';
+import { DocumentType } from '../../../profile/data-access/profile.models';
 import {
   COLOMBIA_DEPARTMENTS,
   DEFAULT_COUNTRY,
@@ -45,7 +46,7 @@ const EMPTY_FORM: CreateAdminForm = {
 @Component({
   selector: 'app-admin-users-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, PetButtonComponent, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, PetButtonComponent, ConfirmDialogComponent],
   templateUrl: './admin-users-page.html',
 })
 export class AdminUsersPage implements OnInit {

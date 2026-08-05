@@ -1,0 +1,304 @@
+<div class="container-custom py-6">
+  <h1 class="text-2xl font-bold text-slate-800 mb-4">Mensajes</h1>
+
+  <div
+    class="rounded-3xl bg-white border border-slate-100 shadow-sm overflow-hidden flex flex-col lg:flex-row"
+    style="height:calc(100vh - 220px); min-height:480px;"
+  >
+    <!-- ======================= LISTA (móvil, solo cuando no hay hilo abierto) ======================= -->
+    @if (!selected()) {
+      <div class="lg:hidden flex-1 flex flex-col overflow-hidden">
+        <div class="px-4 pt-4 pb-3 border-b border-slate-100 flex flex-col gap-2">
+          <button
+            (click)="contactarSoporte()"
+            class="w-full flex items-center justify-center gap-2 text-white text-sm font-medium rounded-xl py-2.5 transition hover:opacity-90"
+            style="background:#2a9d8f; border:none; cursor:pointer;"
+          >
+            <lucide-angular name="life-buoy" [size]="16" [color]="'#ffffff'"></lucide-angular>
+            Contactar al equipo de soporte
+          </button>
+          @if (esAdmin()) {
+            <button
+              (click)="abrirSelector()"
+              class="w-full flex items-center justify-center gap-2 text-sm font-medium rounded-xl py-2.5 transition hover:opacity-90"
+              style="background:#e7f0ee; color:#1f6f64; border:1px solid #c8dfdb; cursor:pointer;"
+            >
+              <lucide-angular name="user-plus" [size]="16"></lucide-angular>
+              Nuevo chat
+            </button>
+          }
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+          @if (conversations().length === 0) {
+            <div class="flex flex-col items-center gap-2 text-center py-16 px-6">
+              <lucide-angular name="inbox" [size]="40" [color]="'#94a3b8'"></lucide-angular>
+              <p class="m-0 text-sm text-slate-500" style="line-height:1.5;">
+                Aún no tienes conversaciones. Cuando alguien reporte un avistamiento de tu mascota o te contacten, aparecerá aquí.
+              </p>
+            </div>
+          }
+
+          @for (conv of conversations(); track conv.id) {
+            <button
+              (click)="select(conv)"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+              style="border:none; background:transparent; cursor:pointer; border-bottom:0.5px solid rgba(0,0,0,.04);"
+            >
+              @if (conv.participant?.photo_url) {
+                <img [src]="conv.participant?.photo_url" alt="" class="rounded-full flex-shrink-0" style="width:42px; height:42px; object-fit:cover;" />
+              } @else {
+                <div class="flex items-center justify-center rounded-full flex-shrink-0 text-white" style="width:42px; height:42px; background:#2a9d8f; font-size:17px;">
+                  {{ (conv.participant?.full_name ?? '?').charAt(0).toUpperCase() }}
+                </div>
+              }
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="m-0 text-sm font-semibold text-slate-800 truncate">
+                    {{ conv.participant?.full_name ?? 'Soporte Pet-Centric' }}
+                  </p>
+                  <span class="text-[11px] text-slate-400 flex-shrink-0">{{ formatoFecha(conv.last_message?.created_at ?? conv.updated_at) }}</span>
+                </div>
+                <p class="m-0 text-xs text-slate-500 truncate mt-0.5">
+                  {{ conv.last_message?.content ?? 'Sin mensajes aún' }}
+                </p>
+              </div>
+              @if (conv.unread_count > 0) {
+                <span class="flex items-center justify-center rounded-full text-white font-semibold flex-shrink-0" style="min-width:18px; height:18px; font-size:10px; background:#ef4444; padding:0 5px;">
+                  {{ conv.unread_count }}
+                </span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ======================= LISTA (escritorio) ======================= -->
+    <div class="hidden lg:flex lg:w-80 flex-col border-r border-slate-100">
+      <div class="px-4 pt-4 pb-3 border-b border-slate-100 flex flex-col gap-2">
+        <button
+          (click)="contactarSoporte()"
+          class="w-full flex items-center justify-center gap-2 text-white text-sm font-medium rounded-xl py-2.5 transition hover:opacity-90"
+          style="background:#2a9d8f; border:none; cursor:pointer;"
+        >
+          <lucide-angular name="life-buoy" [size]="16" [color]="'#ffffff'"></lucide-angular>
+          Contactar al equipo de soporte
+        </button>
+        @if (esAdmin()) {
+          <button
+            (click)="abrirSelector()"
+            class="w-full flex items-center justify-center gap-2 text-sm font-medium rounded-xl py-2.5 transition hover:opacity-90"
+            style="background:#e7f0ee; color:#1f6f64; border:1px solid #c8dfdb; cursor:pointer;"
+          >
+            <lucide-angular name="user-plus" [size]="16"></lucide-angular>
+            Nuevo chat
+          </button>
+        }
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        @if (conversations().length === 0) {
+          <div class="flex flex-col items-center gap-2 text-center py-16 px-6">
+            <lucide-angular name="inbox" [size]="40" [color]="'#94a3b8'"></lucide-angular>
+            <p class="m-0 text-sm text-slate-500" style="line-height:1.5;">
+              Aún no tienes conversaciones. Cuando alguien reporte un avistamiento de tu mascota o te contacten, aparecerá aquí.
+            </p>
+          </div>
+        }
+
+        @for (conv of conversations(); track conv.id) {
+          <button
+            (click)="select(conv)"
+            class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+            style="border:none; background:transparent; cursor:pointer; border-bottom:0.5px solid rgba(0,0,0,.04);"
+            [class]="selected()?.id === conv.id ? 'bg-[#f4f9f8]' : ''"
+          >
+            @if (conv.participant?.photo_url) {
+              <img [src]="conv.participant?.photo_url" alt="" class="rounded-full flex-shrink-0" style="width:42px; height:42px; object-fit:cover;" />
+            } @else {
+              <div class="flex items-center justify-center rounded-full flex-shrink-0 text-white" style="width:42px; height:42px; background:#2a9d8f; font-size:17px;">
+                {{ (conv.participant?.full_name ?? '?').charAt(0).toUpperCase() }}
+              </div>
+            }
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <p class="m-0 text-sm font-semibold text-slate-800 truncate">
+                  {{ conv.participant?.full_name ?? 'Soporte Pet-Centric' }}
+                </p>
+                <span class="text-[11px] text-slate-400 flex-shrink-0">{{ formatoFecha(conv.last_message?.created_at ?? conv.updated_at) }}</span>
+              </div>
+              <p class="m-0 text-xs text-slate-500 truncate mt-0.5">
+                {{ conv.last_message?.content ?? 'Sin mensajes aún' }}
+              </p>
+            </div>
+            @if (conv.unread_count > 0) {
+              <span class="flex items-center justify-center rounded-full text-white font-semibold flex-shrink-0" style="min-width:18px; height:18px; font-size:10px; background:#ef4444; padding:0 5px;">
+                {{ conv.unread_count }}
+              </span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ======================= HILO ======================= -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      @if (selected()) {
+        <!-- Cabecera del hilo -->
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
+          <button
+            (click)="selected.set(null)"
+            class="lg:hidden flex items-center justify-center text-slate-500"
+            style="width:30px; height:30px; border:none; background:transparent; cursor:pointer;"
+          >
+            <lucide-angular name="arrow-left" [size]="20" [color]="'#64748b'"></lucide-angular>
+          </button>
+
+          @if (selected()?.participant?.photo_url) {
+            <img [src]="selected()?.participant?.photo_url" alt="" class="rounded-full flex-shrink-0" style="width:40px; height:40px; object-fit:cover;" />
+          } @else {
+            <div class="flex items-center justify-center rounded-full flex-shrink-0 text-white" style="width:40px; height:40px; background:#2a9d8f; font-size:16px;">
+              {{ (selected()?.participant?.full_name ?? '?').charAt(0).toUpperCase() }}
+            </div>
+          }
+          <div class="flex-1 min-w-0">
+            <p class="m-0 text-sm font-semibold text-slate-800 truncate">
+              {{ selected()?.participant?.full_name ?? 'Soporte Pet-Centric' }}
+            </p>
+            <p class="m-0 text-[11px] text-emerald-600">En línea</p>
+          </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div #threadScroll class="flex-1 overflow-y-auto flex flex-col gap-2 p-4" style="background:#f4f9f8;">
+          @if (loading()) {
+            <div class="flex justify-center py-6">
+              <span class="typing-dot"></span>
+              <span class="typing-dot" style="animation-delay:.18s"></span>
+              <span class="typing-dot" style="animation-delay:.36s"></span>
+            </div>
+          }
+
+          @for (msg of messages(); track msg.id) {
+            @if (msg.sender_user_id === auth.currentUser()?.id) {
+              <div class="flex justify-end">
+                <div class="text-white text-sm leading-relaxed px-4 py-2" style="max-width:75%; background:#2a9d8f; border-radius:18px; border-bottom-right-radius:4px;">
+                  {{ msg.content }}
+                  <div class="flex items-center justify-end gap-1 mt-1" style="font-size:10px; opacity:.75;">
+                    {{ formatoFechaCompleta(msg.created_at) }}
+                    @if (msg.status === 'sending') {
+                      <lucide-angular name="clock" [size]="11" [color]="'#ffffff'"></lucide-angular>
+                    } @else if (msg.status === 'read') {
+                      <lucide-angular name="check-check" [size]="12" [color]="'#ffffff'"></lucide-angular>
+                    } @else {
+                      <lucide-angular name="check" [size]="12" [color]="'#ffffff'"></lucide-angular>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="flex justify-start">
+                <div class="text-sm leading-relaxed px-4 py-2" style="max-width:75%; background:#fff; border-radius:18px; border-bottom-left-radius:4px; border:0.5px solid rgba(0,0,0,.09); color:#1a1a18;">
+                  {{ msg.content }}
+                  <div class="text-left mt-1" style="font-size:10px; color:#94a3b8;">{{ formatoFechaCompleta(msg.created_at) }}</div>
+                </div>
+              </div>
+            }
+          }
+
+          @if (messages().length === 0 && !loading()) {
+            <div class="flex flex-col items-center gap-2 text-center py-10">
+              <p class="m-0 text-sm text-slate-500">Envía un mensaje para iniciar la conversación.</p>
+            </div>
+          }
+        </div>
+
+        <!-- Input -->
+        <div class="px-4 py-3" style="background:#fff; border-top:0.5px solid rgba(0,0,0,.08);">
+          <div class="flex gap-2 items-center">
+            <input
+              [(ngModel)]="inputMensaje"
+              (keyup.enter)="enviar()"
+              placeholder="Escribe un mensaje..."
+              class="flex-1 text-sm outline-none"
+              style="border:0.5px solid #ccd8d7; border-radius:24px; padding:10px 16px; background:#f4f9f8; font-family:inherit;"
+            />
+            <button
+              (click)="enviar()"
+              class="flex items-center justify-center flex-shrink-0"
+              style="width:40px; height:40px; border-radius:50%; background:#2a9d8f; border:none; cursor:pointer;"
+              [disabled]="enviando()"
+              [style.opacity]="enviando() ? '0.6' : '1'"
+            >
+              <lucide-angular name="send-horizontal" [size]="18" [color]="'#ffffff'"></lucide-angular>
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Sin selección (escritorio) -->
+        <div class="hidden lg:flex flex-1 flex-col items-center justify-center gap-3 text-center p-6" style="background:#f4f9f8;">
+          <lucide-angular name="message-square" [size]="48" [color]="'#94a3b8'"></lucide-angular>
+          <p class="m-0 text-base font-medium text-slate-600">Selecciona una conversación</p>
+          <p class="m-0 text-sm text-slate-400">Elige un chat a la izquierda o contacta al equipo de soporte.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ======================= Selector de usuario (solo admin) ======================= -->
+<app-modal [isOpen]="selectorAbierto()" title="Iniciar conversación" size="md" (close)="cerrarSelector()">
+  <div>
+    <p class="m-0 mb-4 text-sm text-slate-500" style="line-height:1.5;">
+      Busca un usuario por nombre o correo y pulsa para abrir un chat con él.
+    </p>
+
+    <div class="flex gap-2 items-center">
+      <input
+        [(ngModel)]="busquedaUsuario"
+        (input)="buscarUsuarios()"
+        placeholder="Buscar usuario..."
+        class="flex-1 text-sm outline-none"
+        style="border:0.5px solid #ccd8d7; border-radius:12px; padding:9px 14px; font-family:inherit;"
+      />
+      <button
+        (click)="buscarUsuarios()"
+        class="flex items-center justify-center flex-shrink-0"
+        style="width:38px; height:38px; border-radius:12px; background:#2a9d8f; border:none; cursor:pointer;"
+      >
+        <lucide-angular name="search" [size]="16" [color]="'#ffffff'"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="mt-3 max-h-72 overflow-y-auto">
+      @if (buscandoUsuarios()) {
+        <div class="flex justify-center py-8">
+          <span class="typing-dot"></span>
+          <span class="typing-dot" style="animation-delay:.18s"></span>
+          <span class="typing-dot" style="animation-delay:.36s"></span>
+        </div>
+      }
+
+      @if (!buscandoUsuarios() && resultadosUsuarios().length === 0) {
+        <p class="m-0 py-8 text-center text-sm text-slate-400">No se encontraron usuarios.</p>
+      }
+
+      @for (user of resultadosUsuarios(); track user.id) {
+        <button
+          (click)="iniciarConUsuario(user)"
+          class="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 transition-colors rounded-xl"
+          style="border:none; background:transparent; cursor:pointer;"
+        >
+          <div class="flex items-center justify-center rounded-full flex-shrink-0 text-white" style="width:38px; height:38px; background:#2a9d8f; font-size:15px;">
+            {{ nombreUsuario(user).charAt(0).toUpperCase() }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="m-0 text-sm font-medium text-slate-800 truncate">{{ nombreUsuario(user) }}</p>
+            <p class="m-0 text-xs text-slate-400 truncate">{{ user.email }}</p>
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+</app-modal>

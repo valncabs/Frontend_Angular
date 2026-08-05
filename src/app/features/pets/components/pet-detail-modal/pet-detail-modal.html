@@ -1,0 +1,133 @@
+<app-modal [isOpen]="isOpen" [title]="'Detalles de la mascota'" size="lg" (close)="onClose()">
+  @if (pet; as pet) {
+    <!-- Foto de la Mascota -->
+    <div class="mb-6">
+      <div
+        class="w-full h-56 rounded-2xl bg-slate-100 flex items-center justify-center overflow-hidden"
+      >
+        @if (pet.photoUrl) {
+          <button
+            type="button"
+            (click)="viewerOpen.set(true)"
+            class="w-full h-full relative group"
+            aria-label="Ver foto en grande"
+          >
+            <img
+              [src]="pet.photoUrl"
+              [alt]="pet.name"
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <span
+              class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              <span class="flex items-center gap-1.5 text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
+                <lucide-angular name="search" [size]="14" [color]="'#ffffff'"></lucide-angular>
+                Ver foto completa
+              </span>
+            </span>
+          </button>
+        } @else {
+          <span class="material-icons text-6xl text-slate-300">pets</span>
+        }
+      </div>
+    </div>
+
+    <!-- Identificación -->
+    <p class="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-3">
+      Identificación
+    </p>
+    <div class="grid grid-cols-2 gap-4 mb-5">
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Nombre</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{{ pet.name }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Especie</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          {{ pet.speciesName ?? 'No especificada' }}
+        </p>
+      </div>
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Raza</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          {{ pet.breedName ?? 'No especificada' }}
+        </p>
+      </div>
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Estado</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          {{ pet.sterilized ? 'Esterilizado/a' : 'Sin esterilizar' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Características -->
+    <p
+      class="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-3 mt-5"
+    >
+      Características
+    </p>
+    <div class="grid grid-cols-2 gap-4 mb-5">
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Sexo</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{{ sexLabel }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Tamaño</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{{ sizeLabel }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Color</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{{ pet.color }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Peso (kg)</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          {{ pet.weight ?? 'No registrado' }}
+        </p>
+      </div>
+      <div>
+        <p class="text-xs text-[var(--text-secondary)] mb-0.5">Edad aproximada</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          {{
+            pet.approximateAge != null
+              ? pet.approximateAge + (pet.approximateAge === 1 ? ' año' : ' años')
+              : 'No registrada'
+          }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Detalles adicionales -->
+    @if (pet.distinctiveMarks || pet.description) {
+      <p
+        class="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-3 mt-5"
+      >
+        Detalles adicionales
+      </p>
+
+      @if (pet.distinctiveMarks) {
+        <div class="mb-4">
+          <p class="text-xs text-[var(--text-secondary)] mb-0.5">Marcas distintivas</p>
+          <p class="text-sm text-[var(--text-primary)]">{{ pet.distinctiveMarks }}</p>
+        </div>
+      }
+
+      @if (pet.description) {
+        <div>
+          <p class="text-xs text-[var(--text-secondary)] mb-0.5">Descripción</p>
+          <p class="text-sm text-[var(--text-primary)]">{{ pet.description }}</p>
+        </div>
+      }
+    }
+  }
+</app-modal>
+
+@if (pet?.photoUrl) {
+  <app-image-viewer
+    [isOpen]="viewerOpen()"
+    [src]="pet!.photoUrl!"
+    [alt]="'Foto de ' + pet!.name"
+    (close)="viewerOpen.set(false)"
+  />
+}

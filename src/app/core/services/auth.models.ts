@@ -8,7 +8,10 @@ export interface LoginUserData {
   email: string;
   email_verified: boolean;
   roles: string[];
+  profile_completed: boolean;
 }
+
+export interface MeResponse extends LoginUserData {}
 
 export interface LoginResponse {
   access_token: string;
@@ -66,4 +69,8 @@ export interface ResetPasswordRequest {
 export interface ChangePasswordRequest {
   current_password: string;
   new_password: string;
+}
+
+export interface DeleteAccountRequest {
+  password: string;
 }

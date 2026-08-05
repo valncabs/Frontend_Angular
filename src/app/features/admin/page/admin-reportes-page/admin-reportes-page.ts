@@ -1,25 +1,27 @@
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Observable, from, forkJoin, of } from 'rxjs';
 import { mergeMap, toArray, catchError } from 'rxjs/operators';
 
-import { AdminReportsService } from '../../../../core/services/admin-reports';
-import { LostReportsService } from '../../../../core/services/lost-reports';
-import { FoundReportsService } from '../../../../core/services/found-reports';
+import { AdminReportsService } from '../../data-access/admin-reports';
+import { LostReportsService } from '../../../reports/data-access/lost-reports';
+import { FoundReportsService } from '../../../reports/data-access/found-reports';
 import { CatalogService } from '../../../../core/services/catalog';
-import {
-  AdminReportDetail,
-  AdminReportListItem,
-} from '../../../../core/services/admin-reports.models';
-import { SpeciesResponse } from '../../../../core/services/pet.models';
+import { AdminReportDetail, AdminReportListItem } from '../../data-access/admin-reports.models';
+import { SpeciesResponse } from '../../../pets/data-access/pet.models';
 import {
   LOST_REPORT_STATUS_LABELS,
   LostReportStatus,
-} from '../../../../core/services/lost-report-models';
-import { FOUND_STATUS_LABELS, FoundReportStatus } from '../../../../core/services/report-models';
+} from '../../../reports/data-access/lost-report-models';
+import {
+  FOUND_STATUS_LABELS,
+  FoundReportResponse,
+  FoundReportStatus,
+} from '../../../reports/data-access/report-models';
 import { PetButtonComponent } from '../../../../shared/components/button-pets/button-pets';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
@@ -33,7 +35,7 @@ interface GalleryImage {
 @Component({
   selector: 'app-admin-reportes-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, PetButtonComponent, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, PetButtonComponent, ConfirmDialogComponent],
   templateUrl: './admin-reportes-page.html',
 })
 export class AdminReportesPage implements OnInit {
@@ -97,6 +99,9 @@ export class AdminReportesPage implements OnInit {
   petGallery = signal<GalleryImage[]>([]);
   reportGallery = signal<GalleryImage[]>([]);
 
+  /** Avistamiento pendiente de expandir tras una recarga de la tabla. */
+  private pendingSightingId = signal<string | null>(null);
+
   // ---------- Lightbox de imágenes ----------
   lightboxImage = signal<string | null>(null);
 
@@ -138,6 +143,24 @@ export class AdminReportesPage implements OnInit {
     );
   }
 
+  /** Etiqueta de estado para una fila LOST, incluyendo la solicitud de
+   * encontrada del dueño (aún pendiente de aprobación del admin). */
+  rowStatusLabel(r: AdminReportListItem): string {
+    if (r.type === 'LOST' && r.status === 'PUBLISHED' && r.found_requested_at) {
+      return 'Activo · Solicitud de encontrada';
+    }
+    return this.statusLabel(r.status);
+  }
+
+  /** Badge de "tipo" que refleja el estado actual: un perdido que ya fue
+   * encontrado se muestra como "Encontrada" y no sigue como "Perdida". */
+  typeBadge(r: AdminReportListItem): { text: string; bg: string; fg: string } {
+    if (r.type === 'FOUND') return { text: 'Avistamiento', bg: '#dbeafe', fg: '#1e40af' };
+    if (r.status === 'FOUND') return { text: 'Encontrada', bg: '#d1fae5', fg: '#065f46' };
+    if (r.status === 'CLOSED') return { text: 'Perdida', bg: '#f1f5f9', fg: '#64748b' };
+    return { text: 'Perdida', bg: '#fee2e2', fg: '#991b1b' };
+  }
+
   reload(): void {
     this.isLoading.set(true);
     this.generalError.set(null);
@@ -161,6 +184,7 @@ export class AdminReportesPage implements OnInit {
           this.total.set(res.data.total);
           this.totalPages.set(res.data.pages);
           this.isLoading.set(false);
+          this.expandPendingSighting();
         },
         error: () => {
           this.generalError.set('No pudimos cargar los reportes.');
@@ -221,6 +245,49 @@ export class AdminReportesPage implements OnInit {
     });
   }
 
+  /** Redirige a un avistamiento del flujo: si su fila está visible la expande
+   * y hace scroll hasta ella; si está fuera de la vista (filtro/página), ajusta
+   * el filtro a avistamientos, recarga y la expande al llegar. */
+  goToSighting(sightingId: string): void {
+    const found = this.reports().find((r) => r.type === 'FOUND' && r.id === sightingId);
+    if (found) {
+      if (this.expandedId() === found.id) {
+        this.scrollToReportRow(found.id);
+        return;
+      }
+      this.toggleExpand(found);
+      this.scrollToReportRow(found.id);
+      return;
+    }
+
+    this.filterType.set('FOUND');
+    this.filterStatus.set('');
+    this.searchTerm.set('');
+    this.page.set(1);
+    this.pendingSightingId.set(sightingId);
+    this.reload();
+  }
+
+  private expandPendingSighting(): void {
+    const id = this.pendingSightingId();
+    if (!id) return;
+    this.pendingSightingId.set(null);
+
+    const found = this.reports().find((r) => r.type === 'FOUND' && r.id === id);
+    if (found) {
+      this.toggleExpand(found);
+      this.scrollToReportRow(found.id);
+    }
+  }
+
+  private scrollToReportRow(id: string): void {
+    setTimeout(() => {
+      document
+        .getElementById(`admin-report-row-${id}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
   // ---------- Acciones admin: cerrar / eliminar ----------
 
   openConfirm(item: AdminReportListItem, mode: 'CLOSE' | 'DELETE'): void {
@@ -271,6 +338,7 @@ export class AdminReportesPage implements OnInit {
       next: () => {
         this.actionInProgress.set(null);
         this.reload();
+        this.refreshExpanded();
       },
       error: (error) => {
         this.actionInProgress.set(null);
@@ -285,10 +353,81 @@ export class AdminReportesPage implements OnInit {
       next: () => {
         this.actionInProgress.set(null);
         this.reload();
+        this.refreshExpanded();
       },
       error: (error) => {
         this.actionInProgress.set(null);
         this.generalError.set(error?.error?.message ?? 'No pudimos rechazar el avistamiento.');
+      },
+    });
+  }
+
+  /** El admin cambia 100% el estado del reporte de pérdida a encontrada. */
+  markFound(reportId: string): void {
+    this.actionInProgress.set(reportId);
+    this.lostReportsService.adminMarkFound(reportId).subscribe({
+      next: () => {
+        this.actionInProgress.set(null);
+        this.generalError.set(null);
+        this.reload();
+        this.refreshExpanded();
+      },
+      error: (error) => {
+        this.actionInProgress.set(null);
+        this.generalError.set(error?.error?.message ?? 'No pudimos marcar el reporte como encontrado.');
+      },
+    });
+  }
+
+  /** Recarga el detalle + avistamientos de la fila expandida, para reflejar
+   * los cambios de estado tras una acción admin. */
+  private refreshExpanded(): void {
+    const item = this.reports().find((r) => r.id === this.expandedId());
+    if (item) {
+      this.toggleExpand(item);
+      this.toggleExpand(item);
+    }
+  }
+
+  sightingBadge(status: string): { bg: string; fg: string } {
+    const colors: Record<string, { bg: string; fg: string }> = {
+      PUBLISHED: { bg: '#fef3c7', fg: '#92400e' },
+      MATCHED: { bg: '#dbeafe', fg: '#1e40af' },
+      APPROVED: { bg: '#d1fae5', fg: '#065f46' },
+      REJECTED: { bg: '#fee2e2', fg: '#991b1b' },
+      CLOSED: { bg: '#f3f4f6', fg: '#6b7280' },
+    };
+    return colors[status] ?? { bg: '#f3f4f6', fg: '#6b7280' };
+  }
+
+  // ---------- Cerrar un avistamiento desde el flujo del reporte ----------
+
+  sightingToClose = signal<FoundReportResponse | null>(null);
+
+  openConfirmSighting(sighting: FoundReportResponse): void {
+    this.sightingToClose.set(sighting);
+  }
+
+  cancelSightingClose(): void {
+    this.sightingToClose.set(null);
+  }
+
+  confirmSightingClose(): void {
+    const sighting = this.sightingToClose();
+    if (!sighting) return;
+
+    this.actionInProgress.set(sighting.id);
+    this.foundReportsService.adminClose(sighting.id).subscribe({
+      next: () => {
+        this.actionInProgress.set(null);
+        this.sightingToClose.set(null);
+        this.reload();
+        this.refreshExpanded();
+      },
+      error: (error) => {
+        this.actionInProgress.set(null);
+        this.sightingToClose.set(null);
+        this.generalError.set(error?.error?.message ?? 'No pudimos cerrar el avistamiento.');
       },
     });
   }
@@ -522,7 +661,9 @@ export class AdminReportesPage implements OnInit {
       let bx = innerX;
       const typeBadge =
         item.type === 'LOST'
-          ? { text: 'Perdida', bg: colors.lostBg, fg: colors.lostText }
+          ? item.status === 'FOUND'
+            ? { text: 'Encontrada', bg: colors.foundBg, fg: colors.foundText }
+            : { text: 'Perdida', bg: colors.lostBg, fg: colors.lostText }
           : { text: 'Avistamiento', bg: colors.foundBg, fg: colors.foundText };
 
       doc.setFontSize(7.5);

@@ -8,27 +8,28 @@ src
 │   │   ├── guards
 │   │   │   ├── admin-guard.ts
 │   │   │   └── auth-guard.ts
+│   │   ├── interceptors
+│   │   │   └── auth.interceptor.ts
+│   │   ├── layout
+│   │   │   ├── messaging-widget
+│   │   │   │   ├── messaging-widget.css
+│   │   │   │   ├── messaging-widget.html
+│   │   │   │   └── messaging-widget.ts
+│   │   │   └── notifications-bell
+│   │   │       ├── notifications-bell.css
+│   │   │       ├── notifications-bell.html
+│   │   │       └── notifications-bell.ts
+│   │   ├── models
+│   │   │   └── pagination.models.ts
 │   │   └── services
-│   │       ├── admin-reports.models.ts
-│   │       ├── admin-reports.ts
-│   │       ├── admin-users.models.ts
-│   │       ├── admin-users.ts
 │   │       ├── api-error.ts
-│   │       ├── auth.interceptor.ts
 │   │       ├── auth.models.ts
 │   │       ├── auth.ts
 │   │       ├── catalog.ts
 │   │       ├── chatbot.ts
 │   │       ├── colombia-locations.ts
-│   │       ├── found-reports.ts
-│   │       ├── lost-report-models.ts
-│   │       ├── lost-reports.ts
-│   │       ├── pet.models.ts
-│   │       ├── pets.ts
-│   │       ├── profile.models.ts
-│   │       ├── profile.ts
-│   │       ├── report-models.ts
-│   │       ├── reports.ts
+│   │       ├── messaging.models.ts
+│   │       ├── messaging.ts
 │   │       └── token-storage.ts
 │   ├── features
 │   │   ├── admin
@@ -36,6 +37,11 @@ src
 │   │   │   │   └── admin-nav
 │   │   │   │       ├── admin-nav.html
 │   │   │   │       └── admin-nav.ts
+│   │   │   ├── data-access
+│   │   │   │   ├── admin-reports.models.ts
+│   │   │   │   ├── admin-reports.ts
+│   │   │   │   ├── admin-users.models.ts
+│   │   │   │   └── admin-users.ts
 │   │   │   └── page
 │   │   │       ├── admin-page
 │   │   │       │   ├── admin-page.html
@@ -82,93 +88,155 @@ src
 │   │   │       └── verify-email-page
 │   │   │           ├── verify-email-page.html
 │   │   │           └── verify-email-page.ts
-│   │   ├── dash
+│   │   ├── dashboard-shell
 │   │   │   ├── components
-│   │   │   │   ├── my-pets
-│   │   │   │   │   ├── my-pets.html
-│   │   │   │   │   ├── my-pets.ts
-│   │   │   │   │   └── pet-models.ts
-│   │   │   │   ├── nav-dashboard
-│   │   │   │   │   ├── nav-dashboard.html
-│   │   │   │   │   └── nav-dashboard.ts
+│   │   │   │   └── nav-dashboard
+│   │   │   │       ├── nav-dashboard.html
+│   │   │   │       └── nav-dashboard.ts
+│   │   │   └── page
+│   │   │       └── dash-page
+│   │   │           ├── dash-page.html
+│   │   │           └── dash-page.ts
+│   │   ├── home
+│   │   │   ├── components
+│   │   │   │   ├── hero
+│   │   │   │   │   ├── hero.css
+│   │   │   │   │   ├── hero.html
+│   │   │   │   │   └── hero.ts
+│   │   │   │   └── nav
+│   │   │   │       ├── nav.html
+│   │   │   │       └── nav.ts
+│   │   │   └── page
+│   │   │       └── home-page
+│   │   │           ├── home-page.html
+│   │   │           └── home-page.ts
+│   │   ├── messaging
+│   │   │   └── page
+│   │   │       └── messaging-page
+│   │   │           ├── messaging-page.css
+│   │   │           ├── messaging-page.html
+│   │   │           └── messaging-page.ts
+│   │   ├── pets
+│   │   │   ├── components
 │   │   │   │   ├── pet-card
 │   │   │   │   │   ├── pet-card.html
 │   │   │   │   │   └── pet-card.ts
-│   │   │   │   ├── pet-input
-│   │   │   │   │   ├── pet-input.html
-│   │   │   │   │   └── pet-input.ts
-│   │   │   │   ├── pet-select
-│   │   │   │   │   ├── pet-select.html
-│   │   │   │   │   └── pet-select.ts
+│   │   │   │   ├── pet-detail-modal
+│   │   │   │   │   ├── pet-detail-modal.html
+│   │   │   │   │   └── pet-detail-modal.ts
 │   │   │   │   ├── pets-modal
 │   │   │   │   │   ├── pets-modal.html
 │   │   │   │   │   └── pets-modal.ts
 │   │   │   │   └── select-pets
 │   │   │   │       ├── select-pets.html
 │   │   │   │       └── select-pets.ts
+│   │   │   ├── data-access
+│   │   │   │   ├── pet.models.ts
+│   │   │   │   └── pets.ts
 │   │   │   └── page
-│   │   │       ├── dash-page
-│   │   │       │   ├── dash-page.html
-│   │   │       │   └── dash-page.ts
-│   │   │       ├── lost-report-form
+│   │   │       ├── my-pets
+│   │   │       │   ├── my-pets.html
+│   │   │       │   └── my-pets.ts
+│   │   │       └── my-pets-page
+│   │   │           ├── my-pets-page.html
+│   │   │           └── my-pets-page.ts
+│   │   ├── profile
+│   │   │   ├── data-access
+│   │   │   │   ├── profile.models.ts
+│   │   │   │   └── profile.ts
+│   │   │   └── page
+│   │   │       └── page-my-profile
+│   │   │           ├── page-my-profile.html
+│   │   │           └── page-my-profile.ts
+│   │   ├── reports
+│   │   │   ├── components
+│   │   │   │   ├── found-report-detail
+│   │   │   │   │   ├── found-report-detail.html
+│   │   │   │   │   └── found-report-detail.ts
+│   │   │   │   ├── lost-report-detail
+│   │   │   │   │   ├── lost-report-detail.html
+│   │   │   │   │   └── lost-report-detail.ts
+│   │   │   │   ├── report-card
+│   │   │   │   │   ├── report-card.html
+│   │   │   │   │   └── report-card.ts
+│   │   │   │   ├── report-detail-modal
+│   │   │   │   │   ├── report-detail-modal.html
+│   │   │   │   │   └── report-detail-modal.ts
+│   │   │   │   ├── report-edit-modal
+│   │   │   │   │   ├── report-edit-modal.html
+│   │   │   │   │   └── report-edit-modal.ts
+│   │   │   │   ├── report-filters
+│   │   │   │   │   ├── report-filters.html
+│   │   │   │   │   └── report-filters.ts
+│   │   │   │   ├── report-status-counts
+│   │   │   │   │   ├── report-status-counts.html
+│   │   │   │   │   └── report-status-counts.ts
+│   │   │   │   ├── sighting-item
+│   │   │   │   │   ├── sighting-item.html
+│   │   │   │   │   └── sighting-item.ts
+│   │   │   │   └── sightings-modal
+│   │   │   │       ├── sightings-modal.html
+│   │   │   │       └── sightings-modal.ts
+│   │   │   ├── data-access
+│   │   │   │   ├── found-reports.ts
+│   │   │   │   ├── lost-report-models.ts
+│   │   │   │   ├── lost-reports.ts
+│   │   │   │   ├── report-models.ts
+│   │   │   │   └── reports.ts
+│   │   │   └── page
+│   │   │       ├── lost-report-form-page
 │   │   │       │   ├── lost-report-form.html
 │   │   │       │   └── lost-report-form.ts
-│   │   │       ├── my-pets-page
-│   │   │       │   ├── my-pets-page.html
-│   │   │       │   └── my-pets-page.ts
-│   │   │       ├── page-configuration
-│   │   │       │   ├── page-configuration.html
-│   │   │       │   └── page-configuration.ts
-│   │   │       ├── page-my-profile
-│   │   │       │   ├── page-my-profile.html
-│   │   │       │   └── page-my-profile.ts
 │   │   │       ├── pet-reports
 │   │   │       │   ├── pet-reports.html
-│   │   │       │   ├── pet-reports.ts
-│   │   │       │   └── report-models.ts
-│   │   │       └── sighting-report
+│   │   │       │   └── pet-reports.ts
+│   │   │       └── sighting-report-page
 │   │   │           ├── sighting-report.html
 │   │   │           ├── sighting-report-models.ts
 │   │   │           └── sighting-report.ts
-│   │   └── home
-│   │       ├── components
-│   │       │   ├── hero
-│   │       │   │   ├── hero.css
-│   │       │   │   ├── hero.html
-│   │       │   │   └── hero.ts
-│   │       │   └── nav
-│   │       │       ├── nav.html
-│   │       │       └── nav.ts
+│   │   └── settings
 │   │       └── page
-│   │           └── home-page
-│   │               ├── home-page.html
-│   │               └── home-page.ts
+│   │           └── page-configuration
+│   │               ├── page-configuration.html
+│   │               └── page-configuration.ts
 │   └── shared
 │       └── components
 │           ├── button-pets
 │           │   ├── button-pets.html
 │           │   └── button-pets.ts
-│           ├── chatbot
-│           │   ├── chatbot.css
-│           │   ├── chatbot.html
-│           │   └── chatbot.ts
 │           ├── confirm-dialog
 │           │   ├── confirm-dialog.html
 │           │   └── confirm-dialog.ts
 │           ├── footer
 │           │   ├── footer.html
 │           │   └── footer.ts
+│           ├── image-viewer
+│           │   ├── image-viewer.css
+│           │   ├── image-viewer.html
+│           │   └── image-viewer.ts
 │           ├── location-picker
 │           │   ├── location-picker.html
 │           │   └── location-picker.ts
-│           └── modal
-│               ├── modal.html
-│               └── modal.ts
+│           ├── modal
+│           │   ├── modal.html
+│           │   └── modal.ts
+│           ├── pet-input
+│           │   ├── pet-input.html
+│           │   └── pet-input.ts
+│           ├── pet-select
+│           │   ├── pet-select.html
+│           │   └── pet-select.ts
+│           ├── profile-completion-modal
+│           │   └── profile-completion-modal.ts
+│           └── profile-form
+│               ├── profile-form.html
+│               └── profile-form.ts
 ├── environments
 │   ├── environment.development.ts
 │   └── environment.ts
 ├── index.html
 ├── main.ts
-└── styles.css
+├── styles.css
+└── tree_front.txt
 
-59 directories, 113 files
+93 directories, 147 files

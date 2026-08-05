@@ -1,0 +1,1004 @@
+<div class="min-h-screen" style="background-color: var(--background)">
+  <!-- Header -->
+  <div class="px-4 pt-6 pb-4">
+    <div class="flex items-center justify-between mb-1">
+      <h1 class="text-2xl font-bold text-[var(--text-primary)]">Reportes</h1>
+    </div>
+    <p class="text-sm text-[var(--text-secondary)]">Mascotas perdidas y encontradas en Colombia</p>
+  </div>
+
+  <!-- Tabs -->
+  <!-- Tabs -->
+  <div class="px-4 flex gap-2 border-b border-gray-100 bg-white sticky top-0 z-10">
+    <button
+      class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
+      [class.border-transparent]="activeTab() !== 'LOST'"
+      [style.borderColor]="activeTab() === 'LOST' ? 'var(--primary)' : ''"
+      [style.color]="activeTab() === 'LOST' ? 'var(--primary)' : 'var(--text-secondary)'"
+      (click)="switchTab('LOST')"
+    >
+      Perdidas
+    </button>
+    <button
+      class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
+      [class.border-transparent]="activeTab() !== 'FOUND'"
+      [style.borderColor]="activeTab() === 'FOUND' ? 'var(--primary)' : ''"
+      [style.color]="activeTab() === 'FOUND' ? 'var(--primary)' : 'var(--text-secondary)'"
+      (click)="switchTab('FOUND')"
+    >
+      Encontradas
+    </button>
+    <button
+      class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
+      [class.border-transparent]="activeTab() !== 'MINE'"
+      [style.borderColor]="activeTab() === 'MINE' ? 'var(--primary)' : ''"
+      [style.color]="activeTab() === 'MINE' ? 'var(--primary)' : 'var(--text-secondary)'"
+      (click)="switchTab('MINE')"
+    >
+      Mis reportes
+    </button>
+  </div>
+
+  @if (successMessage()) {
+    <div
+      class="mx-4 mt-4 bg-green-50 border border-green-100 text-green-700 text-sm rounded-xl px-4 py-3 flex items-center gap-2"
+    >
+      <span class="material-icons text-base">check_circle</span>
+      {{ successMessage() }}
+      <button
+        class="ml-auto text-green-600 hover:text-green-800"
+        (click)="successMessage.set(null)"
+        aria-label="Cerrar"
+      >
+        <span class="material-icons text-base">close</span>
+      </button>
+    </div>
+  }
+
+  @if (activeTab() === 'LOST' || activeTab() === 'FOUND') {
+    <div class="px-4 py-3 border-b border-gray-100 bg-white">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <app-pet-select
+          [(ngModel)]="filterSpeciesValue"
+          [options]="speciesOptions"
+          placeholder="Especie"
+        />
+        <app-pet-select
+          [(ngModel)]="filterDepartmentValue"
+          [options]="departmentOptions"
+          placeholder="Departamento"
+        />
+        <app-pet-select
+          [(ngModel)]="filterCityValue"
+          [options]="cityOptions()"
+          placeholder="Ciudad"
+        />
+      </div>
+
+      @if (filterCity()) {
+        <div class="flex items-center gap-1 mt-2">
+          <span class="material-icons text-sm text-[var(--primary)]">location_on</span>
+          <p class="text-xs text-[var(--text-secondary)]">
+            Mostrando en
+            <span class="font-medium text-[var(--text-primary)]">{{
+              getCityLabel(filterCity())
+            }}</span>
+          </p>
+          <button
+            class="text-xs text-[var(--primary)] underline ml-1"
+            (click)="filterCityValue = ''"
+          >
+            Ver todo el departamento
+          </button>
+        </div>
+      }
+    </div>
+    <div class="px-4 py-3">
+      <app-report-map [reports]="reports()" (markerClick)="openDetail($event)" />
+    </div>
+    <div class="px-4 py-3 flex items-center justify-between">
+      <span class="text-xs text-[var(--text-secondary)]">
+        {{ total() }} resultado{{ total() !== 1 ? 's' : '' }}
+      </span>
+      @if (totalPages() > 1) {
+        <span class="text-xs text-[var(--text-secondary)]">
+          Página {{ page() }} de {{ totalPages() }}
+        </span>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="px-4 py-16 text-center text-sm text-[var(--text-secondary)]">
+        Cargando reportes...
+      </div>
+    } @else if (generalError()) {
+      <div class="px-4 py-16 text-center text-sm" style="color: #b91c1c">{{ generalError() }}</div>
+    } @else {
+      <div class="px-4 pb-8">
+        @if (reports().length === 0) {
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <span class="flex justify-center mb-4"
+              ><lucide-angular name="search" [size]="48" [color]="'#94a3b8'"></lucide-angular
+            ></span>
+            <p class="text-[var(--text-primary)] font-medium mb-1">Sin resultados</p>
+            <p class="text-sm text-[var(--text-secondary)]">
+              Intenta cambiar los filtros para ver más reportes
+            </p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (item of reports(); track item.id) {
+              <div
+                class="card-pet border border-gray-100 p-0 flex flex-col overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
+                (click)="openDetail(item)"
+              >
+                <div class="flex items-center justify-between px-4 pt-3 pb-0">
+                  @if (isResolved(item)) {
+                    <span
+                      class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+                      style="background-color: #d1fae5; color: #065f46"
+                    >
+                      <span class="material-icons text-sm leading-none">favorite</span>
+                      Encontrado
+                    </span>
+                  } @else {
+                    <span
+                      class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+                      style="background-color: #fef3c7; color: #92400e"
+                    >
+                      <span class="material-icons text-sm leading-none">search</span>
+                      Perdido
+                    </span>
+                  }
+                  <span class="text-xs text-[var(--text-secondary)]">
+                    {{ formatDateTime(item.publishedAt) }}
+                  </span>
+                </div>
+
+                <div class="px-4 pt-3">
+                  @if (item.photoUrl) {
+                    <img
+                      [src]="item.photoUrl"
+                      [alt]="item.title"
+                      class="w-full h-36 object-cover rounded-xl"
+                    />
+                  } @else {
+                    <div
+                      class="w-full h-36 rounded-xl flex items-center justify-center"
+                      style="background-color: var(--secondary-soft)"
+                    >
+                      <lucide-angular
+                        [name]="getSpeciesIcon(speciesName(item.speciesId))"
+                        [size]="44"
+                        [color]="'#2a9d8f'"
+                      ></lucide-angular>
+                    </div>
+                  }
+                </div>
+
+                <div class="px-4 pt-3 pb-1 flex-1">
+                  <h3 class="font-semibold text-[var(--text-primary)] text-base">
+                    {{ item.title }}
+                  </h3>
+
+                  <div class="flex flex-wrap gap-1.5 mt-2">
+                    <span
+                      class="text-xs px-2 py-0.5 rounded-full border border-gray-200 text-[var(--text-secondary)] flex items-center gap-0.5"
+                    >
+                      <span class="material-icons text-xs leading-none">place</span>
+                      {{ item.city }}
+                    </span>
+                    @if (isOwnReport(item)) {
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                        Tu reporte
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <div
+                  class="px-4 py-3 mt-2 border-t border-gray-100 flex gap-2"
+                  (click)="$event.stopPropagation()"
+                >
+                  <app-pet-button
+                    label="Ver detalles"
+                    variant="outline"
+                    size="sm"
+                    [fullWidth]="true"
+                    (clicked)="openDetail(item)"
+                  />
+                  @if (item.kind === 'LOST' && !isOwnReport(item) && !isResolved(item)) {
+                    <app-pet-button
+                      label="Yo lo vi"
+                      variant="primary"
+                      size="sm"
+                      [fullWidth]="true"
+                      (clicked)="navigateToReport(item)"
+                    />
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (totalPages() > 1) {
+            <div class="flex items-center justify-center gap-3 pt-6">
+              <app-pet-button
+                label="Anterior"
+                variant="outline"
+                size="sm"
+                [disabled]="page() <= 1"
+                (clicked)="goToPage(page() - 1)"
+              />
+              <span class="text-sm text-[var(--text-secondary)]">
+                {{ page() }} / {{ totalPages() }}
+              </span>
+              <app-pet-button
+                label="Siguiente"
+                variant="outline"
+                size="sm"
+                [disabled]="page() >= totalPages()"
+                (clicked)="goToPage(page() + 1)"
+              />
+            </div>
+          }
+        }
+      </div>
+    }
+  }
+
+  @if (activeTab() === 'MINE') {
+    <div class="px-4 py-3 flex items-center justify-between">
+      <span class="text-xs text-[var(--text-secondary)]">
+        {{ myReports().length }} reporte{{ myReports().length !== 1 ? 's' : '' }} propio{{
+          myReports().length !== 1 ? 's' : ''
+        }}
+      </span>
+    </div>
+
+    @if (isLoading()) {
+      <div class="px-4 py-16 text-center text-sm text-[var(--text-secondary)]">
+        Cargando tus reportes...
+      </div>
+    } @else if (generalError()) {
+      <div class="px-4 py-16 text-center text-sm" style="color: #b91c1c">{{ generalError() }}</div>
+    } @else {
+      <div class="px-4 pb-8">
+        @if (myReports().length === 0) {
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <span class="flex justify-center mb-4"
+              ><lucide-angular
+                name="clipboard-list"
+                [size]="48"
+                [color]="'#94a3b8'"
+              ></lucide-angular
+            ></span>
+            <p class="text-[var(--text-primary)] font-medium mb-1">Aún no tienes reportes</p>
+            <p class="text-sm text-[var(--text-secondary)] mb-4">
+              Crea tu primer reporte de mascota perdida o encontrada.
+            </p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (item of myReports(); track item.id) {
+              <div
+                class="card-pet border border-gray-100 p-0 flex flex-col overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
+                (click)="openDetail(item)"
+              >
+                <div class="flex items-center justify-between px-4 pt-3 pb-0">
+                  <span
+                    class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+                    [style.background-color]="statusBadgeColors(item).bg"
+                    [style.color]="statusBadgeColors(item).fg"
+                  >
+                    {{ item.status }}
+                  </span>
+                  <span class="text-xs text-[var(--text-secondary)]">
+                    {{ formatDateTime(item.publishedAt) }}
+                  </span>
+                </div>
+
+                <div class="px-4 pt-3">
+                  @if (item.photoUrl) {
+                    <img
+                      [src]="item.photoUrl"
+                      [alt]="item.title"
+                      class="w-full h-36 object-cover rounded-xl"
+                    />
+                  } @else {
+                    <div
+                      class="w-full h-36 rounded-xl flex items-center justify-center"
+                      style="background-color: var(--secondary-soft)"
+                    >
+                      <lucide-angular
+                        [name]="item.kind === 'LOST' ? 'paw-print' : 'heart'"
+                        [size]="44"
+                        [color]="'#2a9d8f'"
+                      ></lucide-angular>
+                    </div>
+                  }
+                </div>
+
+                <div class="px-4 pt-3 pb-1 flex-1">
+                  <h3 class="font-semibold text-[var(--text-primary)] text-base">
+                    {{ item.title }}
+                  </h3>
+                  <div class="flex flex-wrap gap-1.5 mt-2">
+                    <span
+                      class="text-xs px-2 py-0.5 rounded-full border border-gray-200 text-[var(--text-secondary)] flex items-center gap-0.5"
+                    >
+                      <span class="material-icons text-xs leading-none">place</span>
+                      {{ item.city }}
+                    </span>
+                    <span
+                      class="text-xs px-2 py-0.5 rounded-full"
+                      [style.background-color]="item.kind === 'LOST' ? '#fee2e2' : '#d1fae5'"
+                      [style.color]="item.kind === 'LOST' ? '#991b1b' : '#065f46'"
+                    >
+                      {{ item.kind === 'LOST' ? 'Perdida' : 'Encontrada' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  class="px-4 py-3 mt-2 border-t border-gray-100 flex flex-wrap gap-2"
+                  (click)="$event.stopPropagation()"
+                >
+                  <app-pet-button
+                    label="Detalles"
+                    variant="outline"
+                    size="sm"
+                    (clicked)="openDetail(item)"
+                  />
+                  @if (item.kind === 'LOST') {
+                    <app-pet-button
+                      label="Avistamientos"
+                      variant="outline"
+                      size="sm"
+                      (clicked)="openSightingsModal(item)"
+                    />
+                  }
+                  @if (item.canMarkAsFound) {
+                    <app-pet-button
+                      label="Marcar encontrada"
+                      variant="primary"
+                      size="sm"
+                      (clicked)="requestMarkAsFound(item)"
+                    />
+                  }
+                  <app-pet-button
+                    label="Editar"
+                    variant="outline"
+                    size="sm"
+                    (clicked)="openEditReport(item)"
+                  />
+                  <app-pet-button
+                    label="Eliminar"
+                    variant="danger"
+                    size="sm"
+                    (clicked)="requestDeleteReport(item)"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Confirmación: marcar como encontrada -->
+  @if (reportToMarkAsFound()) {
+    <app-confirm-dialog
+      [isOpen]="true"
+      [title]="'¿Marcar como encontrada?'"
+      [message]="
+        'Confirmas que ' +
+        reportToMarkAsFound()!.title +
+        ' fue encontrada. Se enviará una solicitud al equipo, que aprobará el cambio de estado.'
+      "
+      [confirmLabel]="'Aceptar'"
+      [confirmVariant]="'primary'"
+      [cancelVariant]="'danger'"
+      (confirmed)="confirmMarkAsFound()"
+      (cancelled)="cancelMarkAsFound()"
+    />
+  }
+
+  <!-- Confirmación: eliminar reporte -->
+  @if (reportToDelete()) {
+    <app-confirm-dialog
+      [isOpen]="true"
+      [title]="'¿Eliminar reporte?'"
+      [message]="
+        '¿Estás seguro de que deseas eliminar \'' +
+        reportToDelete()!.title +
+        '\'? Esta acción no se puede deshacer.'
+      "
+      (confirmed)="confirmDeleteReport()"
+      (cancelled)="cancelDeleteReport()"
+    />
+  }
+
+  <!-- Modal de edición -->
+  @if (editingReportItem()) {
+    <app-modal [isOpen]="true" title="Editar reporte" (close)="closeEditReport()">
+      <form
+        [formGroup]="editForm"
+        (ngSubmit)="submitEditReport()"
+        novalidate
+        class="flex flex-col gap-4"
+      >
+        @if (editGeneralError()) {
+          <div class="rounded-xl p-3 text-sm" style="background-color: #fef3c7; color: #92400e">
+            {{ editGeneralError() }}
+          </div>
+        }
+
+        <app-pet-input
+          label="Título"
+          formControlName="title"
+          [hasError]="!!(editForm.get('title')?.touched && editForm.get('title')?.invalid)"
+          [errorMessage]="editFieldError('title') ?? ''"
+        />
+
+        <app-pet-input
+          label="Descripción"
+          type="textarea"
+          [rows]="3"
+          formControlName="description"
+          [hasError]="
+            !!(editForm.get('description')?.touched && editForm.get('description')?.invalid)
+          "
+          [errorMessage]="editFieldError('description') ?? ''"
+        />
+
+        <app-pet-input
+          label="Fecha"
+          type="text"
+          formControlName="date"
+          hint="Formato YYYY-MM-DD"
+          [hasError]="!!(editForm.get('date')?.touched && editForm.get('date')?.invalid)"
+          [errorMessage]="editFieldError('date') ?? ''"
+        />
+
+        <app-pet-input
+          label="Teléfono de contacto"
+          formControlName="contactPhone"
+          hint="Opcional"
+        />
+
+        <app-pet-input label="Dirección" formControlName="address" hint="Opcional" />
+
+        @if (editingReportItem()!.kind === 'LOST') {
+          <app-pet-input
+            label="Recompensa"
+            type="number"
+            formControlName="reward"
+            hint="Opcional"
+          />
+        }
+
+        <div class="flex justify-end gap-3 mt-2 pt-4 border-t border-gray-100">
+          <app-pet-button label="Cancelar" variant="outline" (click)="closeEditReport()" />
+          <app-pet-button
+            label="Guardar cambios"
+            variant="primary"
+            type="submit"
+            [loading]="savingEdit()"
+          />
+        </div>
+      </form>
+    </app-modal>
+  }
+  <!-- Modal de detalle -->
+  <!-- Modal de detalle -->
+  @if (selectedItem()) {
+    <app-modal
+      [isOpen]="true"
+      [title]="selectedItem()!.kind === 'LOST' ? 'Mascota perdida' : 'Mascota encontrada'"
+      (close)="closeDetail()"
+    >
+      @if (loadingDetail()) {
+        <div class="py-10 text-center text-sm text-[var(--text-secondary)]">
+          Cargando detalle...
+        </div>
+      } @else if (selectedDetail(); as detail) {
+        <div class="flex flex-col gap-5">
+          @if (detail.kind === 'LOST') {
+            @if (selectedItem()!.photoUrl) {
+              <button
+                type="button"
+                class="w-full h-40 rounded-2xl overflow-hidden relative group"
+                (click)="detailViewerOpen.set(true)"
+                aria-label="Ver foto completa"
+              >
+                <img
+                  [src]="selectedItem()!.photoUrl"
+                  [alt]="detail.data.pet_name"
+                  class="w-full h-40 rounded-2xl object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <span
+                  class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full"
+                  >
+                    <lucide-angular name="search" [size]="14" [color]="'#ffffff'"></lucide-angular>
+                    Ver foto completa
+                  </span>
+                </span>
+              </button>
+            } @else {
+              <div
+                class="w-full h-40 rounded-2xl flex items-center justify-center"
+                style="background-color: var(--secondary-soft)"
+              >
+                <lucide-angular
+                  [name]="getSpeciesIcon(speciesName(detail.data.pet_species_id))"
+                  [size]="60"
+                  [color]="'#2a9d8f'"
+                ></lucide-angular>
+              </div>
+            }
+
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold text-[var(--text-primary)]">
+                  {{ detail.data.pet_name }}
+                </h2>
+                <p class="text-sm text-[var(--text-secondary)]">
+                  {{ speciesName(detail.data.pet_species_id) }}
+                </p>
+              </div>
+              <span
+                class="text-xs font-semibold px-3 py-1.5 rounded-full"
+                style="background-color: #fef3c7; color: #92400e"
+              >
+                Perdido/a
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="rounded-xl p-3" style="background-color: var(--background)">
+                <p class="text-xs text-[var(--text-secondary)] mb-0.5">Sexo</p>
+                <p class="text-sm font-medium text-[var(--text-primary)]">
+                  {{ sexLabel[detail.data.pet_sex] }}
+                </p>
+              </div>
+              <div class="rounded-xl p-3" style="background-color: var(--background)">
+                <p class="text-xs text-[var(--text-secondary)] mb-0.5">Tamaño</p>
+                <p class="text-sm font-medium text-[var(--text-primary)]">
+                  {{ sizeLabel[detail.data.pet_size] }}
+                </p>
+              </div>
+              <div class="rounded-xl p-3" style="background-color: var(--background)">
+                <p class="text-xs text-[var(--text-secondary)] mb-0.5">Color</p>
+                <p class="text-sm font-medium text-[var(--text-primary)]">
+                  {{ detail.data.pet_color }}
+                </p>
+              </div>
+              @if (detail.data.pet_approximate_age !== null) {
+                <div class="rounded-xl p-3" style="background-color: var(--background)">
+                  <p class="text-xs text-[var(--text-secondary)] mb-0.5">Edad aprox.</p>
+                  <p class="text-sm font-medium text-[var(--text-primary)]">
+                    {{ detail.data.pet_approximate_age }} años
+                  </p>
+                </div>
+              }
+            </div>
+
+            @if (detail.data.pet_distinctive_marks) {
+              <div
+                class="rounded-xl p-3 border border-yellow-100"
+                style="background-color: #fefce8"
+              >
+                <p class="text-xs font-medium text-yellow-700 mb-1 flex items-center gap-1">
+                  <span class="material-icons text-sm">star</span>
+                  Marcas distintivas
+                </p>
+                <p class="text-sm text-yellow-800">{{ detail.data.pet_distinctive_marks }}</p>
+              </div>
+            }
+
+            @if (detail.data.description) {
+              <div>
+                <p class="text-xs text-[var(--text-secondary)] mb-1">Descripción</p>
+                <p class="text-sm text-[var(--text-primary)] leading-relaxed">
+                  {{ detail.data.description }}
+                </p>
+              </div>
+            }
+
+            <div class="border-t border-gray-100 pt-4 flex flex-col gap-2">
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-icons text-base text-[var(--text-secondary)]">place</span>
+                <span class="text-[var(--text-primary)]">{{ detail.data.city }}</span>
+              </div>
+              @if (detail.data.address) {
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-icons text-base text-[var(--text-secondary)]"
+                    >location_on</span
+                  >
+                  <span class="text-[var(--text-secondary)]">{{ detail.data.address }}</span>
+                </div>
+              }
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-icons text-base text-[var(--text-secondary)]"
+                  >calendar_today</span
+                >
+                <span class="text-[var(--text-secondary)]">
+                  Perdida el {{ formatDate(detail.data.lost_date) }}
+                </span>
+              </div>
+              @if (detail.data.reward) {
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-icons text-base text-[var(--text-secondary)]">paid</span>
+                  <span class="text-[var(--text-secondary)]">
+                    Recompensa: {{ detail.data.reward | currency: 'COP' : 'symbol' : '1.0-0' }}
+                  </span>
+                </div>
+              }
+            </div>
+
+            @if (detail.data.contact_phone) {
+              <div
+                class="rounded-xl p-4 border border-gray-100"
+                style="background-color: var(--background)"
+              >
+                <p class="text-xs text-[var(--text-secondary)] mb-2">Contacto</p>
+
+                <a
+                  [href]="'tel:' + detail.data.contact_phone"
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--primary)]"
+                >
+                  <span class="material-icons text-base">phone</span>
+                  {{ detail.data.contact_phone }}
+                </a>
+              </div>
+            }
+
+            @if (!isOwnReport(selectedItem()!)) {
+              <app-pet-button
+                label="Reportar avistamiento"
+                variant="primary"
+                size="lg"
+                [fullWidth]="true"
+                (clicked)="navigateToReport(selectedItem()!)"
+              />
+            }
+          } @else {
+            @if (selectedItem()!.photoUrl) {
+              <button
+                type="button"
+                class="w-full h-40 rounded-2xl overflow-hidden relative group"
+                (click)="detailViewerOpen.set(true)"
+                aria-label="Ver foto completa"
+              >
+                <img
+                  [src]="selectedItem()!.photoUrl"
+                  [alt]="detail.data.title"
+                  class="w-full h-40 rounded-2xl object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <span
+                  class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full"
+                  >
+                    <lucide-angular name="search" [size]="14" [color]="'#ffffff'"></lucide-angular>
+                    Ver foto completa
+                  </span>
+                </span>
+              </button>
+            } @else {
+              <div
+                class="w-full h-40 rounded-2xl flex items-center justify-center"
+                style="background-color: var(--secondary-soft)"
+              >
+                <lucide-angular
+                  [name]="getSpeciesIcon(speciesName(detail.data.species_id))"
+                  [size]="60"
+                  [color]="'#2a9d8f'"
+                ></lucide-angular>
+              </div>
+            }
+
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold text-[var(--text-primary)]">
+                  {{ detail.data.title }}
+                </h2>
+                <p class="text-sm text-[var(--text-secondary)]">
+                  {{ speciesName(detail.data.species_id) }}
+                </p>
+              </div>
+              <span
+                class="text-xs font-semibold px-3 py-1.5 rounded-full"
+                style="background-color: #d1fae5; color: #065f46"
+              >
+                Encontrado/a
+              </span>
+            </div>
+
+            @if (detail.data.description) {
+              <div>
+                <p class="text-xs text-[var(--text-secondary)] mb-1">Descripción</p>
+                <p class="text-sm text-[var(--text-primary)] leading-relaxed">
+                  {{ detail.data.description }}
+                </p>
+              </div>
+            }
+
+            <div class="border-t border-gray-100 pt-4 flex flex-col gap-2">
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-icons text-base text-[var(--text-secondary)]">place</span>
+                <span class="text-[var(--text-primary)]">{{ detail.data.city }}</span>
+              </div>
+              @if (detail.data.address) {
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-icons text-base text-[var(--text-secondary)]"
+                    >location_on</span
+                  >
+                  <span class="text-[var(--text-secondary)]">{{ detail.data.address }}</span>
+                </div>
+              }
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-icons text-base text-[var(--text-secondary)]"
+                  >calendar_today</span
+                >
+                <span class="text-[var(--text-secondary)]">
+                  Encontrada el {{ formatDate(detail.data.found_date) }}
+                </span>
+              </div>
+            </div>
+
+            @if (detail.data.contact_phone) {
+              <div
+                class="rounded-xl p-4 border border-gray-100"
+                style="background-color: var(--background)"
+              >
+                <p class="text-xs text-[var(--text-secondary)] mb-2">Contacto</p>
+
+                <a
+                  [href]="'tel:' + detail.data.contact_phone"
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--primary)]"
+                >
+                  <span class="material-icons text-base">phone</span>
+                  {{ detail.data.contact_phone }}
+                </a>
+              </div>
+            }
+          }
+        </div>
+      }
+    </app-modal>
+  }
+
+  <!-- Visor de foto completa del detalle -->
+  @if (selectedItem()?.photoUrl) {
+    <app-image-viewer
+      [isOpen]="detailViewerOpen()"
+      [src]="selectedItem()!.photoUrl ?? null"
+      [alt]="'Reporte: ' + selectedItem()!.title"
+      (close)="detailViewerOpen.set(false)"
+    />
+  }
+
+  <!-- Modal de avistamientos -->
+  @if (sightingsModalOpen()) {
+    <app-modal
+      [isOpen]="true"
+      [size]="'xl'"
+      [title]="'Avistamientos de: ' + (sightingsForReport()?.title ?? '')"
+      (close)="closeSightingsModal()"
+    >
+      @if (loadingSightings()) {
+        <div class="py-10 text-center text-sm text-[var(--text-secondary)]">
+          Cargando avistamientos...
+        </div>
+      } @else if (sightingActionError()) {
+        <div class="rounded-xl p-3 text-sm mb-4" style="background-color: #fef3c7; color: #92400e">
+          {{ sightingActionError() }}
+        </div>
+      }
+
+      @if (!loadingSightings() && sightings().length === 0) {
+        <div class="py-10 text-center">
+          <p class="flex justify-center mb-3">
+            <lucide-angular name="eye" [size]="40" [color]="'#94a3b8'"></lucide-angular>
+          </p>
+          <p class="text-sm text-[var(--text-secondary)]">
+            Aún no hay avistamientos reportados para esta mascota.
+          </p>
+        </div>
+      }
+
+      @if (!loadingSightings() && sightings().length > 0) {
+        <div class="flex flex-col gap-5">
+          @for (sighting of sightings(); track sighting.id) {
+            <div class="border border-gray-100 rounded-2xl p-5 flex flex-col gap-4">
+              <!-- Header: título + estado -->
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="font-semibold text-[var(--text-primary)] text-base">
+                    {{ sighting.title }}
+                  </h3>
+                  <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+                    Reportado el {{ formatDate(sighting.published_at) }}
+                  </p>
+                </div>
+                <span
+                  class="text-xs font-medium px-2.5 py-1 rounded-full shrink-0"
+                  [style.background-color]="
+                    sighting.status === 'MATCHED'
+                      ? '#dbeafe'
+                      : sighting.status === 'APPROVED'
+                        ? '#d1fae5'
+                        : sighting.status === 'REJECTED'
+                          ? '#fee2e2'
+                          : '#f3f4f6'
+                  "
+                  [style.color]="
+                    sighting.status === 'MATCHED'
+                      ? '#1e40af'
+                      : sighting.status === 'APPROVED'
+                        ? '#065f46'
+                        : sighting.status === 'REJECTED'
+                          ? '#991b1b'
+                          : '#374151'
+                  "
+                >
+                  {{ sightingStatusLabel(sighting.status) }}
+                </span>
+              </div>
+
+              <!-- Foto de evidencia + info en grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Foto -->
+                <div class="sm:col-span-1">
+                  @if (sightingPhotos()[sighting.id]) {
+                    <button
+                      type="button"
+                      class="w-full h-40 rounded-xl overflow-hidden relative group"
+                      (click)="openSightingPhoto(sightingPhotos()[sighting.id])"
+                      aria-label="Ver foto completa del avistamiento"
+                    >
+                      <img
+                        [src]="sightingPhotos()[sighting.id]"
+                        [alt]="sighting.title"
+                        class="w-full h-40 object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <span
+                        class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl"
+                      >
+                        <span
+                          class="flex items-center gap-1.5 text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full"
+                        >
+                          <lucide-angular name="search" [size]="14" [color]="'#ffffff'"></lucide-angular>
+                          Ver foto completa
+                        </span>
+                      </span>
+                    </button>
+                  } @else {
+                    <div
+                      class="w-full h-40 rounded-xl flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)]"
+                      style="background-color: var(--secondary-soft)"
+                    >
+                      <span class="material-icons text-3xl">image_not_supported</span>
+                      <span class="text-xs">Sin foto de evidencia</span>
+                    </div>
+                  }
+                </div>
+
+                <!-- Detalles -->
+                <div class="sm:col-span-2 flex flex-col gap-3">
+                  @if (sighting.description) {
+                    <div>
+                      <p class="text-xs text-[var(--text-secondary)] mb-1">Descripción</p>
+                      <p class="text-sm text-[var(--text-primary)] leading-relaxed">
+                        {{ sighting.description }}
+                      </p>
+                    </div>
+                  }
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="rounded-xl p-3" style="background-color: var(--background)">
+                      <p class="text-xs text-[var(--text-secondary)] mb-0.5">Especie reportada</p>
+                      <p class="text-sm font-medium text-[var(--text-primary)]">
+                        {{ speciesName(sighting.species_id) || 'No especificada' }}
+                      </p>
+                    </div>
+                    <div class="rounded-xl p-3" style="background-color: var(--background)">
+                      <p class="text-xs text-[var(--text-secondary)] mb-0.5">
+                        Fecha del avistamiento
+                      </p>
+                      <p class="text-sm font-medium text-[var(--text-primary)]">
+                        {{ formatDate(sighting.found_date) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                    <div class="flex items-center gap-2 text-sm">
+                      <span class="material-icons text-base text-[var(--text-secondary)]"
+                        >place</span
+                      >
+                      <span class="text-[var(--text-primary)]">{{ sighting.city }}</span>
+                    </div>
+                    @if (sighting.address) {
+                      <div class="flex items-center gap-2 text-sm">
+                        <span class="material-icons text-base text-[var(--text-secondary)]"
+                          >location_on</span
+                        >
+                        <span class="text-[var(--text-secondary)]">{{ sighting.address }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  @if (sighting.contact_phone) {
+                    <a
+                      [href]="'tel:' + sighting.contact_phone"
+                      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--primary)] w-fit"
+                    >
+                      <span class="material-icons text-base">phone</span>
+                      {{ sighting.contact_phone }}
+                    </a>
+                  }
+
+                  @if (sighting.owner_confirmed_at) {
+                    <div class="flex items-center gap-1.5 text-xs" style="color: #065f46">
+                      <span class="material-icons text-sm">check_circle</span>
+                      Confirmaste el encuentro el {{ formatDate(sighting.owner_confirmed_at) }}
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Acciones -->
+              <div class="flex gap-2 pt-2 border-t border-gray-100">
+                @if (sighting.status === 'PUBLISHED') {
+                  <app-pet-button
+                    label="Marcar como posible coincidencia"
+                    variant="primary"
+                    size="sm"
+                    (clicked)="markAsMatch(sighting)"
+                  />
+                }
+                @if (sighting.status === 'MATCHED' && !sighting.owner_confirmed_at) {
+                  <app-pet-button
+                    label="Confirmar encuentro"
+                    variant="primary"
+                    size="sm"
+                    (clicked)="confirmSightingFound(sighting)"
+                  />
+                  <app-pet-button
+                    label="Descartar"
+                    variant="outline"
+                    size="sm"
+                    (clicked)="unmatchSighting(sighting)"
+                  />
+                }
+                @if (sighting.status === 'MATCHED' && sighting.owner_confirmed_at) {
+                  <span class="text-xs text-[var(--text-secondary)] italic pt-2">
+                    Esperando aprobación del administrador...
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </app-modal>
+  }
+
+  <!-- Visor de foto completa del avistamiento -->
+  @if (sightingViewerUrl()) {
+    <app-image-viewer
+      [isOpen]="sightingViewerOpen()"
+      [src]="sightingViewerUrl()"
+      [alt]="'Evidencia del avistamiento'"
+      (close)="closeSightingPhoto()"
+    />
+  }
+</div>

@@ -60,6 +60,15 @@
         >
           Perfil
         </a>
+        <a
+          routerLink="/admin/mensajes"
+          routerLinkActive="!text-white !bg-[var(--primary)]"
+          class="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition no-underline"
+        >
+          <lucide-angular name="message-square" [size]="15"></lucide-angular>
+          Mensajes
+        </a>
+        <app-notifications-bell></app-notifications-bell>
       </div>
 
       <button

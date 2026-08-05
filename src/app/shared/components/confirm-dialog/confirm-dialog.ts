@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PetButtonComponent } from '../button-pets/button-pets';
+import { PetButtonComponent, ButtonVariant } from '../button-pets/button-pets';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -14,6 +14,8 @@ export class ConfirmDialogComponent {
   @Input() message = 'Esta acción no se puede deshacer.';
   @Input() confirmLabel = 'Eliminar';
   @Input() cancelLabel = 'Cancelar';
+  @Input() confirmVariant: ButtonVariant = 'danger';
+  @Input() cancelVariant: ButtonVariant = 'outline';
 
   @Output() confirmed = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();

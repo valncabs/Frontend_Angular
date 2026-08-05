@@ -11,6 +11,9 @@ export class ModalComponent {
   @Input() isOpen = false;
   @Input() title = '';
   @Input() size: ModalSize = 'md';
+  /** Si es false, oculta el botón "Cerrar" y desactiva el click en el
+   * backdrop. Úsalo para modales obligatorios como completar perfil. */
+  @Input() dismissible = true;
 
   @Output() close = new EventEmitter<void>();
 
@@ -23,7 +26,11 @@ export class ModalComponent {
     return sizes[this.size];
   }
 
+  onBackdropClick(): void {
+    if (this.dismissible) this.closeModal();
+  }
+
   closeModal(): void {
-    this.close.emit();
+    if (this.dismissible) this.close.emit();
   }
 }

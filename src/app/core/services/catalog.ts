@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiSuccessResponse } from './auth.models';
-import { BreedResponse, SpeciesResponse } from './pet.models';
+import { BreedResponse, SpeciesResponse } from '../../features/pets/data-access/pet.models';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {

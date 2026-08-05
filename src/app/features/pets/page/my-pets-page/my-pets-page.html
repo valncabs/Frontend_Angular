@@ -1,0 +1,112 @@
+<div class="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
+  <!-- Encabezado Principal -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100 pb-5"
+  >
+    <div>
+      <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Mis Mascotas</h2>
+      <p class="text-slate-500 mt-1">
+        Administra tus compañeros registrados y gestiona sus datos generales.
+      </p>
+    </div>
+
+    <!-- Botón de Registro Restaurado con Tailwind Nativo -->
+    <button
+      type="button"
+      (click)="openAddModal()"
+      class="w-full sm:w-auto px-5 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl shadow-md font-medium transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5 duration-150"
+    >
+      <i class="bi bi-plus-lg text-lg"></i>
+      <span>Registrar Mascota</span>
+    </button>
+  </div>
+
+  <!-- Panel de Resumen Rápido -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <div
+        class="p-3 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center w-12 h-12"
+      >
+        <span class="material-icons text-base" style="color: #0369a1">pets</span>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-slate-400">Total registradas</p>
+        <p class="text-2xl font-bold text-slate-800">{{ pets().length }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid Dinámico de Mascotas -->
+  @if (pets().length > 0) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (pet of pets(); track pet.id) {
+        <app-pet-card
+          [pet]="pet"
+          (view)="openViewModal($any($event))"
+          (edit)="openEditModal($any($event))"
+          (delete)="requestDelete($any($event))"
+        >
+        </app-pet-card>
+      }
+    </div>
+  } @else {
+    <!-- Estado Vacío Corregido y Centrado Visualmente -->
+    <div
+      class="bg-white border border-gray-100 rounded-3xl p-12 text-center max-w-xl mx-auto shadow-sm flex flex-col items-center justify-center my-10"
+    >
+      <div
+        class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-teal-600 mb-4 border border-gray-100 shadow-inner"
+      >
+        <i class="bi bi-folder2-open text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-800">No tienes mascotas registradas</h3>
+      <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto leading-relaxed">
+        Agrega a tus compañeros para poder gestionar su información técnica, reportes y estado de
+        salud.
+      </p>
+
+      <button
+        type="button"
+        (click)="openAddModal()"
+        class="mt-6 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition duration-150 font-semibold text-sm shadow-md shadow-teal-600/10 transform hover:-translate-y-0.5"
+      >
+        Comenzar registro
+      </button>
+    </div>
+  }
+</div>
+
+<!-- Modal de Formulario (Creación y Edición) -->
+@if (isModalOpen()) {
+  <app-add-pet-modal
+    [isOpen]="isModalOpen()"
+    [petToEdit]="editingPet()"
+    [loading]="savingPet()"
+    [species]="species()"
+    (close)="closeModal()"
+    (saved)="onSavedPet($any($event))"
+  >
+  </app-add-pet-modal>
+}
+
+<!-- Modal de Detalle (Consulta) -->
+@if (viewingPet(); as pet) {
+  <app-pet-detail-modal [isOpen]="true" [pet]="pet" (close)="closeViewModal()">
+  </app-pet-detail-modal>
+}
+
+<!-- Diálogo de Confirmación de Borrado -->
+@if (deletingPet(); as pet) {
+  <app-confirm-dialog
+    [isOpen]="true"
+    title="¿Eliminar Mascota?"
+    [message]="
+      '¿Estás seguro de que deseas eliminar a ' + pet.name + '? Esta acción no se puede deshacer.'
+    "
+    confirmLabel="Eliminar"
+    cancelLabel="Cancelar"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  >
+  </app-confirm-dialog>
+}

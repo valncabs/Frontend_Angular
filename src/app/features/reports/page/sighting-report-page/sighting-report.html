@@ -1,0 +1,450 @@
+<div class="min-h-screen pb-16" style="background-color: var(--background)">
+  <!-- Header -->
+  <div
+    class="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-20"
+  >
+    <button
+      class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-[var(--text-secondary)] hover:bg-gray-50 transition-colors"
+      (click)="goBack()"
+    >
+      <span class="material-icons text-xl">arrow_back</span>
+    </button>
+    <div>
+      <h1 class="text-base font-semibold text-[var(--text-primary)] leading-tight">
+        Reportar avistamiento
+      </h1>
+      <p class="text-xs text-[var(--text-secondary)]">Ayuda a reunir una mascota con su familia</p>
+    </div>
+  </div>
+
+  <!-- Success state -->
+  @if (submitted()) {
+    <div class="flex flex-col items-center justify-center px-6 py-20 text-center">
+      <div
+        class="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+        style="background-color: #d1fae5"
+      >
+        <span class="material-icons text-4xl" style="color: #065f46">check_circle</span>
+      </div>
+      <h2 class="text-xl font-bold text-[var(--text-primary)] mb-2">¡Reporte enviado!</h2>
+      <p class="text-sm text-[var(--text-secondary)] mb-8 max-w-xs">
+        Tu reporte fue enviado correctamente. El dueño de la mascota será notificado.
+      </p>
+      <app-pet-button
+        label="Volver a reportes"
+        variant="primary"
+        size="md"
+        icon="arrow_back"
+        (clicked)="goBack()"
+      />
+    </div>
+  }
+
+  @if (!submitted()) {
+    @if (petContext()) {
+      <div class="px-4 pt-4">
+        <div class="card-pet border border-gray-100 p-4 flex flex-col gap-4 max-w-2xl mx-auto">
+          <!-- Header: miniatura + nombre + expandir/colapsar -->
+          <div class="flex gap-4 items-start">
+            @if (petContextImages()[0]) {
+              <button
+                type="button"
+                (click)="openPetImage(petContextImages()[0])"
+                class="w-20 h-20 rounded-xl overflow-hidden shrink-0 group"
+                aria-label="Ver foto de la mascota"
+              >
+                <img
+                  [src]="petContextImages()[0]"
+                  [alt]="petContext()!.pet_name"
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+              </button>
+            } @else {
+              <div
+                class="w-20 h-20 rounded-xl flex items-center justify-center shrink-0"
+                style="background-color: var(--secondary-soft)"
+              >
+                <lucide-angular name="paw-print" [size]="36" [color]="'#2a9d8f'"></lucide-angular>
+              </div>
+            }
+
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-[var(--text-secondary)] mb-0.5">
+                Estás reportando un avistamiento de:
+              </p>
+              <h3 class="font-semibold text-[var(--text-primary)]">{{ petContext()!.pet_name }}</h3>
+              <p class="text-xs text-[var(--text-secondary)]">
+                {{ sexLabel[petContext()!.pet_sex] }} · {{ sizeLabel[petContext()!.pet_size] }} ·
+                {{ petContext()!.pet_color }}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              (click)="contextExpanded.set(!contextExpanded())"
+              class="flex items-center gap-0.5 text-xs font-medium text-[var(--primary)] shrink-0 mt-1"
+            >
+              {{ contextExpanded() ? 'Ocultar información' : 'Ver información completa' }}
+              <span class="material-icons text-base leading-none">
+                {{ contextExpanded() ? 'expand_less' : 'expand_more' }}
+              </span>
+            </button>
+          </div>
+
+          @if (contextExpanded()) {
+            <!-- Información completa de la mascota -->
+            <div class="border-t border-gray-100 pt-4 flex flex-col gap-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="rounded-xl p-3" style="background-color: var(--background)">
+                  <p class="text-xs text-[var(--text-secondary)] mb-0.5">Especie</p>
+                  <p class="text-sm font-medium text-[var(--text-primary)]">
+                    {{ speciesName(petContext()!.pet_species_id) || 'No especificada' }}
+                  </p>
+                </div>
+                <div class="rounded-xl p-3" style="background-color: var(--background)">
+                  <p class="text-xs text-[var(--text-secondary)] mb-0.5">Sexo</p>
+                  <p class="text-sm font-medium text-[var(--text-primary)]">
+                    {{ sexLabel[petContext()!.pet_sex] }}
+                  </p>
+                </div>
+                <div class="rounded-xl p-3" style="background-color: var(--background)">
+                  <p class="text-xs text-[var(--text-secondary)] mb-0.5">Tamaño</p>
+                  <p class="text-sm font-medium text-[var(--text-primary)]">
+                    {{ sizeLabel[petContext()!.pet_size] }}
+                  </p>
+                </div>
+                <div class="rounded-xl p-3" style="background-color: var(--background)">
+                  <p class="text-xs text-[var(--text-secondary)] mb-0.5">Color</p>
+                  <p class="text-sm font-medium text-[var(--text-primary)]">
+                    {{ petContext()!.pet_color }}
+                  </p>
+                </div>
+                @if (petContext()!.pet_approximate_age !== null) {
+                  <div class="rounded-xl p-3" style="background-color: var(--background)">
+                    <p class="text-xs text-[var(--text-secondary)] mb-0.5">Edad aproximada</p>
+                    <p class="text-sm font-medium text-[var(--text-primary)]">
+                      {{ petContext()!.pet_approximate_age }} años
+                    </p>
+                  </div>
+                }
+              </div>
+
+              @if (petContext()!.pet_distinctive_marks) {
+                <div
+                  class="rounded-xl p-3 border border-yellow-100"
+                  style="background-color: #fefce8"
+                >
+                  <p class="text-xs font-medium text-yellow-700 mb-1 flex items-center gap-1">
+                    <span class="material-icons text-sm">star</span>
+                    Marcas distintivas
+                  </p>
+                  <p class="text-sm text-yellow-800">{{ petContext()!.pet_distinctive_marks }}</p>
+                </div>
+              }
+
+              @if (petContext()!.description) {
+                <div>
+                  <p class="text-xs text-[var(--text-secondary)] mb-1">Descripción</p>
+                  <p class="text-sm text-[var(--text-primary)] leading-relaxed">
+                    {{ petContext()!.description }}
+                  </p>
+                </div>
+              }
+
+              <div class="border-t border-gray-100 pt-4 flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-icons text-base text-[var(--text-secondary)]"
+                    >calendar_today</span
+                  >
+                  <span class="text-[var(--text-secondary)]">
+                    Perdida el {{ formatDate(petContext()!.lost_date) }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-icons text-base text-[var(--text-secondary)]">place</span>
+                  <span class="text-[var(--text-primary)]">{{ petContext()!.city }}</span>
+                </div>
+                @if (petContext()!.address) {
+                  <div class="flex items-center gap-2 text-sm">
+                    <span class="material-icons text-base text-[var(--text-secondary)]"
+                      >location_on</span
+                    >
+                    <span class="text-[var(--text-secondary)]">{{ petContext()!.address }}</span>
+                  </div>
+                }
+                @if (petContext()!.reward) {
+                  <div class="flex items-center gap-2 text-sm">
+                    <span class="material-icons text-base text-[var(--text-secondary)]">paid</span>
+                    <span class="text-[var(--text-secondary)]">
+                      Recompensa:
+                      {{ petContext()!.reward | currency: 'COP' : 'symbol' : '1.0-0' }}
+                    </span>
+                  </div>
+                }
+                @if (petContext()!.contact_phone) {
+                  <a
+                    [href]="'tel:' + petContext()!.contact_phone"
+                    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--primary)] w-fit"
+                  >
+                    <span class="material-icons text-base">phone</span>
+                    {{ petContext()!.contact_phone }}
+                  </a>
+                }
+              </div>
+
+              <!-- Galería: todas las imágenes del reporte, cada una expandible -->
+              @if (petContextImages().length > 0) {
+                <div>
+                  <p class="text-xs text-[var(--text-secondary)] mb-2">Fotos de la mascota</p>
+                  <div class="flex flex-wrap gap-3">
+                    @for (url of petContextImages(); track url) {
+                      <button
+                        type="button"
+                        (click)="openPetImage(url)"
+                        class="w-24 h-24 rounded-xl overflow-hidden group relative"
+                        aria-label="Ver foto completa"
+                      >
+                        <img
+                          [src]="url"
+                          [alt]="petContext()!.pet_name"
+                          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      class="px-4 py-5 flex flex-col gap-6 max-w-2xl mx-auto"
+    >
+      @if (generalError()) {
+        <div class="rounded-xl p-3 text-sm" style="background-color: #fef3c7; color: #92400e">
+          {{ generalError() }}
+        </div>
+      }
+
+      <!-- Sección: información del avistamiento -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #e0f2fe"
+          >
+            <span class="material-icons text-base" style="color: #0369a1">info</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">Información del reporte</h2>
+        </div>
+
+        <app-pet-select
+          label="Especie de la mascota"
+          placeholder="Selecciona una especie"
+          formControlName="species_id"
+          [options]="speciesOptions"
+          [hasError]="hasError('species_id')"
+          [errorMessage]="getError('species_id')"
+        />
+
+        <app-pet-input
+          label="Título"
+          placeholder="Ej: Vi un perro labrador cerca del parque"
+          [hasError]="hasError('title')"
+          [errorMessage]="getError('title')"
+          formControlName="title"
+        />
+
+        <!-- Descripción como textarea nativo -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-[var(--text-primary)]">Descripción</label>
+          <textarea
+            formControlName="description"
+            placeholder="Describe la mascota, su estado, comportamiento y cualquier detalle relevante..."
+            rows="4"
+            class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[var(--text-primary)] resize-none focus:outline-none focus:ring-2 focus:border-[var(--primary)] transition-all"
+            [class.border-red-400]="hasError('description')"
+          ></textarea>
+          @if (hasError('description')) {
+            <p class="text-xs text-red-500 flex items-center gap-1">
+              <span class="material-icons text-sm">error_outline</span>
+              {{ getError('description') }}
+            </p>
+          }
+        </div>
+
+        <!-- Fecha y teléfono en grid -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-[var(--text-primary)]">
+              Fecha de avistamiento
+            </label>
+            <input
+              type="date"
+              formControlName="sightingDate"
+              [max]="''"
+              class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:border-[var(--primary)] transition-all"
+              [class.border-red-400]="hasError('sightingDate')"
+            />
+            @if (hasError('sightingDate')) {
+              <p class="text-xs text-red-500 flex items-center gap-1">
+                <span class="material-icons text-sm">error_outline</span>
+                {{ getError('sightingDate') }}
+              </p>
+            }
+          </div>
+
+          <app-pet-input
+            label="Teléfono de contacto (opcional)"
+            placeholder="310 000 0000"
+            [hasError]="hasError('contactPhone')"
+            [errorMessage]="getError('contactPhone')"
+            formControlName="contactPhone"
+          />
+        </div>
+      </section>
+
+      <hr class="border-gray-100" />
+
+      <!-- Sección: ubicación -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #fef9c3"
+          >
+            <span class="material-icons text-base" style="color: #854d0e">place</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">
+            Ubicación del avistamiento
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <app-pet-select
+            label="Departamento"
+            placeholder="Selecciona un departamento"
+            formControlName="department"
+            [options]="departmentOptions"
+            [hasError]="hasError('department')"
+            [errorMessage]="getError('department')"
+          />
+
+          <app-pet-select
+            label="Ciudad"
+            placeholder="Selecciona una ciudad"
+            formControlName="city"
+            [options]="cityOptions()"
+            [hasError]="hasError('city')"
+            [errorMessage]="getError('city')"
+          />
+        </div>
+
+        <app-pet-input
+          label="Dirección"
+          placeholder="Calle, carrera, barrio..."
+          [hasError]="hasError('address')"
+          [errorMessage]="getError('address')"
+          formControlName="address"
+        />
+
+        <app-location-picker
+          [initialLat]="form.get('latitude')?.value"
+          [initialLng]="form.get('longitude')?.value"
+          (locationPicked)="onLocationPicked($event)"
+        />
+
+        @if (hasError('latitude')) {
+          <p class="text-xs text-red-500 flex items-center gap-1">
+            <span class="material-icons text-sm">error_outline</span>
+            Marca la ubicación en el mapa
+          </p>
+        }
+      </section>
+
+      <hr class="border-gray-100" />
+
+      <section class="flex flex-col gap-3">
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style="background-color: #f3e8ff"
+          >
+            <span class="material-icons text-base" style="color: #7e22ce">photo_camera</span>
+          </div>
+          <h2 class="text-sm font-semibold text-[var(--text-primary)]">
+            Foto de evidencia (opcional)
+          </h2>
+        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          class="hidden"
+          #evidenceInput
+          (change)="onPhotoSelected($event)"
+        />
+
+        @if (photoPreview()) {
+          <div class="relative w-28 h-28">
+            <img
+              [src]="photoPreview()"
+              alt="Evidencia"
+              class="w-28 h-28 rounded-2xl object-cover border border-gray-200"
+            />
+            <button
+              type="button"
+              (click)="removePhoto()"
+              class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[var(--danger)] text-white flex items-center justify-center text-xs shadow"
+            >
+              <lucide-angular name="x" [size]="12" [color]="'#ffffff'"></lucide-angular>
+            </button>
+          </div>
+        } @else {
+          <button
+            type="button"
+            (click)="evidenceInput.click()"
+            class="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
+          >
+            <span class="material-icons text-xl">add_a_photo</span>
+            <span class="text-xs">Subir foto</span>
+          </button>
+        }
+
+        @if (photoError) {
+          <p class="text-xs text-[var(--danger)]">{{ photoError }}</p>
+        }
+      </section>
+
+      <!-- Submit -->
+      <div class="pt-2">
+        <app-pet-button
+          label="Enviar reporte"
+          variant="primary"
+          size="lg"
+          [fullWidth]="true"
+          [loading]="submitting()"
+          type="submit"
+          icon="send"
+        />
+        <p class="text-xs text-center text-[var(--text-secondary)] mt-3">
+          Al enviar confirmas que la información es verídica y ayudas a reunir esta mascota con su
+          familia.
+        </p>
+      </div>
+    </form>
+  }
+
+  @if (selectedPetImage()) {
+    <app-image-viewer
+      [isOpen]="petImageOpen()"
+      [src]="selectedPetImage()"
+      [alt]="'Foto de ' + (petContext()?.pet_name ?? 'la mascota')"
+      (close)="petImageOpen.set(false)"
+    />
+  }
+</div>
