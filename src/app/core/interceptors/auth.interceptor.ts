@@ -8,8 +8,9 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, catchError, filter, switchMap, take, throwError } from 'rxjs';
 import { AuthService } from '../services/auth';
+import { TokenStorage } from '../services/token-storage';
 
-const PUBLIC_AUTH_PATHS = [
+const PUBLIC_AUTH_PATHS = new Set([
   '/auth/login',
   '/auth/register',
   '/auth/refresh',
@@ -17,16 +18,24 @@ const PUBLIC_AUTH_PATHS = [
   '/auth/reset-password',
   '/auth/verify-email',
   '/auth/resend-verification',
-];
+]);
 
 let isRefreshing = false;
-const refreshedToken$ = new BehaviorSubject<string | null>(null);
+// Subject compartido: mientras un refresh está en curso, las demás peticiones
+// que reciban 401 se encolan aquí esperando el token nuevo. Si el refresh
+// FALLA, el subject emite error para que esas peticiones se desbloqueen y
+// propaguen el fallo (antes quedaban colgadas para siempre).
+let refreshedToken$ = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const tokenStorage = inject(TokenStorage);
 
-  const isPublicAuthRequest = PUBLIC_AUTH_PATHS.some((path) => req.url.includes(path));
+  // Coincidencia exacta sobre el path (sin query string): evita que una ruta
+  // como /auth/login marque por error como pública otra que solo la contenga.
+  const requestPath = req.url.split('?')[0];
+  const isPublicAuthRequest = PUBLIC_AUTH_PATHS.has(requestPath);
   const accessToken = authService.getAccessToken();
 
   const authorizedReq =
@@ -37,7 +46,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authorizedReq).pipe(
     catchError((error: HttpErrorResponse) => {
       const shouldTryRefresh =
-        error.status === 401 && !isPublicAuthRequest && authService.hasSession();
+        error.status === 401 && !isPublicAuthRequest && tokenStorage.hasSession();
       if (!shouldTryRefresh) {
         return throwError(() => error);
       }
@@ -54,22 +63,23 @@ function handleTokenRefresh(
 ): Observable<any> {
   if (!isRefreshing) {
     isRefreshing = true;
-    refreshedToken$.next(null);
+    refreshedToken$ = new BehaviorSubject<string | null>(null);
 
-    return authService.refreshToken().pipe(
-      switchMap((response) => {
-        isRefreshing = false;
-        const newToken = response.data.access_token;
-        refreshedToken$.next(newToken);
-        return next(req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } }));
-      }),
-      catchError((refreshError) => {
-        isRefreshing = false;
+    authService.refreshToken().subscribe({
+      next: (response) => {
+        refreshedToken$.next(response.data.access_token);
+        refreshedToken$.complete();
+      },
+      error: (refreshError) => {
         authService.logout();
-        router.navigate(['/login']);
-        return throwError(() => refreshError);
-      }),
-    );
+        router.navigate(['/home']);
+        refreshedToken$.error(refreshError);
+        isRefreshing = false;
+      },
+      complete: () => {
+        isRefreshing = false;
+      },
+    });
   }
 
   return refreshedToken$.pipe(

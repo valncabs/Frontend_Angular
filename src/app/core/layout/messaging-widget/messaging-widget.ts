@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject, signal, DestroyRef } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { AuthService } from '../../services/auth';
@@ -17,6 +18,7 @@ interface Fuente {
 }
 
 interface Mensaje {
+  id: number;
   usuario: boolean;
   texto: string;
   fuentes?: Fuente[];
@@ -42,6 +44,7 @@ export class MessagingWidgetComponent {
   readonly messaging = inject(MessagingService);
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   abierto = signal(false);
   activeTab = signal<Tab>('ai');
@@ -68,10 +71,14 @@ export class MessagingWidgetComponent {
   /** Refresco en silencio del hilo abierto como respaldo del WebSocket
    * (evita perder mensajes entrantes si un evento en vivo se pierde). */
   private threadRefreshTimer: ReturnType<typeof setInterval> | null = null;
+  private chatMessageId = 0;
 
   constructor() {
     this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(() => {
         const hidden = this.router.url.includes('/mensajes');
         this.escondido.set(hidden);
@@ -81,37 +88,41 @@ export class MessagingWidgetComponent {
         }
       });
 
-    this.messaging.onMessage.subscribe(({ conversation_id, data }) => {
-      const t = this.thread();
-      if (t && t.conversation.id === conversation_id) {
-        const msg: ThreadMessage = { ...data, status: data.is_read ? 'read' : 'sent' };
-        this.thread.update((cur) =>
-          cur ? { ...cur, messages: [...cur.messages, msg] } : cur,
-        );
-        if (this.abierto()) {
-          this.messaging.markRead(conversation_id).subscribe({ error: () => {} });
-          this.messaging.refreshNotifications();
+    this.messaging.onMessage
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ conversation_id, data }) => {
+        const t = this.thread();
+        if (t && t.conversation.id === conversation_id) {
+          const msg: ThreadMessage = { ...data, status: data.is_read ? 'read' : 'sent' };
+          this.thread.update((cur) =>
+            cur ? { ...cur, messages: [...cur.messages, msg] } : cur,
+          );
+          if (this.abierto()) {
+            this.messaging.markRead(conversation_id).subscribe({ error: () => {} });
+            this.messaging.refreshNotifications();
+          }
+          this.scrollThreadToBottom();
         }
-        this.scrollThreadToBottom();
-      }
-    });
+      });
 
-    this.messaging.onMessagesRead.subscribe(({ conversation_id, message_ids }) => {
-      const t = this.thread();
-      if (t && t.conversation.id === conversation_id) {
-        const ids = new Set(message_ids);
-        this.thread.update((cur) =>
-          cur
-            ? {
-                ...cur,
-                messages: cur.messages.map((m) =>
-                  ids.has(m.id) ? { ...m, is_read: true, status: 'read' } : m,
-                ),
-              }
-            : cur,
-        );
-      }
-    });
+    this.messaging.onMessagesRead
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ conversation_id, message_ids }) => {
+        const t = this.thread();
+        if (t && t.conversation.id === conversation_id) {
+          const ids = new Set(message_ids);
+          this.thread.update((cur) =>
+            cur
+              ? {
+                  ...cur,
+                  messages: cur.messages.map((m) =>
+                    ids.has(m.id) ? { ...m, is_read: true, status: 'read' } : m,
+                  ),
+                }
+              : cur,
+          );
+        }
+      });
 
     this.threadRefreshTimer = setInterval(() => this.refreshOpenThread(), 15000);
   }
@@ -186,19 +197,20 @@ export class MessagingWidgetComponent {
     if (!this.pregunta.trim()) return;
 
     const texto = this.pregunta.trim();
-    this.mensajes.push({ usuario: true, texto });
+    this.mensajes.push({ id: ++this.chatMessageId, usuario: true, texto });
     this.pregunta = '';
     this.cargando = true;
 
     this.chatbot.ask(texto).subscribe({
       next: (resp) => {
         this.cargando = false;
-        this.mensajes.push({ usuario: false, texto: resp.answer });
+        this.mensajes.push({ id: ++this.chatMessageId, usuario: false, texto: resp.answer });
         this.scrollAiToBottom();
       },
       error: () => {
         this.cargando = false;
         this.mensajes.push({
+          id: ++this.chatMessageId,
           usuario: false,
           texto: 'Lo siento, ocurrió un error al conectar con Pet AI.',
         });

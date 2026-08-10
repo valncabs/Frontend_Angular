@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TokenStorage } from './token-storage';
+import { MessagingService } from './messaging';
 
 import {
   ApiSuccessResponse,
@@ -33,6 +34,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenStorage = inject(TokenStorage);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
   private readonly baseUrl = `${environment.apiUrl}/auth`;
 
   private readonly currentUserSignal = signal<LoginUserData | null>(this.tokenStorage.getUser());
@@ -107,6 +109,12 @@ export class AuthService {
   }
 
   logout(): void {
+    // Cierra el WebSocket del usuario actual antes de limpiar la sesión, para
+    // que una siguiente sesión (otro usuario) no herede la conexión anterior.
+    // Se resuelve por Injector para evitar una dependencia circular con
+    // MessagingService (que a su vez inyecta AuthService).
+    this.injector.get(MessagingService).disconnect();
+
     this.clearRefreshTimer();
     const refreshToken = this.tokenStorage.getRefreshToken();
     this.tokenStorage.clear();

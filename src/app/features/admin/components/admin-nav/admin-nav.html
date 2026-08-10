@@ -30,7 +30,7 @@
       </div>
 
       <!-- Links -->
-      <div class="flex items-center gap-1">
+      <div class="hidden lg:flex items-center gap-1">
         <a
           routerLink="/admin/dashboard"
           routerLinkActive="!text-white !bg-[var(--primary)]"
@@ -71,12 +71,93 @@
         <app-notifications-bell></app-notifications-bell>
       </div>
 
-      <button
-        (click)="logout()"
-        class="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 hover:bg-red-100 transition shadow-sm"
-      >
-        Cerrar sesión
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="lg:hidden w-11 h-11 rounded-xl flex items-center justify-center text-slate-700 bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md hover:bg-white transition-all duration-300"
+          (click)="toggleMenu()"
+          [attr.aria-label]="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'"
+        >
+          @if (isMenuOpen) {
+            <lucide-angular name="x" [size]="20"></lucide-angular>
+          } @else {
+            <lucide-angular name="menu" [size]="20"></lucide-angular>
+          }
+        </button>
+
+        <button
+          (click)="logout()"
+          class="hidden lg:inline-flex px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 hover:bg-red-100 transition shadow-sm"
+        >
+          Cerrar sesión
+        </button>
+      </div>
     </div>
+
+    <!-- Mobile Menu -->
+    @if (isMenuOpen) {
+      <div class="lg:hidden mt-3 pb-4 animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-3 flex flex-col gap-1">
+          <a
+            routerLink="/admin/dashboard"
+            (click)="toggleMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
+            <i class="bi bi-clipboard-data"></i>
+            <span>Gestión de Reportes</span>
+          </a>
+
+          <a
+            routerLink="/admin/usuarios"
+            (click)="toggleMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
+            <i class="bi bi-people"></i>
+            <span>Usuarios</span>
+          </a>
+
+          <a
+            routerLink="/admin/powerbi"
+            (click)="toggleMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
+            <i class="bi bi-bar-chart-line"></i>
+            <span>Power BI</span>
+          </a>
+
+          <a
+            routerLink="/admin/mi-perfil"
+            (click)="toggleMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
+            <i class="bi bi-person"></i>
+            <span>Perfil</span>
+          </a>
+
+          <a
+            routerLink="/admin/mensajes"
+            (click)="toggleMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
+            <i class="bi bi-chat-dots"></i>
+            <span>Mensajes</span>
+          </a>
+
+          <div class="border-t my-2 border-slate-100"></div>
+
+          <div class="flex items-center justify-center gap-2 p-2">
+            <app-notifications-bell></app-notifications-bell>
+          </div>
+
+          <div class="p-2">
+            <button
+              (click)="logout()"
+              class="w-full text-center py-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl transition duration-200"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </nav>

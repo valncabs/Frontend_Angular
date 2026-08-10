@@ -1,8 +1,5 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
   OnChanges,
   OnDestroy,
   AfterViewInit,
@@ -10,9 +7,13 @@ import {
   ElementRef,
   ViewChild,
   signal,
+  computed,
+  input,
+  output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UnifiedReportItem } from '../../data-access/report-models';
+import { loadExternalScript, loadExternalStylesheet } from '../../../../core/utils/external-scripts';
 
 declare const maplibregl: any;
 
@@ -52,20 +53,23 @@ const MARKER_SIZE = 0.75;
 export class ReportMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
 
-  @Input() reports: UnifiedReportItem[] = [];
+  readonly reports = input<UnifiedReportItem[]>([]);
 
-  @Output() markerClick = new EventEmitter<UnifiedReportItem>();
+  readonly markerClick = output<UnifiedReportItem>();
 
   mapReady = signal(false);
+  mapLoadError = signal(false);
 
   private map: any = null;
   private viewInitialized = false;
   private renderToken = 0;
   private defaultPinsReady = false;
 
-  get pointsWithLocation(): UnifiedReportItem[] {
-    return this.reports.filter((r) => r.latitude != null && r.longitude != null);
-  }
+  /** Filtro memorizado (computed) para no re-iterar `reports` en cada ciclo
+   * de detección de cambios. */
+  readonly pointsWithLocation = computed(() =>
+    this.reports().filter((r) => r.latitude != null && r.longitude != null),
+  );
 
   /** Tipo visual del marcador: un perdido que ya fue encontrado (status FOUND)
    * se pinta como encontrado (verde), no como perdido (ámbar). */
@@ -92,17 +96,14 @@ export class ReportMapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private async loadMapLibreAndInit(): Promise<void> {
     if (typeof maplibregl === 'undefined') {
-      const cssLink = document.createElement('link');
-      cssLink.rel = 'stylesheet';
-      cssLink.href = 'https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css';
-      document.head.appendChild(cssLink);
-
-      await new Promise<void>((resolve) => {
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js';
-        script.onload = () => resolve();
-        document.head.appendChild(script);
-      });
+      loadExternalStylesheet('https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css');
+      try {
+        await loadExternalScript('https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js');
+      } catch {
+        // CDN caído o bloqueado: mostrar el error en vez de un spinner infinito.
+        this.mapLoadError.set(true);
+        return;
+      }
     }
     this.initMap();
   }
@@ -188,7 +189,7 @@ export class ReportMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.map.on('click', 'report-pin', (e: any) => {
       const feature = e.features[0];
       const id = feature.properties['id'];
-      const item = this.reports.find((r) => r.id === id);
+      const item = this.reports().find((r) => r.id === id);
       if (item) this.markerClick.emit(item);
     });
 
@@ -202,7 +203,7 @@ export class ReportMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (!this.map || !this.map.getSource('reports')) return;
 
     const token = ++this.renderToken;
-    const points = this.pointsWithLocation;
+    const points = this.pointsWithLocation();
 
     // Pines por defecto (sin foto o si la foto no se puede cargar).
     this.ensureDefaultPins();

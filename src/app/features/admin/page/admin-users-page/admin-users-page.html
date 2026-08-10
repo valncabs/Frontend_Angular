@@ -96,7 +96,7 @@
           @for (u of users(); track u.id) {
             <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
               <td class="px-6 py-4 font-semibold text-slate-800">{{ u.email }}</td>
-              <td class="px-6 py-4 text-slate-700">{{ fullName(u) }}</td>
+              <td class="px-6 py-4 text-slate-700">{{ usersView().get(u.id) }}</td>
               <td class="px-6 py-4">
                 <span
                   class="px-3 py-1 rounded-full text-xs font-medium"

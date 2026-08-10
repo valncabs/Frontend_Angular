@@ -1,30 +1,10 @@
 import { Routes } from '@angular/router';
 
 import { HomePage } from './features/home/page/home-page/home-page';
-
-import { LoginPage } from './features/auth/page/login-page/login-page';
-import { RegisterPage } from './features/auth/page/register-page/register-page';
-import { ForgotPasswordPage } from './features/auth/page/forgot-password-page/forgot-password-page';
-import { ResetPasswordPage } from './features/auth/page/reset-password-page/reset-password-page';
-import { VerifyEmailPage } from './features/auth/page/verify-email-page/verify-email-page';
-
 import { DashPage } from './features/dashboard-shell/page/dash-page/dash-page';
-import { MyPetsPage } from './features/pets/page/my-pets-page/my-pets-page';
-import { PetReportsComponent } from './features/reports/page/pet-reports/pet-reports';
-import { SightingReportComponent } from './features/reports/page/sighting-report-page/sighting-report';
-import { LostReportFormComponent } from './features/reports/page/lost-report-form-page/lost-report-form';
-import { PageConfiguration } from './features/settings/page/page-configuration/page-configuration';
-import { PageMyProfile } from './features/profile/page/page-my-profile/page-my-profile';
-import { MessagingPageComponent } from './features/messaging/page/messaging-page/messaging-page';
-
 import { AdminPage } from './features/admin/page/admin-page/admin-page';
-import { AdminReportesPage } from './features/admin/page/admin-reportes-page/admin-reportes-page';
-import { AdminPanelPage } from './features/admin/page/admin-panel-page/admin-panel-page';
-import { AdminUsersPage } from './features/admin/page/admin-users-page/admin-users-page';
-import { PowerBI } from './features/admin/page/power-bi/power-bi';
 
-import { authGuard } from './core/guards/auth-guard';
-import { adminGuard } from './core/guards/admin-guard';
+import { authGuard, adminGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
   {
@@ -41,31 +21,42 @@ export const routes: Routes = [
 
   {
     path: 'login',
-    component: LoginPage,
+    loadComponent: () =>
+      import('./features/auth/page/login-page/login-page').then((m) => m.LoginPage),
     title: 'Iniciar sesión',
   },
 
   {
     path: 'registro',
-    component: RegisterPage,
+    loadComponent: () =>
+      import('./features/auth/page/register-page/register-page').then((m) => m.RegisterPage),
     title: 'Crear cuenta',
   },
 
   {
     path: 'forgot-password',
-    component: ForgotPasswordPage,
+    loadComponent: () =>
+      import('./features/auth/page/forgot-password-page/forgot-password-page').then(
+        (m) => m.ForgotPasswordPage,
+      ),
     title: 'Recuperar contraseña',
   },
 
   {
     path: 'reset-password',
-    component: ResetPasswordPage,
+    loadComponent: () =>
+      import('./features/auth/page/reset-password-page/reset-password-page').then(
+        (m) => m.ResetPasswordPage,
+      ),
     title: 'Restablecer contraseña',
   },
 
   {
     path: 'verify-email',
-    component: VerifyEmailPage,
+    loadComponent: () =>
+      import('./features/auth/page/verify-email-page/verify-email-page').then(
+        (m) => m.VerifyEmailPage,
+      ),
     title: 'Verificar correo',
   },
 
@@ -82,43 +73,62 @@ export const routes: Routes = [
 
       {
         path: 'mascotas',
-        component: MyPetsPage,
+        loadComponent: () =>
+          import('./features/pets/page/my-pets-page/my-pets-page').then((m) => m.MyPetsPage),
         title: 'Mis mascotas',
       },
 
       {
         path: 'reportes',
-        component: PetReportsComponent,
+        loadComponent: () =>
+          import('./features/reports/page/pet-reports/pet-reports').then(
+            (m) => m.PetReportsComponent,
+          ),
         title: 'Reportes de mascotas',
       },
 
       {
         path: 'reportar-avistamiento',
-        component: SightingReportComponent,
+        loadComponent: () =>
+          import('./features/reports/page/sighting-report-page/sighting-report').then(
+            (m) => m.SightingReportComponent,
+          ),
         title: 'Reportar avistamiento de mascota',
       },
 
       {
         path: 'reportar-perdida',
-        component: LostReportFormComponent,
+        loadComponent: () =>
+          import('./features/reports/page/lost-report-form-page/lost-report-form').then(
+            (m) => m.LostReportFormComponent,
+          ),
         title: 'Reportar mascota perdida',
       },
 
       {
         path: 'configuracion',
-        component: PageConfiguration,
+        loadComponent: () =>
+          import('./features/settings/page/page-configuration/page-configuration').then(
+            (m) => m.PageConfiguration,
+          ),
         title: 'Configuración',
       },
 
       {
         path: 'mi-perfil',
-        component: PageMyProfile,
+        loadComponent: () =>
+          import('./features/profile/page/page-my-profile/page-my-profile').then(
+            (m) => m.PageMyProfile,
+          ),
         title: 'Mi perfil',
       },
 
       {
         path: 'mensajes',
-        component: MessagingPageComponent,
+        loadComponent: () =>
+          import('./features/messaging/page/messaging-page/messaging-page').then(
+            (m) => m.MessagingPageComponent,
+          ),
         title: 'Mensajes',
       },
     ],
@@ -137,37 +147,53 @@ export const routes: Routes = [
 
       {
         path: 'dashboard',
-        component: AdminReportesPage,
+        loadComponent: () =>
+          import('./features/admin/page/admin-reportes-page/admin-reportes-page').then(
+            (m) => m.AdminReportesPage,
+          ),
         title: 'Dashboard',
       },
 
       {
         path: 'panel',
-        component: AdminPanelPage,
+        loadComponent: () =>
+          import('./features/admin/page/admin-panel-page/admin-panel-page').then(
+            (m) => m.AdminPanelPage,
+          ),
         title: 'Panel de administración',
       },
 
       {
         path: 'powerbi',
-        component: PowerBI,
+        loadComponent: () =>
+          import('./features/admin/page/power-bi/power-bi').then((m) => m.PowerBI),
         title: 'Power BI',
       },
 
       {
         path: 'mi-perfil',
-        component: PageMyProfile,
+        loadComponent: () =>
+          import('./features/profile/page/page-my-profile/page-my-profile').then(
+            (m) => m.PageMyProfile,
+          ),
         title: 'Mi perfil',
       },
 
       {
         path: 'usuarios',
-        component: AdminUsersPage,
+        loadComponent: () =>
+          import('./features/admin/page/admin-users-page/admin-users-page').then(
+            (m) => m.AdminUsersPage,
+          ),
         title: 'Gestión de usuarios',
       },
 
       {
         path: 'mensajes',
-        component: MessagingPageComponent,
+        loadComponent: () =>
+          import('./features/messaging/page/messaging-page/messaging-page').then(
+            (m) => m.MessagingPageComponent,
+          ),
         title: 'Mensajes',
       },
     ],

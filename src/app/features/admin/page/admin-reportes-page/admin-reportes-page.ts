@@ -2,8 +2,6 @@ import { Component, HostListener, OnInit, computed, inject, signal } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { Observable, from, forkJoin, of } from 'rxjs';
 import { mergeMap, toArray, catchError } from 'rxjs/operators';
 
@@ -50,6 +48,29 @@ export class AdminReportesPage implements OnInit {
   generalError = signal<string | null>(null);
   actionInProgress = signal<string | null>(null);
   exportLoading = signal(false);
+
+  /** Valores de badge/label ya precomputados por fila de la tabla (evita
+   * re-ejecutar typeBadge/rowStatusLabel 3 veces por fila en cada CD). */
+  readonly reportsView = computed(() => {
+    const map = new Map<string, { typeBadge: { text: string; bg: string; fg: string }; rowStatus: string }>();
+    for (const r of this.reports()) {
+      map.set(r.id, { typeBadge: this.typeBadge(r), rowStatus: this.rowStatusLabel(r) });
+    }
+    return map;
+  });
+
+  /** Badges de los avistamientos del detalle expandido, indexados por id. */
+  readonly sightingsView = computed(() => {
+    const map = new Map<string, { bg: string; fg: string; label: string }>();
+    for (const s of this.expandedDetail()?.sightings ?? []) {
+      map.set(s.id, {
+        bg: this.sightingBadge(s.status).bg,
+        fg: this.sightingBadge(s.status).fg,
+        label: this.statusLabel(s.status),
+      });
+    }
+    return map;
+  });
 
   // ---------- Filtros ----------
   searchTerm = signal('');
@@ -214,6 +235,12 @@ export class AdminReportesPage implements OnInit {
     }
 
     this.expandedId.set(item.id);
+    this.loadExpandedDetail(item);
+  }
+
+  /** Carga el detalle + imágenes de la fila expandida sin togglear el estado
+   * expandido (lo reusa refreshExpanded para reflejar cambios de estado). */
+  private loadExpandedDetail(item: AdminReportListItem): void {
     this.expandedDetail.set(null);
     this.expandedError.set(null);
     this.petGallery.set([]);
@@ -380,12 +407,11 @@ export class AdminReportesPage implements OnInit {
   }
 
   /** Recarga el detalle + avistamientos de la fila expandida, para reflejar
-   * los cambios de estado tras una acción admin. */
+   * los cambios de estado tras una acción admin (sin colapsar la fila). */
   private refreshExpanded(): void {
     const item = this.reports().find((r) => r.id === this.expandedId());
     if (item) {
-      this.toggleExpand(item);
-      this.toggleExpand(item);
+      this.loadExpandedDetail(item);
     }
   }
 
@@ -467,7 +493,7 @@ export class AdminReportesPage implements OnInit {
    * eso arma un PDF con una sección por reporte, igual que la fila expandida. */
   private buildDetailedPdf(items: AdminReportListItem[]): void {
     if (items.length === 0) {
-      this.buildPdf(items);
+      void this.buildPdf(items);
       this.exportLoading.set(false);
       return;
     }
@@ -509,7 +535,7 @@ export class AdminReportesPage implements OnInit {
       )
       .subscribe({
         next: (results) => {
-          this.renderDetailedPdf(results);
+          void this.renderDetailedPdf(results);
           this.exportLoading.set(false);
         },
         error: () => {
@@ -526,6 +552,10 @@ export class AdminReportesPage implements OnInit {
       petImages: GalleryImage[];
     }[],
   ): Promise<void> {
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+    ]);
     const doc = new jsPDF({ orientation: 'portrait' });
     const pageHeight = doc.internal.pageSize.getHeight();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -898,7 +928,11 @@ export class AdminReportesPage implements OnInit {
   }
 
   /** PDF de respaldo sin detalle (solo tabla), usado si la lista viene vacía. */
-  private buildPdf(items: AdminReportListItem[]): void {
+  private async buildPdf(items: AdminReportListItem[]): Promise<void> {
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+    ]);
     const doc = new jsPDF({ orientation: 'landscape' });
     doc.setFontSize(14);
     doc.text('Pet-Centric — Reporte de mascotas perdidas y encontradas', 14, 15);

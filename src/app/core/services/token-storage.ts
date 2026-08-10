@@ -50,7 +50,14 @@ export class TokenStorage {
 
   getUser(): LoginUserData | null {
     const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as LoginUserData) : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as LoginUserData;
+    } catch {
+      // localStorage corrupto o editado a mano: no tumbar la app en el arranque.
+      this.clear();
+      return null;
+    }
   }
 
   getRol(): string | null {

@@ -10,11 +10,13 @@ import {
   Conversation,
   MessageItem,
   PagedMessages,
+  PagedNotifications,
   WsEvent,
 } from './messaging.models';
 import { TokenStorage } from './token-storage';
 
 const RECONNECT_DELAY_MS = 4000;
+const RECONNECT_MAX_DELAY_MS = 30_000;
 
 /** Estado compartido de mensajería: el widget flotante, la campana de
  * notificaciones y la página de mensajes usan la misma instancia y los
@@ -42,6 +44,11 @@ export class MessagingService {
 
   private socket: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Nº de reintentos consecutivos para el backoff exponencial de reconexión. */
+  private reconnectAttempts = 0;
+  /** Si `false`, `onclose` no programa reconexión (desconexión manual por
+   * logout). Vuelve a `true` al conectar una nueva sesión. */
+  private reconnectEnabled = true;
   /** Última conversación en vista; se reenvía al servidor al reconectar el
    * WebSocket para que el backend no cree notificaciones mientras el usuario
    * realmente tiene el hilo abierto (si se pierde, llega una notificación que
@@ -106,8 +113,8 @@ export class MessagingService {
   listNotifications(
     page = 1,
     pageSize = 30,
-  ): Observable<ApiSuccessResponse<{ items: AppNotification[] }>> {
-    return this.http.get<ApiSuccessResponse<{ items: AppNotification[] }>>(
+  ): Observable<ApiSuccessResponse<PagedNotifications>> {
+    return this.http.get<ApiSuccessResponse<PagedNotifications>>(
       `${this.apiUrl}/notifications`,
       { params: { page, page_size: pageSize } },
     );
@@ -193,6 +200,7 @@ export class MessagingService {
   }
 
   disconnect(): void {
+    this.reconnectEnabled = false;
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
@@ -201,19 +209,27 @@ export class MessagingService {
       this.socket.close();
       this.socket = null;
     }
+    this.viewingConversation = null;
     this.wsConnected.set(false);
+    this.conversations.set([]);
+    this.notifications.set([]);
+    this.unreadCount.set(0);
   }
 
   private connect(token: string): void {
+    this.reconnectEnabled = true;
     const base = this.apiUrl.replace(/^http/, 'ws');
-    this.socket = new WebSocket(`${base}/ws/messages?token=${encodeURIComponent(token)}`);
+    this.socket = new WebSocket(`${base}/ws/messages`);
 
     this.socket.onopen = () => {
       this.wsConnected.set(true);
+      this.reconnectAttempts = 0;
       if (this.reconnectTimer) {
         clearTimeout(this.reconnectTimer);
         this.reconnectTimer = null;
       }
+      // El token se envía como primer mensaje (nunca en la URL).
+      this.socket?.send(JSON.stringify({ type: 'auth', token }));
       this.refreshAll();
       if (this.viewingConversation !== null && this.socket?.readyState === WebSocket.OPEN) {
         this.socket.send(
@@ -234,6 +250,7 @@ export class MessagingService {
     this.socket.onclose = () => {
       this.socket = null;
       this.wsConnected.set(false);
+      if (!this.reconnectEnabled) return;
       this.scheduleReconnect();
     };
 
@@ -244,17 +261,35 @@ export class MessagingService {
 
   private scheduleReconnect(): void {
     if (this.reconnectTimer || !this.auth.isAuthenticated()) return;
+    // Backoff exponencial (4s → 8s → 16s …) con tope de 30s, para no saturar
+    // el servidor si está caído o la red inestable.
+    const delay = Math.min(
+      RECONNECT_DELAY_MS * 2 ** this.reconnectAttempts,
+      RECONNECT_MAX_DELAY_MS,
+    );
+    this.reconnectAttempts++;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      if (this.auth.isAuthenticated()) {
-        const token = this.tokenStorage.getAccessToken();
-        if (token) this.connect(token);
+      if (!this.auth.isAuthenticated()) return;
+      if (document.hidden) {
+        // Pestaña oculta: no abrir sockets ni hacer HTTP; reintenta después.
+        this.scheduleReconnect();
+        return;
       }
-    }, RECONNECT_DELAY_MS);
+      const token = this.tokenStorage.getAccessToken();
+      if (token) this.connect(token);
+    }, delay);
   }
 
   private handleWsEvent(event: WsEvent): void {
     switch (event.type) {
+      case 'ping': {
+        // Keepalive del servidor: confirma que el cliente sigue vivo.
+        if (this.socket?.readyState === WebSocket.OPEN) {
+          this.socket.send(JSON.stringify({ type: 'pong' }));
+        }
+        break;
+      }
       case 'message': {
         const { conversation_id, data } = event;
         if (!conversation_id) return;

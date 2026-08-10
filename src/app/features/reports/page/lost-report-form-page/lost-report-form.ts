@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -55,6 +56,7 @@ function noFutureDate(control: AbstractControl): { futureDate: true } | null {
   templateUrl: './lost-report-form.html',
 })
 export class LostReportFormComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -127,17 +129,21 @@ export class LostReportFormComponent implements OnInit {
 
     // Al cambiar el departamento manualmente, la ubicación del mapa ya no
     // corresponde: se limpia el pin y la dirección hasta elegir una ciudad.
-    this.form.get('department')?.valueChanges.subscribe((deptValue: string) => {
-      this.updateCityOptions(deptValue);
-      this.form.get('city')?.setValue('', { emitEvent: false });
-      this.clearMapSelection();
-    });
+    this.form.get('department')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((deptValue: string) => {
+        this.updateCityOptions(deptValue);
+        this.form.get('city')?.setValue('', { emitEvent: false });
+        this.clearMapSelection();
+      });
 
     // Elegir una ciudad mueve el mapa a esa ciudad para que coincidan la
     // "última ubicación conocida" y lo que muestra el mapa.
-    this.form.get('city')?.valueChanges.subscribe((cityValue: string) => {
-      this.focusMapOnCity(cityValue);
-    });
+    this.form.get('city')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((cityValue: string) => {
+        this.focusMapOnCity(cityValue);
+      });
   }
 
   private updateCityOptions(deptValue: string): void {

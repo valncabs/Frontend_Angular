@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { COLOMBIA_DEPARTMENTS } from '../../../core/services/colombia-locations';
+import { loadExternalScript, loadExternalStylesheet } from '../../../core/utils/external-scripts';
 
 declare const L: any;
 
@@ -61,6 +62,7 @@ export class LocationPickerComponent implements AfterViewInit, OnChanges, OnDest
   @Output() locationPicked = new EventEmitter<PickedLocation>();
 
   mapReady = signal(false);
+  mapLoadError = signal(false);
   locatingUser = signal(false);
   searchQuery = signal('');
   searchResults = signal<any[]>([]);
@@ -102,17 +104,14 @@ export class LocationPickerComponent implements AfterViewInit, OnChanges, OnDest
 
   private async loadLeafletAndInit(): Promise<void> {
     if (typeof L === 'undefined') {
-      const cssLink = document.createElement('link');
-      cssLink.rel = 'stylesheet';
-      cssLink.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(cssLink);
-
-      await new Promise<void>((resolve) => {
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = () => resolve();
-        document.head.appendChild(script);
-      });
+      loadExternalStylesheet('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+      try {
+        await loadExternalScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+      } catch {
+        // CDN caído o bloqueado: mostrar el error en vez de un spinner infinito.
+        this.mapLoadError.set(true);
+        return;
+      }
     }
     this.initMap();
   }

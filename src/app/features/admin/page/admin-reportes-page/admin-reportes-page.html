@@ -146,10 +146,10 @@
               <td class="px-6 py-4">
                 <span
                   class="px-3 py-1 rounded-full text-xs font-medium"
-                  [style.background]="typeBadge(r).bg"
-                  [style.color]="typeBadge(r).fg"
+                  [style.background]="reportsView().get(r.id)?.typeBadge?.bg ?? '#f1f5f9'"
+                  [style.color]="reportsView().get(r.id)?.typeBadge?.fg ?? '#64748b'"
                 >
-                  {{ typeBadge(r).text }}
+                  {{ reportsView().get(r.id)?.typeBadge?.text }}
                 </span>
               </td>
               <td class="px-6 py-4 font-semibold text-slate-800">{{ r.title }}</td>
@@ -167,7 +167,7 @@
                       : '#6b7280'
                   "
                 >
-                  {{ rowStatusLabel(r) }}
+                  {{ reportsView().get(r.id)?.rowStatus }}
                 </span>
               </td>
               <td class="px-6 py-4 text-slate-700">{{ r.city }}</td>
@@ -403,10 +403,10 @@
                                     <td class="px-3 py-2.5">
                                       <span
                                         class="px-2.5 py-1 rounded-full text-xs font-medium"
-                                        [style.background]="sightingBadge(s.status).bg"
-                                        [style.color]="sightingBadge(s.status).fg"
+                                        [style.background]="sightingsView().get(s.id)?.bg ?? '#f3f4f6'"
+                                        [style.color]="sightingsView().get(s.id)?.fg ?? '#6b7280'"
                                       >
-                                        {{ statusLabel(s.status) }}
+                                        {{ sightingsView().get(s.id)?.label ?? s.status }}
                                       </span>
                                     </td>
                                     <td class="px-3 py-2.5" style="color: var(--text-secondary)">

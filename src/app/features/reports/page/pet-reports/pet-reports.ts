@@ -1,4 +1,5 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReportMapComponent } from '../../components/report-map/report-map';
@@ -44,6 +45,25 @@ type ReportDetail =
   | { kind: 'LOST'; data: LostReportResponse }
   | { kind: 'FOUND'; data: FoundReportResponse };
 
+/** Valores ya formateados/precomputados por tarjeta de reporte, para que el
+ * template no ejecute formateos ni búsquedas en cada detección de cambios. */
+interface CardView {
+  dateTime: string;
+  date: string;
+  icon: string;
+  isOwn: boolean;
+  isResolved: boolean;
+  badge: { bg: string; fg: string };
+}
+
+/** Valores ya formateados por avistamiento (modal grande). */
+interface SightingView {
+  species: string;
+  reportedDate: string;
+  foundDate: string;
+  confirmedDate: string;
+}
+
 /** Cada pestaña pagina contra su propio endpoint del backend — ver
  * ReportsFacade. 'MINE' sigue siendo un listado propio, sin paginación
  * (bajo volumen esperado: reportes del usuario autenticado). */
@@ -70,6 +90,7 @@ const PAGE_SIZE = 50;
   templateUrl: './pet-reports.html',
 })
 export class PetReportsComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
@@ -101,6 +122,52 @@ export class PetReportsComponent implements OnInit {
   detailViewerOpen = signal(false);
 
   currentUserId = computed(() => this.authService.currentUser()?.id ?? null);
+
+  /** Especies indexadas por id (evita un `.find()` lineal por tarjeta y por
+   * ciclo de detección de cambios). */
+  private readonly speciesById = computed(() => {
+    const map = new Map<string, string>();
+    for (const s of this.species()) map.set(s.id, s.name);
+    return map;
+  });
+
+  /** Valor ya renderizado por tarjeta (fecha, icono, badge, flags). Precomputado
+   * para que el template no re-ejecute formatos/búsquedas en cada CD. */
+  private buildCardView(item: UnifiedReportItem | MyReportItem): CardView {
+    return {
+      dateTime: this.formatDateTime(item.publishedAt),
+      date: this.formatDate(item.publishedAt),
+      icon: this.iconForSpecies(item.speciesId),
+      isOwn: item.createdBy === this.currentUserId(),
+      isResolved: this.isResolved(item),
+      badge: this.statusBadgeColors(item as MyReportItem),
+    };
+  }
+
+  readonly reportsView = computed(() => {
+    const map = new Map<string, CardView>();
+    for (const item of this.reports()) map.set(item.id, this.buildCardView(item));
+    return map;
+  });
+
+  readonly myReportsView = computed(() => {
+    const map = new Map<string, CardView>();
+    for (const item of this.myReports()) map.set(item.id, this.buildCardView(item));
+    return map;
+  });
+
+  readonly sightingsView = computed(() => {
+    const map = new Map<string, SightingView>();
+    for (const s of this.sightings()) {
+      map.set(s.id, {
+        species: this.speciesById().get(s.species_id ?? '') ?? '',
+        reportedDate: this.formatDate(s.published_at),
+        foundDate: this.formatDate(s.found_date),
+        confirmedDate: s.owner_confirmed_at ? this.formatDate(s.owner_confirmed_at) : '',
+      });
+    }
+    return map;
+  });
 
   // ---------- Filtros ----------
   filterSpecies = signal('');
@@ -261,7 +328,7 @@ export class PetReportsComponent implements OnInit {
       error: () => {},
     });
 
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       if (params['tab'] === 'MINE' && params['report']) {
         this.activeTab.set('MINE');
         this.loadMyReports(params['report']);
@@ -716,6 +783,11 @@ export class PetReportsComponent implements OnInit {
   speciesName(speciesId: string | null): string {
     if (!speciesId) return '';
     return this.species().find((s) => s.id === speciesId)?.name ?? '';
+  }
+
+  private iconForSpecies(speciesId: string | null): string {
+    if (!speciesId) return 'paw-print';
+    return this.speciesIcon[this.speciesById().get(speciesId) ?? ''] ?? 'paw-print';
   }
 
   getSpeciesIcon(speciesName?: string): string {

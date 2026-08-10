@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, inject, signal, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, OnInit, ViewChild, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -66,6 +67,7 @@ export class ProfileFormComponent implements OnInit {
   @Output() saved = new EventEmitter<ProfileResponse>();
   @Output() cancelled = new EventEmitter<void>();
 
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly profileService = inject(ProfileService);
 
@@ -109,17 +111,21 @@ export class ProfileFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.form.get('department')?.valueChanges.subscribe((deptValue: string) => {
-      this.updateCityOptions(deptValue);
-      this.form.get('city')?.setValue('', { emitEvent: false });
-      this.clearMapSelection();
-    });
+    this.form.get('department')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((deptValue: string) => {
+        this.updateCityOptions(deptValue);
+        this.form.get('city')?.setValue('', { emitEvent: false });
+        this.clearMapSelection();
+      });
 
     // Elegir una ciudad mueve el mapa a esa ciudad para que la ubicación del
     // perfil y lo que muestra el mapa siempre coincidan.
-    this.form.get('city')?.valueChanges.subscribe((cityValue: string) => {
-      this.focusMapOnCity(cityValue);
-    });
+    this.form.get('city')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((cityValue: string) => {
+        this.focusMapOnCity(cityValue);
+      });
 
     if (this.initialValue) {
       const departmentValue =

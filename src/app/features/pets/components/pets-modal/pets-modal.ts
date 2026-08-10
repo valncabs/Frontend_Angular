@@ -8,7 +8,9 @@ import {
   SimpleChanges,
   inject,
   signal,
+  DestroyRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -43,6 +45,7 @@ import {
   templateUrl: './pets-modal.html',
 })
 export class AddPetModalComponent implements OnInit, OnChanges {
+  private readonly destroyRef = inject(DestroyRef);
   @Input() isOpen = false;
   @Input() species: Species[] = [];
   @Input() loading = false;
@@ -163,17 +166,19 @@ export class AddPetModalComponent implements OnInit, OnChanges {
       description: [''],
     });
 
-    this.form.get('species_id')?.valueChanges.subscribe((speciesId: string) => {
-      if (!this.petToEdit) {
-        this.form.get('breed_id')?.setValue('', { emitEvent: false });
-      }
+    this.form.get('species_id')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((speciesId: string) => {
+        if (!this.petToEdit) {
+          this.form.get('breed_id')?.setValue('', { emitEvent: false });
+        }
 
-      if (speciesId) {
-        this.loadBreeds(speciesId);
-      } else {
-        this.breeds.set([]);
-      }
-    });
+        if (speciesId) {
+          this.loadBreeds(speciesId);
+        } else {
+          this.breeds.set([]);
+        }
+      });
   }
 
   private loadBreeds(speciesId: string): void {

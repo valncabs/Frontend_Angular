@@ -63,6 +63,16 @@ export class AdminUsersPage implements OnInit {
   generalError = signal<string | null>(null);
   actionInProgress = signal<string | null>(null);
 
+  /** Nombre completo precomputado por usuario (evita re-join por fila en cada
+   * ciclo de detección de cambios). */
+  readonly usersView = computed(() => {
+    const map = new Map<string, string>();
+    for (const u of this.users()) {
+      map.set(u.id, [u.first_name, u.last_name].filter(Boolean).join(' ') || '—');
+    }
+    return map;
+  });
+
   searchTerm = signal('');
   filterRole = signal<RoleFilter>('ALL');
   filterStatus = signal<StatusFilter>('ALL');
@@ -147,11 +157,6 @@ export class AdminUsersPage implements OnInit {
     if (newPage < 1 || newPage > this.totalPages()) return;
     this.page.set(newPage);
     this.reload();
-  }
-
-  fullName(user: AdminUserListItem): string {
-    const name = [user.first_name, user.last_name].filter(Boolean).join(' ');
-    return name || '—';
   }
 
   // ---------- Cambiar estado (activar/desactivar) ----------

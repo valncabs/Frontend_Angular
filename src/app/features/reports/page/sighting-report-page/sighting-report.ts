@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -57,6 +58,7 @@ function noFutureDate(control: AbstractControl): { futureDate: true } | null {
   templateUrl: './sighting-report.html',
 })
 export class SightingReportComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -182,17 +184,21 @@ export class SightingReportComponent implements OnInit {
       longitude: [null, Validators.required],
     });
 
-    this.form.get('department')?.valueChanges.subscribe((deptValue: string) => {
-      this.updateCityOptions(deptValue);
-      this.form.get('city')?.setValue('', { emitEvent: false });
-      this.clearMapSelection();
-    });
+    this.form.get('department')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((deptValue: string) => {
+        this.updateCityOptions(deptValue);
+        this.form.get('city')?.setValue('', { emitEvent: false });
+        this.clearMapSelection();
+      });
 
     // Elegir una ciudad mueve el mapa a esa ciudad para que la ubicación
     // reportada y lo que muestra el mapa siempre coincidan.
-    this.form.get('city')?.valueChanges.subscribe((cityValue: string) => {
-      this.focusMapOnCity(cityValue);
-    });
+    this.form.get('city')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((cityValue: string) => {
+        this.focusMapOnCity(cityValue);
+      });
   }
 
   @ViewChild(LocationPickerComponent) private picker?: LocationPickerComponent;

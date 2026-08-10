@@ -31,6 +31,14 @@ export interface PagedMessages {
   has_more: boolean;
 }
 
+export interface PagedNotifications {
+  items: AppNotification[];
+  page: number;
+  page_size: number;
+  total: number;
+  pages: number;
+}
+
 export interface AppNotification {
   id: string;
   type: string;
@@ -49,7 +57,8 @@ export interface WsEvent {
     | 'conversation_unread'
     | 'notification'
     | 'notification_count'
-    | 'messages_read';
+    | 'messages_read'
+    | 'ping';
   conversation_id?: string;
   data: {
     unread_count?: number;

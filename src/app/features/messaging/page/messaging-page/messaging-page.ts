@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, inject, signal, DestroyRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { take } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { AdminUsersService } from '../../../admin/data-access/admin-users';
 import { AdminUserListItem } from '../../../admin/data-access/admin-users.models';
@@ -24,6 +25,7 @@ type ThreadMessage = MessageItem & { status?: 'sending' | 'sent' | 'read' };
 export class MessagingPageComponent {
   readonly messaging = inject(MessagingService);
   readonly auth = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly adminUsers = inject(AdminUsersService);
   private readonly route = inject(ActivatedRoute);
   readonly conversations = this.messaging.conversations;
@@ -63,26 +65,30 @@ export class MessagingPageComponent {
       }
     });
 
-    this.messaging.onMessage.subscribe(({ conversation_id, data }) => {
-      if (this.selected()?.id === conversation_id) {
-        const msg: ThreadMessage = { ...data, status: data.is_read ? 'read' : 'sent' };
-        this.messages.update((list) => [...list, msg]);
-        if (document.visibilityState === 'visible') {
-          this.messaging.markRead(conversation_id).subscribe({ error: () => {} });
-          this.messaging.refreshNotifications();
+    this.messaging.onMessage
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ conversation_id, data }) => {
+        if (this.selected()?.id === conversation_id) {
+          const msg: ThreadMessage = { ...data, status: data.is_read ? 'read' : 'sent' };
+          this.messages.update((list) => [...list, msg]);
+          if (document.visibilityState === 'visible') {
+            this.messaging.markRead(conversation_id).subscribe({ error: () => {} });
+            this.messaging.refreshNotifications();
+          }
+          this.scrollBottom();
         }
-        this.scrollBottom();
-      }
-      this.messaging.refreshConversations();
-    });
+        this.messaging.refreshConversations();
+      });
 
-    this.messaging.onMessagesRead.subscribe(({ conversation_id, message_ids }) => {
-      if (this.selected()?.id !== conversation_id) return;
-      const ids = new Set(message_ids);
-      this.messages.update((list) =>
-        list.map((m) => (ids.has(m.id) ? { ...m, is_read: true, status: 'read' } : m)),
-      );
-    });
+    this.messaging.onMessagesRead
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ conversation_id, message_ids }) => {
+        if (this.selected()?.id !== conversation_id) return;
+        const ids = new Set(message_ids);
+        this.messages.update((list) =>
+          list.map((m) => (ids.has(m.id) ? { ...m, is_read: true, status: 'read' } : m)),
+        );
+      });
 
     this.threadRefreshTimer = setInterval(() => this.refreshOpenThread(), 15000);
   }

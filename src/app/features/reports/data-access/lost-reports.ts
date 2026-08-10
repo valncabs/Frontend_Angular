@@ -110,13 +110,6 @@ export class LostReportsService {
       .pipe(map((res) => ({ ...res, data: normalizeLostReportResponse(res.data) })));
   }
 
-  close(reportId: string): Observable<ApiSuccessResponse<LostReportResponse>> {
-    return this.http.post<ApiSuccessResponse<LostReportResponse>>(
-      `${this.baseUrl}/${reportId}/close`,
-      {},
-    );
-  }
-
   uploadImage(
     reportId: string,
     file: File,

@@ -114,7 +114,7 @@
           </a>
 
           <a
-            routerLink="/dashboard/reportar-avistamiento"
+            routerLink="/dashboard/reportar-perdida"
             (click)="toggleMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
           >
@@ -141,15 +141,6 @@
           </a>
 
           <a
-            routerLink="/dashboard/mensajes"
-            (click)="toggleMenu()"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
-          >
-            <i class="bi bi-chat-dots"></i>
-            <span>Mensajes</span>
-          </a>
-
-          <a
             routerLink="/dashboard/configuracion"
             (click)="toggleMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
@@ -158,7 +149,20 @@
             <span>Configuración</span>
           </a>
 
+          <a
+            routerLink="/dashboard/mensajes"
+            (click)="toggleMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 hover:text-[var(--primary)] transition no-underline"
+          >
+            <i class="bi bi-chat-dots"></i>
+            <span>Mensajes</span>
+          </a>
+
           <div class="border-t my-2 border-slate-100"></div>
+
+          <div class="flex items-center justify-center p-2">
+            <app-notifications-bell></app-notifications-bell>
+          </div>
 
           <div class="p-2">
             <button

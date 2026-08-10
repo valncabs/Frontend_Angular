@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth';
 
 @Component({
   selector: 'app-page-configuration',
@@ -10,7 +11,8 @@ import { Router } from '@angular/router';
 })
 export class PageConfiguration {
 
-  constructor(private router: Router) {}
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   // Estados locales para los interruptores
   notificationsEnabled = true;
@@ -36,13 +38,10 @@ export class PageConfiguration {
 
   // Cerrar sesión
   logout(): void {
-
-    localStorage.removeItem('token');
-    localStorage.removeItem('rol');
-    localStorage.removeItem('usuario');
-
+    // Delegar en AuthService: limpia TODAS las claves de sesión, notifica el
+    // logout al backend, resetea el signal currentUser y el timer de refresco.
+    this.authService.logout();
     this.router.navigate(['/home']);
-
   }
 
 }

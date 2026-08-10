@@ -10,6 +10,4 @@ import { MessagingWidgetComponent } from './core/layout/messaging-widget/messagi
   imports: [RouterOutlet, CommonModule, MessagingWidgetComponent],
   templateUrl: './app.html',
 })
-export class App {
-  protected readonly window = window;
-}
+export class App {}

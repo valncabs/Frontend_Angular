@@ -2,7 +2,7 @@
   <!-- Botón flotante -->
   <button
     (click)="abrirCerrar()"
-    class="fixed bottom-6 right-6 z-50 flex items-center justify-center text-white transition-all hover:scale-105"
+    class="chat-fab fixed bottom-6 right-6 z-50 flex items-center justify-center text-white transition-all hover:scale-105"
     style="width:56px; height:56px; border-radius:50%; background:#2a9d8f; border:none; cursor:pointer; box-shadow: 0 4px 16px rgba(42,157,143,.4);"
   >
     @if (!abierto()) {
@@ -24,7 +24,7 @@
   <!-- Ventana -->
   @if (abierto()) {
     <div
-      class="fixed bottom-20 right-6 z-50 flex flex-col overflow-hidden"
+      class="chat-window fixed bottom-20 right-6 z-50 flex flex-col overflow-hidden"
       style="width:380px; height:560px; border-radius:20px; background:#fff; border:0.5px solid rgba(0,0,0,.1); box-shadow:0 8px 32px rgba(0,0,0,.12), 0 1px 4px rgba(0,0,0,.05); animation:chatIn .22s ease;"
     >
       <!-- Encabezado -->
@@ -81,7 +81,7 @@
       <!-- Chat IA -->
       @if (activeTab() === 'ai') {
         <div class="flex-1 overflow-y-auto flex flex-col gap-2.5 p-3" #scrollRef style="background:#f4f9f8;">
-          @for (msg of mensajes; track msg) {
+          @for (msg of mensajes; track msg.id) {
             @if (msg.usuario) {
               <div class="flex justify-end">
                 <div

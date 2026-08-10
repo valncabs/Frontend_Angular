@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { NotificationsBellComponent } from '../../../../core/layout/notifications-bell/notifications-bell';
+import { AuthService } from '../../../../core/services/auth';
 
 @Component({
   selector: 'app-admin-nav',
@@ -13,13 +14,18 @@ import { NotificationsBellComponent } from '../../../../core/layout/notification
 })
 export class AdminNavComponent {
 
+  isMenuOpen = false;
+
+  private readonly authService = inject(AuthService);
+
   constructor(private router: Router) {}
 
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('rol');
-    localStorage.removeItem('usuario');
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 
+  logout(): void {
+    this.authService.logout();
     this.router.navigate(['/home']);
   }
 

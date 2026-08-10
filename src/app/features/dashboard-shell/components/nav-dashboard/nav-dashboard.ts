@@ -1,9 +1,10 @@
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { NotificationsBellComponent } from '../../../../core/layout/notifications-bell/notifications-bell';
+import { AuthService } from '../../../../core/services/auth';
 
 @Component({
   selector: 'app-nav-dashboard',
@@ -21,6 +22,8 @@ export class NavDashboardComponent {
 
   isMenuOpen = false;
 
+  private readonly authService = inject(AuthService);
+
   constructor(private router: Router) {}
 
   toggleMenu(): void {
@@ -28,10 +31,7 @@ export class NavDashboardComponent {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('rol');
-    localStorage.removeItem('usuario');
-
+    this.authService.logout();
     this.router.navigate(['/home']);
   }
 
