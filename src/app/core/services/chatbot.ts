@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Fuente {
   documento: string;
@@ -24,7 +25,7 @@ export interface ChatResponse {
   providedIn: 'root',
 })
 export class ChatbotService {
-  private readonly api = 'https://rag-neww.onrender.com/ask';
+  private readonly api = `${environment.chatApiUrl}/ask`;
 
   constructor(private http: HttpClient) {}
 
